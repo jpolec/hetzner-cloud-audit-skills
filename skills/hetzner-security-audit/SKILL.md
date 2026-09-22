@@ -55,14 +55,18 @@ Use `--input snapshot.json` for mocked or exported evidence. Use `--dry-run` to 
 
 ### 3. Load only applicable modules
 
-- Always load `../cloud-audit/SKILL.md` and `../network/SKILL.md`.
-- Load `../linux-host/SKILL.md` only for explicitly authorized SSH or host fixtures.
-- Load `../docker/SKILL.md` when containers, Compose, Dockerfiles, or runtime evidence exists.
-- Load `../postgres/SKILL.md` when PostgreSQL exists or is declared.
-- Load `../redis/SKILL.md` when Redis exists or is declared.
-- Load `../backup/SKILL.md` for stateful production assets.
+- Always load `references/cloud-audit.md` and `references/network.md`.
+- Load `references/linux-host.md` only for explicitly authorized SSH or host fixtures.
+- Load `references/docker.md` when containers, Compose, Dockerfiles, or runtime evidence exists.
+- Load `references/postgres.md` when PostgreSQL exists or is declared.
+- Load `references/redis.md` when Redis exists or is declared.
+- Load `references/backup.md` for stateful production assets.
 
 Each module returns facts, coverage results, hardening notes, and schema-shaped candidates. It may not confirm its own candidate.
+
+The `references/` copies are bundled with this orchestrator so installing only
+`hetzner-security-audit` is sufficient. The sibling skills in the repository expose the
+same focused guidance for users who want a module independently.
 
 ### 4. Correlate and hunt
 
@@ -97,4 +101,3 @@ Expected finding fields: stable ID/rule, severity and confidence separately, ver
 ## Output quality gate
 
 Before calling the audit complete, verify that every confirmed record answers: who can reach what, across which layers, because of which exact state, with what demonstrated impact, and which evidence could refute it. The top-level skill should be at least as clear and disciplined as Cloudflare's `security-audit-skill`; infrastructure-specific audits must additionally establish current cloud discovery, topology, drift, reachability, runtime/database context, and cross-layer attack paths.
-
