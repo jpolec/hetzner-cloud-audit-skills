@@ -1,0 +1,56 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "hetzner-security-skills"
+version = "0.1.0"
+description = "Agentic cross-layer security auditing for Hetzner infrastructure"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [{name = "Hetzner Security Skills contributors"}]
+keywords = ["hetzner", "cloud-security", "devsecops", "ai-agents"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Topic :: Security",
+]
+dependencies = []
+
+[project.optional-dependencies]
+dev = [
+  "build>=1.2",
+  "jsonschema>=4.23",
+  "mypy>=1.15",
+  "pytest>=8.3",
+  "ruff>=0.11",
+]
+
+[project.scripts]
+hetzner-sec = "hetzner_security.cli.main:main"
+
+[project.urls]
+Homepage = "https://github.com/OWNER/hetzner-security-skills"
+Issues = "https://github.com/OWNER/hetzner-security-skills/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/hetzner_security"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["E501", "S104", "S603", "S607"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["hetzner_security"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

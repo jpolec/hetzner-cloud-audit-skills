@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Deterministic coverage ledger",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["coverage_id", "asset_id", "layer", "attack_class", "status", "evidence_sources", "result_fingerprints", "unresolved", "prior_status"],
+    "properties": {
+      "coverage_id": {"type": "string", "pattern": "^coverage/[a-f0-9]{20}$"},
+      "asset_id": {"type": "string", "minLength": 1},
+      "layer": {"type": "string", "minLength": 1},
+      "attack_class": {"type": "string", "minLength": 1},
+      "status": {"enum": ["planned", "covered", "candidate", "blocked", "deferred", "out_of_scope"]},
+      "evidence_sources": {"type": "array", "items": {"type": "string"}},
+      "result_fingerprints": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+      "unresolved": {"type": "array", "items": {"type": "string"}},
+      "prior_status": {"type": ["string", "null"]}
+    }
+  }
+}
