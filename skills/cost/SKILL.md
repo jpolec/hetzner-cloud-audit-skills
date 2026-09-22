@@ -5,7 +5,7 @@ description: Audit authorized Hetzner infrastructure costs using observed utiliz
 
 # Hetzner Cost Audit
 
-Produce evidence-backed architecture recommendations, not a list of cheaper SKUs. Keep cost, security, reliability, and performance observations separate until the final correlation step.
+Produce evidence-backed architecture recommendations, not a list of cheaper SKUs. The useful outcome is a quantified candidate with its observation window, saving basis, change risk, confidence, prerequisites, validation, and rollback. Keep cost, security, reliability, and performance observations separate until the final correlation step.
 
 ## Safety and permissions
 
@@ -46,6 +46,8 @@ Use `confirmed`, `needs_validation`, or `rejected`; keep risk separate from conf
 After validating each domain independently, create one architecture recommendation when actions share the same asset and constraints. Example: rightsize an oversized database host, move it behind a private network, and establish a tested restore policy. Never let savings downgrade a required security or recovery control.
 
 Output records compatible with `schemas/architecture-recommendation.schema.json`, including current state, observed window, metrics and gaps, candidate state, monthly/annual saving with currency and basis, risk, confidence, prerequisites, cross-domain impacts, verification, and rollback/validation steps.
+
+A concise human result must show the current resource and cost, the measured window and p95/headroom values, the compatible candidate, monthly and annual estimated saving, risk, confidence, decisive evidence, unresolved gaps, and any security/reliability work that should be combined with the change. Never hide a missing metric behind a confident recommendation.
 
 ## Verify
 

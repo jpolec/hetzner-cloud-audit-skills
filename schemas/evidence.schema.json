@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:hetzner-security-skills:schema:evidence:1.0.0",
+  "$id": "urn:hetzner-cloud-audit-skills:schema:evidence:1.0.0",
   "title": "Evidence",
   "type": "object",
   "additionalProperties": false,

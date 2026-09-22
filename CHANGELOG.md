@@ -4,6 +4,20 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-22
+
+### Added
+
+- First-class `hetzner-security-audit` and `hetzner-cost-audit` installation paths.
+- Canonical `hetzner-audit` CLI with the existing `hetzner-sec` command retained as an alias.
+- Concrete security and cost examples plus a synthetic cost recommendation screenshot.
+
+### Changed
+
+- Renamed the project and repository from `hetzner-security-skills` to `hetzner-cloud-audit-skills`.
+- Reworked the README around inputs, outputs, measurable user value, safety boundaries, and limitations for both skills.
+- Updated package metadata, schemas, SARIF identity, user agent, commands, and repository links.
+
 ## [0.1.1] - 2026-09-22
 
 ### Added
@@ -32,6 +46,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-security-skills/compare/v0.1.1...HEAD
-[0.1.1]: https://github.com/jpolec/hetzner-security-skills/compare/v0.1.0...v0.1.1
-[0.1.0]: https://github.com/jpolec/hetzner-security-skills/releases/tag/v0.1.0
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.1.1...v0.2.0
+[0.1.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.1.0...v0.1.1
+[0.1.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/releases/tag/v0.1.0

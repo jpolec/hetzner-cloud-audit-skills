@@ -30,7 +30,7 @@ Collectors do not assign severity. Analyzers generate candidates. The verifier c
 - `CoverageUnit`: stable asset/layer/attack-class identity and current/prior result fingerprints.
 - `ArchitectureRecommendation`: independently reviewed cost/security/reliability decision with timestamped metrics, price basis, risk, confidence, and rollback criteria.
 
-The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.1 fixtures and small-to-medium projects.
+The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.2 fixtures and small-to-medium projects.
 
 ## Trust boundaries
 
@@ -44,4 +44,4 @@ Cost analysis uses the same normalized boundary but a separate recommendation sc
 
 ## MCP decision
 
-Deferred to Phase 2. A read-only MCP facade could expose asset lists, topology, findings, and evidence, but v0.1 first needs stable authorization, pagination, evidence freshness, and output contracts. The CLI and SKILL packages already serve humans, CI, and agents without an always-on server.
+Deferred. A read-only MCP facade could expose asset lists, topology, findings, and evidence, but the project first needs stable authorization, pagination, evidence freshness, and output contracts. The CLI and SKILL packages already serve humans, CI, and agents without an always-on server.

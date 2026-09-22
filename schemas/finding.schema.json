@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:hetzner-security-skills:schema:finding:1.0.0",
+  "$id": "urn:hetzner-cloud-audit-skills:schema:finding:1.0.0",
   "title": "Verified security finding",
   "type": "object",
   "additionalProperties": false,

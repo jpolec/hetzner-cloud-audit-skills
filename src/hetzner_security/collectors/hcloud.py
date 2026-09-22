@@ -51,7 +51,7 @@ class ReadOnlyHCloudCollector:
             f"{self.base_url}/{endpoint}?{query}",
             headers={
                 "Authorization": f"Bearer {self._token}",
-                "User-Agent": "hetzner-security-skills/0.1.1",
+                "User-Agent": "hetzner-cloud-audit-skills/0.2.0",
                 "Accept": "application/json",
             },
             method="GET",

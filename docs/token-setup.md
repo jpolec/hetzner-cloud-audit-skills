@@ -27,8 +27,8 @@ export HCLOUD_TOKEN
 Run the audit, then remove the variable from the current shell:
 
 ```sh
-hetzner-sec inventory --format json --output inventory.json --read-only --no-ssh
-hetzner-sec audit --format json --output findings.json --read-only --no-ssh
+hetzner-audit inventory --format json --output inventory.json --read-only --no-ssh
+hetzner-audit audit --format json --output findings.json --read-only --no-ssh
 unset HCLOUD_TOKEN
 ```
 

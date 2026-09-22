@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "urn:hetzner-security-skills:schema:architecture-recommendation:1.0.0",
+  "$id": "urn:hetzner-cloud-audit-skills:schema:architecture-recommendation:1.0.0",
   "title": "Verified cross-domain architecture recommendation",
   "type": "object",
   "additionalProperties": false,

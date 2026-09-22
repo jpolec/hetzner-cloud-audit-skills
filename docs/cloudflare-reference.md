@@ -57,7 +57,7 @@ Public release is blocked unless the installable top-level skill is comparable t
 The intended experience is:
 
 ```sh
-npx skills add https://github.com/jpolec/hetzner-security-skills \
+npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills \
   --skill hetzner-security-audit
 ```
 

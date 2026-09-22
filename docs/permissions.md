@@ -9,7 +9,7 @@ SSH is disabled by default. Enabling a host audit requires separate operator aut
 `--dry-run` makes no API request. Offline fixture use requires no credentials:
 
 ```sh
-hetzner-sec audit --input snapshot.json --read-only --no-ssh
+hetzner-audit audit --input snapshot.json --read-only --no-ssh
 ```
 
 See [token setup](token-setup.md) for masked shell input, multi-project use, CI guidance, rotation, and revocation.

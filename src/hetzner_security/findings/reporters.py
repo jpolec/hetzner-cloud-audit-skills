@@ -88,8 +88,8 @@ def render_sarif(findings: list[Finding]) -> str:
             {
                 "tool": {
                     "driver": {
-                        "name": "hetzner-security-skills",
-                        "version": "0.1.1",
+                        "name": "hetzner-cloud-audit-skills",
+                        "version": "0.2.0",
                         "rules": list(rules.values()),
                     }
                 },

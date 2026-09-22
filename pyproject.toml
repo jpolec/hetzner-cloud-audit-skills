@@ -3,14 +3,14 @@ requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
-name = "hetzner-security-skills"
-version = "0.1.1"
-description = "Agentic cross-layer security auditing for Hetzner infrastructure"
+name = "hetzner-cloud-audit-skills"
+version = "0.2.0"
+description = "Agentic security and cost auditing for Hetzner infrastructure"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-authors = [{name = "Hetzner Security Skills contributors"}]
-keywords = ["hetzner", "cloud-security", "devsecops", "ai-agents"]
+authors = [{name = "Hetzner Cloud Audit Skills contributors"}]
+keywords = ["hetzner", "cloud-security", "finops", "devsecops", "ai-agents"]
 classifiers = [
   "Development Status :: 3 - Alpha",
   "License :: OSI Approved :: Apache Software License",
@@ -29,11 +29,12 @@ dev = [
 ]
 
 [project.scripts]
+hetzner-audit = "hetzner_security.cli.main:main"
 hetzner-sec = "hetzner_security.cli.main:main"
 
 [project.urls]
-Homepage = "https://github.com/jpolec/hetzner-security-skills"
-Issues = "https://github.com/jpolec/hetzner-security-skills/issues"
+Homepage = "https://github.com/jpolec/hetzner-cloud-audit-skills"
+Issues = "https://github.com/jpolec/hetzner-cloud-audit-skills/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/hetzner_security"]

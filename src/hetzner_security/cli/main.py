@@ -19,7 +19,7 @@ SEVERITY_ORDER = {severity.value: index for index, severity in enumerate(Severit
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="hetzner-sec", description=__doc__)
+    parser = argparse.ArgumentParser(prog="hetzner-audit", description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
     for name in ("audit", "inventory", "network", "postgres", "docker", "coverage"):
         cmd = subparsers.add_parser(name)
@@ -38,7 +38,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _snapshot(args: argparse.Namespace) -> Snapshot:
     if not args.read_only:
-        raise ValueError("v0.1 supports read-only mode only")
+        raise ValueError("v0.2 supports read-only mode only")
     if args.input:
         return load_snapshot(args.input)
     if args.dry_run:
