@@ -10,6 +10,7 @@ from dataclasses import replace
 from ..graph import AttackGraph
 from ..models import (
     Asset,
+    Edge,
     Evidence,
     Finding,
     FindingStatus,
@@ -20,7 +21,13 @@ from ..models import (
 
 Rule = Callable[[Snapshot, AttackGraph], list[Finding]]
 PUBLIC_SOURCES = {"0.0.0.0/0", "::/0", "any", "internet"}
-MANAGEMENT_PORTS = {2375: "Docker daemon", 2376: "Docker daemon TLS", 6443: "Kubernetes API"}
+MANAGEMENT_PORTS = {
+    2375: "Docker daemon",
+    2376: "Docker daemon TLS",
+    6443: "Kubernetes API",
+    9200: "Elasticsearch API",
+    27017: "MongoDB",
+}
 
 
 def _fingerprint(rule_id: str, assets: list[str], discriminator: str = "") -> str:
@@ -107,6 +114,14 @@ def _int_set(value: object) -> set[int]:
     return {_as_int(item) for item in value if _as_int(item) >= 0}
 
 
+def _port_bounds(rule: dict[str, object]) -> tuple[int, int]:
+    start = _as_int(rule.get("port_from", rule.get("port", -1)))
+    end = _as_int(rule.get("port_to", rule.get("port", start)), start)
+    if rule.get("port") in {None, "any"} and start < 0:
+        return 0, 65535
+    return start, end
+
+
 def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     output: list[Finding] = []
     services = {
@@ -122,8 +137,7 @@ def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Find
         if asset.type not in {"server", "firewall", "service"}:
             continue
         for rule in _public_ports(asset):
-            start = _as_int(rule.get("port", rule.get("port_from", -1)))
-            end = _as_int(rule.get("port_to", start), start)
+            start, end = _port_bounds(rule)
             for port, (rule_id, title, severity) in services.items():
                 if not start <= port <= end:
                     continue
@@ -260,6 +274,12 @@ def cross_environment_data_path(snapshot: Snapshot, graph: AttackGraph) -> list[
                 e.get("kind") == "environment_isolation"
                 and source_env in e.get("separate", [])
                 and target_env in e.get("separate", [])
+                for e in snapshot.expectations
+            )
+            declared = declared or any(
+                e.get("kind") == "environment_policy"
+                and e.get("target_environment") == target_env
+                and source_env not in e.get("allowed_sources", [])
                 for e in snapshot.expectations
             )
             if not declared:
@@ -414,7 +434,7 @@ def redis_configuration(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]
 def backup_and_protection(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     output: list[Finding] = []
     for asset in snapshot.assets:
-        if asset.type not in {"server", "postgres", "redis"} or asset.labels.get("environment") != "prod":
+        if asset.type not in {"server", "postgres", "redis"} or asset.labels.get("environment") not in {"prod", "production"}:
             continue
         if asset.properties.get("stateful") and not asset.properties.get("backup_enabled"):
             output.append(
@@ -436,6 +456,132 @@ def backup_and_protection(snapshot: Snapshot, graph: AttackGraph) -> list[Findin
                 )
             )
     return output
+
+
+def broad_private_data_path(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    """Find cloud-level paths to sensitive production servers from unrelated projects."""
+    output: list[Finding] = []
+    sensitive_tokens = {"db", "database", "postgres", "redis", "vault", "auth"}
+    servers = [asset for asset in snapshot.assets if asset.type == "server"]
+    for target in servers:
+        role = target.labels.get("role", "").lower()
+        name = target.name.lower()
+        if not (role in sensitive_tokens or any(token in name for token in sensitive_tokens)):
+            continue
+        target_project = target.labels.get("project") or target.labels.get("owner")
+        candidate_paths: list[tuple[Asset, list[Edge]]] = []
+        for source in servers:
+            if source.id == target.id:
+                continue
+            source_project = source.labels.get("project") or source.labels.get("owner")
+            if source_project and target_project and source_project == target_project:
+                continue
+            paths = graph.paths(source.id, target.id, protocol="tcp", max_depth=3)
+            if paths:
+                candidate_paths.append((source, paths[0]))
+        if not candidate_paths:
+            continue
+        source, path = candidate_paths[0]
+        evidence = [item for edge in path for item in edge.evidence]
+        evidence.extend(
+            [
+                _evidence(source, "workload_identity", source.labels, "labels"),
+                _evidence(target, "sensitive_role", {"role": role or target.name}, "labels.role"),
+            ]
+        )
+        output.append(
+            _candidate(
+                "HETZ-XLY-002",
+                "Unrelated workloads have a broad cloud path to a sensitive service host",
+                Severity.HIGH,
+                0.82,
+                [source.id, target.id],
+                f"{len(candidate_paths)} unrelated server(s) have a cloud-network path to {target.name}.",
+                "Sensitive production hosts admit only explicitly required workload identities and ports.",
+                "A shared private network and broad inbound rule permit TCP before host/runtime controls are evaluated.",
+                evidence,
+                [source.id, *[edge.target for edge in path]],
+                ["A target service listens on the private interface.", "Host/runtime authentication does not block the source."],
+                "Compromise of an unrelated workload can become lateral access to a database, identity, or secrets boundary.",
+                "Restrict private ingress to explicit workload sources and service ports, then verify host and application controls.",
+                ["https://docs.hetzner.com/cloud/networks/overview/"],
+                target.id,
+            )
+        )
+    return output
+
+
+def deletion_protection_gap(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    affected = [
+        asset
+        for asset in snapshot.assets
+        if asset.source == "hcloud_api"
+        and asset.type in {"server", "volume", "network", "storage_box"}
+        and (
+            asset.type != "server"
+            or asset.labels.get("environment") in {"prod", "production"}
+            or bool(asset.properties.get("stateful"))
+        )
+        and (
+            asset.properties.get("delete_protection") is False
+            or asset.properties.get("protection", {}).get("delete") is False
+        )
+    ]
+    if not affected:
+        return []
+    evidence = [
+        _evidence(asset, "deletion_protection", False, "properties.protection.delete")
+        for asset in affected
+    ]
+    return [
+        _candidate(
+            "HETZ-GOV-001",
+            "Production or foundational assets lack deletion protection",
+            Severity.MEDIUM,
+            0.99,
+            [asset.id for asset in affected],
+            f"Deletion protection is disabled on {len(affected)} production or foundational asset(s).",
+            "Stateful and foundational production resources resist accidental provider deletion.",
+            "Provider configuration explicitly reports deletion protection disabled.",
+            evidence,
+            ["write-capable credential", "provider delete action", "production asset"],
+            ["A write-capable credential or operator error."],
+            "A mistaken or compromised provider action can remove production infrastructure more easily.",
+            "Enable deletion protection through reviewed IaC for assets whose recovery requirements justify it.",
+            ["https://docs.hetzner.com/cloud/servers/faq/#how-can-i-protect-my-server-from-deletion"],
+        )
+    ]
+
+
+def ownership_metadata_gap(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    affected = [
+        asset
+        for asset in snapshot.assets
+        if asset.type == "server"
+        and asset.source == "hcloud_api"
+        and not asset.labels.get("owner")
+        and not asset.labels.get("project")
+    ]
+    if not affected:
+        return []
+    return [
+        _candidate(
+            "HETZ-GOV-002",
+            "Servers lack ownership metadata",
+            Severity.LOW,
+            0.99,
+            [asset.id for asset in affected],
+            f"{len(affected)} server(s) have neither an owner nor project label.",
+            "Every long-lived server has an accountable owner or project identifier.",
+            "Normalized provider labels contain neither key.",
+            [_evidence(asset, "resource_labels", asset.labels, "labels") for asset in affected],
+            ["unowned resource", "delayed security or lifecycle response"],
+            [],
+            "Unowned assets are harder to patch, review, expire, or include in incident response.",
+            "Add owner, project, environment, role, and lifecycle labels through IaC.",
+            ["https://docs.hetzner.cloud/reference/cloud#labels"],
+        )
+    ]
 
 
 def contextualize_vulnerabilities(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
@@ -474,10 +620,13 @@ RULES: tuple[Rule, ...] = (
     internet_host_without_firewall,
     expectation_drift,
     cross_environment_data_path,
+    broad_private_data_path,
     docker_runtime_risks,
     postgres_configuration,
     redis_configuration,
     backup_and_protection,
+    deletion_protection_gap,
+    ownership_metadata_gap,
     contextualize_vulnerabilities,
 )
 

@@ -1,0 +1,137 @@
+{
+  "schema_version": "1.0.0",
+  "metadata": {
+    "scenario": "v0.3-cost",
+    "synthetic": true,
+    "run_id": "run-synthetic-cost",
+    "collector_version": "0.3.0",
+    "collected_at": "2026-09-22T00:00:00+00:00"
+  },
+  "assets": [
+    {
+      "id": "hcloud:server:1",
+      "type": "server",
+      "name": "synthetic-app-large",
+      "properties": {
+        "id": 1,
+        "status": "running",
+        "location": {"name": "fsn1"},
+        "server_type": {
+          "name": "synthetic-x86-large",
+          "architecture": "x86",
+          "cpu_type": "shared",
+          "cores": 4,
+          "memory": 8,
+          "prices": [{"location": "fsn1", "price_monthly": {"net": "100.00"}}]
+        },
+        "metrics": {
+          "start": "2026-08-23T00:00:00+00:00",
+          "end": "2026-09-22T00:00:00+00:00",
+          "time_series": {"cpu": {"values": [[1, "20"], [2, "30"], [3, "40"]]}}
+        },
+        "backup_enabled": false
+      },
+      "labels": {"environment": "production", "project": "synthetic-app"},
+      "source": "hcloud_api"
+    },
+    {
+      "id": "hcloud:server:2",
+      "type": "server",
+      "name": "synthetic-migration-old",
+      "properties": {
+        "id": 2,
+        "status": "off",
+        "location": {"name": "fsn1"},
+        "server_type": {
+          "name": "synthetic-old",
+          "architecture": "x86",
+          "cpu_type": "shared",
+          "cores": 2,
+          "memory": 4,
+          "prices": [{"location": "fsn1", "price_monthly": {"net": "40.00"}}]
+        },
+        "metrics": {},
+        "backup_enabled": false
+      },
+      "labels": {"migration_state": "replaced"},
+      "source": "hcloud_api"
+    },
+    {
+      "id": "hcloud:server:3",
+      "type": "server",
+      "name": "synthetic-busy-worker",
+      "properties": {
+        "id": 3,
+        "status": "running",
+        "location": {"name": "fsn1"},
+        "server_type": {
+          "name": "synthetic-busy",
+          "architecture": "x86",
+          "cpu_type": "shared",
+          "cores": 4,
+          "memory": 8,
+          "prices": [{"location": "fsn1", "price_monthly": {"net": "80.00"}}]
+        },
+        "metrics": {
+          "start": "2026-08-23T00:00:00+00:00",
+          "end": "2026-09-22T00:00:00+00:00",
+          "time_series": {"cpu": {"values": [[1, "300"], [2, "390"], [3, "400"]]}}
+        },
+        "backup_enabled": false
+      },
+      "labels": {"environment": "production", "project": "synthetic-worker"},
+      "source": "hcloud_api"
+    },
+    {
+      "id": "hcloud:server_type:10",
+      "type": "server_type",
+      "name": "synthetic-x86-medium",
+      "properties": {
+        "name": "synthetic-x86-medium",
+        "architecture": "x86",
+        "cpu_type": "shared",
+        "cores": 2,
+        "memory": 4,
+        "deprecated": false,
+        "locations": [{"name": "fsn1", "available": true}],
+        "prices": [{"location": "fsn1", "price_monthly": {"net": "60.00"}}]
+      },
+      "labels": {},
+      "source": "hcloud_api"
+    },
+    {
+      "id": "hcloud:server_type:11",
+      "type": "server_type",
+      "name": "synthetic-arm-large",
+      "properties": {
+        "name": "synthetic-arm-large",
+        "architecture": "arm",
+        "cpu_type": "shared",
+        "cores": 4,
+        "memory": 8,
+        "deprecated": false,
+        "locations": [{"name": "fsn1", "available": true}],
+        "prices": [{"location": "fsn1", "price_monthly": {"net": "50.00"}}]
+      },
+      "labels": {},
+      "source": "hcloud_api"
+    },
+    {
+      "id": "hcloud:pricing:current",
+      "type": "pricing",
+      "name": "synthetic pricing",
+      "properties": {
+        "currency": "EUR",
+        "server_backup": {"percentage": "20"},
+        "volume": {"price_per_gb_month": {"net": "0.05"}},
+        "primary_ips": []
+      },
+      "labels": {},
+      "source": "hcloud_api"
+    }
+  ],
+  "edges": [],
+  "facts": [],
+  "expectations": [],
+  "signals": []
+}

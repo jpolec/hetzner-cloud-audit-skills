@@ -5,16 +5,20 @@ The module intentionally implements only HTTP GET and exposes no generic request
 
 from __future__ import annotations
 
+import hashlib
+import ipaddress
 import json
 import os
 import urllib.parse
 import urllib.request
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from ..models import Asset, Edge, Evidence, Snapshot
+from ..models import Asset, Edge, Evidence, Fact, Snapshot
 
 API_BASE = "https://api.hetzner.cloud/v1"
+HETZNER_API_BASE = "https://api.hetzner.com/v1"
+COLLECTOR_VERSION = "0.3.0"
 RESOURCE_ENDPOINTS = {
     "server": "servers",
     "server_type": "server_types",
@@ -26,11 +30,16 @@ RESOURCE_ENDPOINTS = {
     "primary_ip": "primary_ips",
     "floating_ip": "floating_ips",
     "load_balancer": "load_balancers",
+    "load_balancer_type": "load_balancer_types",
     "volume": "volumes",
     "ssh_key": "ssh_keys",
     "placement_group": "placement_groups",
     "certificate": "certificates",
     "zone": "zones",
+}
+HETZNER_RESOURCE_ENDPOINTS = {
+    "storage_box": "storage_boxes",
+    "storage_box_type": "storage_box_types",
 }
 
 
@@ -39,19 +48,42 @@ class HCloudCollectionError(RuntimeError):
 
 
 class ReadOnlyHCloudCollector:
-    def __init__(self, token: str | None = None, *, base_url: str = API_BASE) -> None:
+    def __init__(
+        self,
+        token: str | None = None,
+        *,
+        base_url: str = API_BASE,
+        include_metrics: bool = False,
+        metrics_days: int = 30,
+    ) -> None:
         self._token = token or os.environ.get("HCLOUD_TOKEN")
         self.base_url = base_url.rstrip("/")
+        self.include_metrics = include_metrics
+        self.metrics_days = metrics_days
         if not self._token:
             raise HCloudCollectionError("HCLOUD_TOKEN is required for live collection")
 
     def _get_page(self, endpoint: str, page: int) -> dict[str, Any]:
-        query = urllib.parse.urlencode({"page": page, "per_page": 50})
+        base_url = self.base_url
+        if endpoint.startswith("hetzner:"):
+            endpoint = endpoint.removeprefix("hetzner:")
+            base_url = HETZNER_API_BASE
+        return self._get_json(endpoint, {"page": page, "per_page": 50}, base_url=base_url)
+
+    def _get_json(
+        self,
+        endpoint: str,
+        params: dict[str, object] | None = None,
+        *,
+        base_url: str | None = None,
+    ) -> dict[str, Any]:
+        query = urllib.parse.urlencode(params or {})
+        suffix = f"?{query}" if query else ""
         request = urllib.request.Request(  # noqa: S310 -- fixed HTTPS API base by default
-            f"{self.base_url}/{endpoint}?{query}",
+            f"{(base_url or self.base_url).rstrip('/')}/{endpoint}{suffix}",
             headers={
                 "Authorization": f"Bearer {self._token}",
-                "User-Agent": "hetzner-cloud-audit-skills/0.2.0",
+                "User-Agent": f"hetzner-cloud-audit-skills/{COLLECTOR_VERSION}",
                 "Accept": "application/json",
             },
             method="GET",
@@ -80,11 +112,45 @@ class ReadOnlyHCloudCollector:
 
     def collect(self) -> Snapshot:
         assets: list[Asset] = []
-        edges: list[Edge] = []
         raw_by_kind: dict[str, list[dict[str, Any]]] = {}
+        coverage: dict[str, dict[str, object]] = {}
         for kind, endpoint in RESOURCE_ENDPOINTS.items():
-            rows = self._list(endpoint)
+            try:
+                rows = self._list(endpoint)
+                coverage[kind] = {"status": "collected", "count": len(rows)}
+            except HCloudCollectionError as exc:
+                rows = []
+                coverage[kind] = {"status": "failed", "error": str(exc)}
             raw_by_kind[kind] = rows
+        for kind, endpoint in HETZNER_RESOURCE_ENDPOINTS.items():
+            try:
+                rows = self._list(f"hetzner:{endpoint}", endpoint)
+                coverage[kind] = {"status": "collected", "count": len(rows)}
+            except HCloudCollectionError as exc:
+                rows = []
+                coverage[kind] = {"status": "unavailable", "error": str(exc)}
+            raw_by_kind[kind] = rows
+
+        pricing: dict[str, Any] = {}
+        try:
+            value = self._get_page("pricing", 1).get("pricing", {})
+            pricing = value if isinstance(value, dict) else {}
+            coverage["pricing"] = {"status": "collected", "count": int(bool(pricing))}
+        except HCloudCollectionError as exc:
+            coverage["pricing"] = {"status": "failed", "error": str(exc)}
+
+        if not any(raw_by_kind.get(kind) for kind in ("server", "network", "firewall")):
+            failures = [kind for kind, state in coverage.items() if state["status"] == "failed"]
+            if failures:
+                raise HCloudCollectionError("no core assets collected; failed sources: " + ", ".join(failures))
+
+        collected_at = datetime.now(UTC).isoformat()
+        run_id = "run-" + hashlib.sha256(collected_at.encode()).hexdigest()[:16]
+        if self.include_metrics:
+            self._collect_server_metrics(raw_by_kind.get("server", []), coverage, collected_at)
+
+        normalized = _normalize_resources(raw_by_kind)
+        for kind, rows in normalized.items():
             for row in rows:
                 rid = str(row.get("id", row.get("name", "unknown")))
                 asset_kind = str(row.get("type")) if kind == "image" and row.get("type") in {"snapshot", "backup"} else kind
@@ -98,6 +164,17 @@ class ReadOnlyHCloudCollector:
                         source="hcloud_api",
                     )
                 )
+        if pricing:
+            assets.append(
+                Asset(
+                    id="hcloud:pricing:current",
+                    type="pricing",
+                    name="current Hetzner catalog pricing",
+                    properties=_sanitize_resource(pricing),
+                    source="hcloud_api",
+                )
+            )
+        edges: list[Edge] = []
         for zone in raw_by_kind.get("zone", []):
             zone_id = str(zone.get("id", zone.get("name", "unknown")))
             for rrset in self._list(f"zones/{zone_id}/rrsets", "rrsets"):
@@ -119,16 +196,53 @@ class ReadOnlyHCloudCollector:
                         relation="contains",
                     )
                 )
-        edges.extend(_derive_edges(raw_by_kind))
+        edges.extend(_derive_edges(normalized))
+        facts = _derive_facts(assets, collected_at, run_id)
         return Snapshot(
             assets=assets,
             edges=edges,
+            facts=facts,
             metadata={
                 "collector": "hcloud_api",
+                "collector_version": COLLECTOR_VERSION,
+                "run_id": run_id,
                 "read_only": True,
-                "collected_at": datetime.now(UTC).isoformat(),
+                "collected_at": collected_at,
+                "coverage": coverage,
             },
         )
+
+    def _collect_server_metrics(
+        self,
+        servers: list[dict[str, Any]],
+        coverage: dict[str, dict[str, object]],
+        collected_at: str,
+    ) -> None:
+        end = datetime.fromisoformat(collected_at)
+        start = end - timedelta(days=self.metrics_days)
+        failures = 0
+        for server in servers:
+            server_id = server.get("id")
+            if server_id is None:
+                continue
+            try:
+                server["metrics"] = self._get_json(
+                    f"servers/{server_id}/metrics",
+                    {
+                        "type": "cpu,disk,network",
+                        "start": start.isoformat(),
+                        "end": end.isoformat(),
+                    },
+                ).get("metrics", {})
+            except HCloudCollectionError:
+                server["metrics"] = {}
+                failures += 1
+        coverage["server_metrics"] = {
+            "status": "collected" if failures == 0 else "partial",
+            "count": len(servers) - failures,
+            "failed": failures,
+            "window_days": self.metrics_days,
+        }
 
 
 def _sanitize_resource(value: Any, key: str = "") -> Any:
@@ -143,8 +257,87 @@ def _sanitize_resource(value: Any, key: str = "") -> Any:
     return value
 
 
+def _parse_port(value: object) -> tuple[int | None, int | None]:
+    if value in (None, "any"):
+        return None, None
+    if isinstance(value, int):
+        return value, value
+    if isinstance(value, str) and "-" in value:
+        start, end = value.split("-", 1)
+        if start.isdigit() and end.isdigit():
+            return int(start), int(end)
+    if isinstance(value, str) and value.isdigit():
+        return int(value), int(value)
+    return None, None
+
+
+def _normal_rule(rule: dict[str, Any]) -> dict[str, Any]:
+    start, end = _parse_port(rule.get("port"))
+    return {
+        "direction": rule.get("direction"),
+        "protocol": rule.get("protocol", "tcp"),
+        "port": start if start == end else rule.get("port", "any"),
+        "port_from": start,
+        "port_to": end,
+        "sources": list(rule.get("source_ips", [])),
+        "destinations": list(rule.get("destination_ips", [])),
+        "description": rule.get("description"),
+    }
+
+
+def _normalize_resources(
+    raw: dict[str, list[dict[str, Any]]],
+) -> dict[str, list[dict[str, Any]]]:
+    normalized = {kind: [dict(row) for row in rows] for kind, rows in raw.items()}
+    firewalls = {row.get("id"): row for row in raw.get("firewall", [])}
+    for firewall in normalized.get("firewall", []):
+        firewall["inbound"] = [
+            _normal_rule(rule) for rule in firewall.get("rules", []) if rule.get("direction") == "in"
+        ]
+    for server in normalized.get("server", []):
+        public_net = server.get("public_net", {})
+        firewall_ids = [item.get("id") for item in public_net.get("firewalls", [])]
+        inbound = [
+            _normal_rule(rule)
+            for firewall_id in firewall_ids
+            for rule in firewalls.get(firewall_id, {}).get("rules", [])
+            if rule.get("direction") == "in"
+        ]
+        server["public_ip"] = bool(
+            public_net.get("ipv4", {}).get("ip") or public_net.get("ipv6", {}).get("ip")
+        )
+        server["firewall_attached"] = bool(firewall_ids)
+        server["firewall_ids"] = firewall_ids
+        server["inbound"] = inbound
+        server["backup_enabled"] = bool(server.get("backup_window"))
+        server["stateful"] = bool(server.get("volumes"))
+        server["delete_protection"] = bool(server.get("protection", {}).get("delete"))
+    return normalized
+
+
+def _network_contains(cidr: object, source: object) -> bool:
+    if not isinstance(cidr, str) or not isinstance(source, str):
+        return False
+    try:
+        source_network = ipaddress.ip_network(source, strict=False)
+        target_network = ipaddress.ip_network(cidr, strict=False)
+        if isinstance(source_network, ipaddress.IPv4Network) and isinstance(
+            target_network, ipaddress.IPv4Network
+        ):
+            return source_network.subnet_of(target_network)
+        if isinstance(source_network, ipaddress.IPv6Network) and isinstance(
+            target_network, ipaddress.IPv6Network
+        ):
+            return source_network.subnet_of(target_network)
+        return False
+    except ValueError:
+        return False
+
+
 def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
     edges: list[Edge] = []
+    servers = {server.get("id"): server for server in raw.get("server", [])}
+    networks = {network.get("id"): network for network in raw.get("network", [])}
     for server in raw.get("server", []):
         sid = f"hcloud:server:{server['id']}"
         public_net = server.get("public_net", {})
@@ -183,4 +376,48 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
             server = applied.get("server", {}).get("id")
             if server is not None:
                 edges.append(Edge(fid, f"hcloud:server:{server}", "protects"))
+    for server_id, server in servers.items():
+        sid = f"hcloud:server:{server_id}"
+        network_ids = [item.get("network") for item in server.get("private_net", [])]
+        for rule in server.get("inbound", []):
+            protocol = str(rule.get("protocol", "tcp"))
+            port = rule.get("port") if isinstance(rule.get("port"), int) else None
+            evidence = (
+                Evidence("hcloud_api", "firewall_rule", sid, rule, "properties.inbound"),
+            )
+            if set(rule.get("sources", [])) & {"0.0.0.0/0", "::/0"}:
+                edges.append(Edge("internet", sid, "allows", protocol, port, evidence))
+            for network_id, network in networks.items():
+                if network_id not in network_ids:
+                    continue
+                cidr = network.get("ip_range")
+                if any(_network_contains(cidr, source) for source in rule.get("sources", [])):
+                    edges.append(
+                        Edge(f"hcloud:network:{network_id}", sid, "allows", protocol, port, evidence)
+                    )
     return edges
+
+
+def _derive_facts(
+    assets: list[Asset], observed_at: str, run_id: str
+) -> list[Fact]:
+    facts: list[Fact] = []
+    for asset in assets:
+        for key, value in sorted(asset.properties.items()):
+            if key in {"prices", "metrics"} or isinstance(value, (str, int, float, bool, type(None), list, dict)):
+                identity = f"{asset.id}\x00{key}"
+                fact_id = "fact-" + hashlib.sha256(identity.encode()).hexdigest()[:20]
+                facts.append(
+                    Fact(
+                        id=fact_id,
+                        kind=key,
+                        asset_id=asset.id,
+                        value=value,
+                        source=asset.source,
+                        observed_at=observed_at,
+                        collector_version=COLLECTOR_VERSION,
+                        run_id=run_id,
+                        path=f"properties.{key}",
+                    )
+                )
+    return facts

@@ -1,0 +1,399 @@
+{
+  "schema_version": "1.0.0",
+  "status": "needs_validation",
+  "currency": "EUR",
+  "price_observed_at": "2026-09-22T00:00:00+00:00",
+  "current_catalog_estimate": {
+    "monthly_net": 220.0,
+    "annual_net": 2640.0,
+    "basis": "Current Hetzner catalog prices; not an invoice."
+  },
+  "identified_potential_savings": {
+    "monthly_net": 90.0,
+    "annual_net": 1080.0,
+    "confirmed_monthly_net": 0.0,
+    "basis": "Maximum non-overlapping candidate per asset; all require validation."
+  },
+  "servers": [
+    {
+      "asset_id": "hcloud:server:1",
+      "name": "synthetic-app-large",
+      "status": "running",
+      "server_type": "synthetic-x86-large",
+      "architecture": "x86",
+      "cores": 4,
+      "memory_gb": 8,
+      "monthly_net": 100.0,
+      "components_net": {
+        "server": 100.0,
+        "volumes": 0,
+        "ipv4": 0.0,
+        "backup": 0.0
+      },
+      "cpu_samples": 3,
+      "cpu_p95_capacity_percent": 10.0,
+      "cpu_max_capacity_percent": 10.0,
+      "metrics_start": "2026-08-23T00:00:00+00:00",
+      "metrics_end": "2026-09-22T00:00:00+00:00"
+    },
+    {
+      "asset_id": "hcloud:server:2",
+      "name": "synthetic-migration-old",
+      "status": "off",
+      "server_type": "synthetic-old",
+      "architecture": "x86",
+      "cores": 2,
+      "memory_gb": 4,
+      "monthly_net": 40.0,
+      "components_net": {
+        "server": 40.0,
+        "volumes": 0,
+        "ipv4": 0.0,
+        "backup": 0.0
+      },
+      "cpu_samples": 0,
+      "cpu_p95_capacity_percent": null,
+      "cpu_max_capacity_percent": null,
+      "metrics_start": null,
+      "metrics_end": null
+    },
+    {
+      "asset_id": "hcloud:server:3",
+      "name": "synthetic-busy-worker",
+      "status": "running",
+      "server_type": "synthetic-busy",
+      "architecture": "x86",
+      "cores": 4,
+      "memory_gb": 8,
+      "monthly_net": 80.0,
+      "components_net": {
+        "server": 80.0,
+        "volumes": 0,
+        "ipv4": 0.0,
+        "backup": 0.0
+      },
+      "cpu_samples": 3,
+      "cpu_p95_capacity_percent": 100.0,
+      "cpu_max_capacity_percent": 100.0,
+      "metrics_start": "2026-08-23T00:00:00+00:00",
+      "metrics_end": "2026-09-22T00:00:00+00:00"
+    }
+  ],
+  "resource_components_net": {
+    "unattached_volumes": 0.0,
+    "unassigned_primary_ipv4": 0.0,
+    "floating_ips": 0.0,
+    "snapshots": 0.0,
+    "load_balancers": 0,
+    "storage_boxes": 0
+  },
+  "recommendations": [
+    {
+      "id": "HETZ-COST-002-068d0f9e3ce115cb",
+      "rule_id": "HETZ-COST-002",
+      "title": "Validate compute rightsizing",
+      "provider": "hetzner",
+      "status": "needs_validation",
+      "assets": [
+        "hcloud:server:1"
+      ],
+      "observation_window": {
+        "start": "2026-08-23T00:00:00+00:00",
+        "end": "2026-09-22T00:00:00+00:00",
+        "days": 30
+      },
+      "current_state": {
+        "asset_id": "hcloud:server:1",
+        "name": "synthetic-app-large",
+        "status": "running",
+        "server_type": "synthetic-x86-large",
+        "architecture": "x86",
+        "cores": 4,
+        "memory_gb": 8,
+        "monthly_net": 100.0,
+        "components_net": {
+          "server": 100.0,
+          "volumes": 0,
+          "ipv4": 0.0,
+          "backup": 0.0
+        },
+        "cpu_samples": 3,
+        "cpu_p95_capacity_percent": 10.0,
+        "cpu_max_capacity_percent": 10.0,
+        "metrics_start": "2026-08-23T00:00:00+00:00",
+        "metrics_end": "2026-09-22T00:00:00+00:00"
+      },
+      "metrics": [
+        {
+          "name": "cpu_capacity",
+          "statistic": "p95",
+          "value": 10.0,
+          "unit": "percent",
+          "source": "hcloud_metrics",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        }
+      ],
+      "data_gaps": [
+        "guest RAM p95",
+        "filesystem occupancy",
+        "workload SLO and seasonality"
+      ],
+      "candidate_state": {
+        "server_type": "synthetic-x86-medium",
+        "architecture": "x86",
+        "cores": 2,
+        "memory_gb": 4,
+        "compute_monthly_net": 60.0
+      },
+      "estimated_savings": {
+        "monthly": 40.0,
+        "annual": 480.0,
+        "currency": "EUR",
+        "basis": "Current catalog price; excludes tax, credits, traffic, and migration cost.",
+        "price_observed_at": "2026-09-22T00:00:00+00:00"
+      },
+      "risk": "medium",
+      "confidence": 0.72,
+      "prerequisites": [
+        "Collect guest RAM p95.",
+        "Validate root filesystem usage, I/O peaks, SLO, and migration path."
+      ],
+      "evidence": [
+        {
+          "source": "cost_analyzer",
+          "observation": "30-day CPU p95 uses 10.00% of aggregate vCPU capacity."
+        }
+      ],
+      "cross_domain_impacts": {
+        "security": [
+          "Preserve or improve current network trust boundaries."
+        ],
+        "reliability": [
+          "Do not weaken recovery or availability requirements."
+        ],
+        "performance": [
+          "Validate representative peaks before implementation."
+        ]
+      },
+      "verification": {
+        "method": "independent validation required",
+        "result": "needs_validation",
+        "notes": "No cost-changing action was performed."
+      },
+      "implementation": {
+        "steps": [
+          "Prepare a reviewed IaC change after prerequisites are satisfied."
+        ],
+        "validation": [
+          "Compare performance, reachability, and recovery controls before cutover."
+        ],
+        "rollback": [
+          "Retain the prior configuration until owner acceptance and restore validation."
+        ]
+      },
+      "discovered_at": "2026-09-22T00:00:00+00:00"
+    },
+    {
+      "id": "HETZ-COST-003-db0d8cbe69544c30",
+      "rule_id": "HETZ-COST-003",
+      "title": "Validate x86-to-ARM migration",
+      "provider": "hetzner",
+      "status": "needs_validation",
+      "assets": [
+        "hcloud:server:1"
+      ],
+      "observation_window": {
+        "start": "2026-08-23T00:00:00+00:00",
+        "end": "2026-09-22T00:00:00+00:00",
+        "days": 30
+      },
+      "current_state": {
+        "asset_id": "hcloud:server:1",
+        "name": "synthetic-app-large",
+        "status": "running",
+        "server_type": "synthetic-x86-large",
+        "architecture": "x86",
+        "cores": 4,
+        "memory_gb": 8,
+        "monthly_net": 100.0,
+        "components_net": {
+          "server": 100.0,
+          "volumes": 0,
+          "ipv4": 0.0,
+          "backup": 0.0
+        },
+        "cpu_samples": 3,
+        "cpu_p95_capacity_percent": 10.0,
+        "cpu_max_capacity_percent": 10.0,
+        "metrics_start": "2026-08-23T00:00:00+00:00",
+        "metrics_end": "2026-09-22T00:00:00+00:00"
+      },
+      "metrics": [
+        {
+          "name": "cpu_capacity",
+          "statistic": "p95",
+          "value": 10.0,
+          "unit": "percent",
+          "source": "hcloud_metrics",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        }
+      ],
+      "data_gaps": [
+        "guest RAM p95",
+        "filesystem occupancy",
+        "workload SLO and seasonality"
+      ],
+      "candidate_state": {
+        "server_type": "synthetic-arm-large",
+        "architecture": "arm",
+        "cores": 4,
+        "memory_gb": 8,
+        "compute_monthly_net": 50.0
+      },
+      "estimated_savings": {
+        "monthly": 50.0,
+        "annual": 600.0,
+        "currency": "EUR",
+        "basis": "Current catalog price; excludes tax, credits, traffic, and migration cost.",
+        "price_observed_at": "2026-09-22T00:00:00+00:00"
+      },
+      "risk": "medium",
+      "confidence": 0.62,
+      "prerequisites": [
+        "Prove multi-architecture image and native dependency support.",
+        "Benchmark representative load and retain rollback."
+      ],
+      "evidence": [
+        {
+          "source": "cost_analyzer",
+          "observation": "A same-capacity ARM catalog type is cheaper in fsn1."
+        }
+      ],
+      "cross_domain_impacts": {
+        "security": [
+          "Preserve or improve current network trust boundaries."
+        ],
+        "reliability": [
+          "Do not weaken recovery or availability requirements."
+        ],
+        "performance": [
+          "Validate representative peaks before implementation."
+        ]
+      },
+      "verification": {
+        "method": "independent validation required",
+        "result": "needs_validation",
+        "notes": "No cost-changing action was performed."
+      },
+      "implementation": {
+        "steps": [
+          "Prepare a reviewed IaC change after prerequisites are satisfied."
+        ],
+        "validation": [
+          "Compare performance, reachability, and recovery controls before cutover."
+        ],
+        "rollback": [
+          "Retain the prior configuration until owner acceptance and restore validation."
+        ]
+      },
+      "discovered_at": "2026-09-22T00:00:00+00:00"
+    },
+    {
+      "id": "HETZ-COST-001-275b9e4c87bb30e4",
+      "rule_id": "HETZ-COST-001",
+      "title": "Validate retirement of a stopped but billed server",
+      "provider": "hetzner",
+      "status": "needs_validation",
+      "assets": [
+        "hcloud:server:2"
+      ],
+      "observation_window": {
+        "start": "2026-09-22T00:00:00+00:00",
+        "end": "2026-09-22T00:00:00+00:00",
+        "days": 30
+      },
+      "current_state": {
+        "asset_id": "hcloud:server:2",
+        "name": "synthetic-migration-old",
+        "status": "off",
+        "server_type": "synthetic-old",
+        "architecture": "x86",
+        "cores": 2,
+        "memory_gb": 4,
+        "monthly_net": 40.0,
+        "components_net": {
+          "server": 40.0,
+          "volumes": 0,
+          "ipv4": 0.0,
+          "backup": 0.0
+        },
+        "cpu_samples": 0,
+        "cpu_p95_capacity_percent": null,
+        "cpu_max_capacity_percent": null,
+        "metrics_start": null,
+        "metrics_end": null
+      },
+      "metrics": [],
+      "data_gaps": [
+        "guest RAM p95",
+        "filesystem occupancy",
+        "workload SLO and seasonality"
+      ],
+      "candidate_state": {
+        "action": "retire after owner, dependency, and restore validation"
+      },
+      "estimated_savings": {
+        "monthly": 40.0,
+        "annual": 480.0,
+        "currency": "EUR",
+        "basis": "Current catalog price; excludes tax, credits, traffic, and migration cost.",
+        "price_observed_at": "2026-09-22T00:00:00+00:00"
+      },
+      "risk": "medium",
+      "confidence": 0.9,
+      "prerequisites": [
+        "Owner confirms the server is not a rollback or cold-standby asset.",
+        "Required data and restore points are preserved."
+      ],
+      "evidence": [
+        {
+          "source": "cost_analyzer",
+          "observation": "Stopped servers remain billable while they exist."
+        }
+      ],
+      "cross_domain_impacts": {
+        "security": [
+          "Preserve or improve current network trust boundaries."
+        ],
+        "reliability": [
+          "Do not weaken recovery or availability requirements."
+        ],
+        "performance": [
+          "Validate representative peaks before implementation."
+        ]
+      },
+      "verification": {
+        "method": "independent validation required",
+        "result": "needs_validation",
+        "notes": "No cost-changing action was performed."
+      },
+      "implementation": {
+        "steps": [
+          "Prepare a reviewed IaC change after prerequisites are satisfied."
+        ],
+        "validation": [
+          "Compare performance, reachability, and recovery controls before cutover."
+        ],
+        "rollback": [
+          "Retain the prior configuration until owner acceptance and restore validation."
+        ]
+      },
+      "discovered_at": "2026-09-22T00:00:00+00:00"
+    }
+  ],
+  "data_gaps": [
+    "Hetzner does not expose guest RAM utilization.",
+    "Filesystem occupancy, workload SLOs, and application architecture constraints are not provider metrics.",
+    "Catalog prices can differ from invoices, credits, taxes, and legacy contracts."
+  ]
+}

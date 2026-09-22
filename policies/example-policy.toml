@@ -1,0 +1,20 @@
+version = 1
+
+[environments.production]
+may_receive_from = ["production"]
+
+[environments.staging]
+may_receive_from = ["staging", "production"]
+
+[services.postgres]
+public = false
+
+[services.redis]
+public = false
+
+[ssh]
+public = false
+
+[required_controls.production_stateful]
+deletion_protection = true
+backup_evidence = "required"

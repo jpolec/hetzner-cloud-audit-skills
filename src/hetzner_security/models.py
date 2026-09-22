@@ -35,6 +35,25 @@ class Evidence:
         return asdict(self)
 
 
+@dataclass(frozen=True)
+class Fact:
+    """A timestamped observation that can be compared across collection runs."""
+
+    id: str
+    kind: str
+    asset_id: str
+    value: Any
+    source: str
+    observed_at: str
+    collector_version: str
+    run_id: str
+    path: str | None = None
+    freshness_seconds: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        return asdict(self)
+
+
 @dataclass
 class Asset:
     id: str
@@ -56,6 +75,11 @@ class Edge:
     protocol: str | None = None
     port: int | None = None
     evidence: tuple[Evidence, ...] = ()
+
+    def to_dict(self) -> dict[str, Any]:
+        data = asdict(self)
+        data["evidence"] = [item.to_dict() for item in self.evidence]
+        return data
 
 
 @dataclass
@@ -105,9 +129,21 @@ class Finding:
 class Snapshot:
     assets: list[Asset] = field(default_factory=list)
     edges: list[Edge] = field(default_factory=list)
+    facts: list[Fact] = field(default_factory=list)
     expectations: list[dict[str, Any]] = field(default_factory=list)
     signals: list[dict[str, Any]] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
 
     def asset_map(self) -> dict[str, Asset]:
         return {asset.id: asset for asset in self.assets}
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "schema_version": "1.0.0",
+            "metadata": self.metadata,
+            "assets": [asset.to_dict() for asset in self.assets],
+            "edges": [edge.to_dict() for edge in self.edges],
+            "facts": [fact.to_dict() for fact in self.facts],
+            "expectations": self.expectations,
+            "signals": self.signals,
+        }

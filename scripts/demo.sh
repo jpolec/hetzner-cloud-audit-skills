@@ -11,3 +11,9 @@ python3 -m hetzner_security.cli.main audit \
 python3 -m hetzner_security.cli.main audit \
   --input benchmarks/scenarios/v0.1-insecure.json \
   --format sarif --output examples/reports/demo.sarif
+python3 -m hetzner_security.cli.main cost \
+  --input benchmarks/scenarios/v0.3-cost.json \
+  --format json --output examples/reports/demo-cost-v0.3.json
+python3 -m hetzner_security.cli.main cost \
+  --input benchmarks/scenarios/v0.3-cost.json \
+  --format markdown --output examples/reports/demo-cost-v0.3.md

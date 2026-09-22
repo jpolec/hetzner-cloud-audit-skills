@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hetzner-cloud-audit-skills:schema:policy:1.0.0",
+  "title": "Owner-declared infrastructure policy",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version"],
+  "properties": {
+    "version": {"const": 1},
+    "environments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["may_receive_from"],
+        "properties": {
+          "may_receive_from": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        }
+      }
+    },
+    "services": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "public": {"type": "boolean"},
+          "allowed_sources": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+        }
+      }
+    },
+    "ssh": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {"public": {"type": "boolean"}}
+    },
+    "required_controls": {"type": "object"}
+  }
+}

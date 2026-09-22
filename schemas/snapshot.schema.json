@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hetzner-cloud-audit-skills:schema:snapshot:1.0.0",
+  "title": "Temporal infrastructure snapshot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "metadata", "assets", "edges", "facts", "expectations", "signals"],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "metadata": {"type": "object"},
+    "assets": {"type": "array", "items": {"$ref": "asset.schema.json"}},
+    "edges": {"type": "array", "items": {"type": "object"}},
+    "facts": {"type": "array", "items": {"$ref": "fact.schema.json"}},
+    "expectations": {"type": "array"},
+    "signals": {"type": "array"}
+  }
+}

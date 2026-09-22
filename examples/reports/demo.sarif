@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "hetzner-cloud-audit-skills",
-          "version": "0.2.0",
+          "version": "0.3.0",
           "rules": [
             {
               "id": "HETZ-BCP-001",

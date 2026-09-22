@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import tomllib
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
@@ -31,9 +32,15 @@ def main() -> None:
         (ROOT / "examples/findings/architecture-recommendation.json").read_text()
     )
     Draft202012Validator(architecture_schema).validate(architecture_example)
+    cost_report = json.loads((ROOT / "examples/reports/demo-cost-v0.3.json").read_text())
+    for recommendation in cost_report["recommendations"]:
+        Draft202012Validator(architecture_schema).validate(recommendation)
+    policy_schema = json.loads((SCHEMA_DIR / "policy.schema.json").read_text())
+    policy = tomllib.loads((ROOT / "policies/example-policy.toml").read_text())
+    Draft202012Validator(policy_schema).validate(policy)
     print(
         f"validated {len(report['findings'])} findings, {len(coverage)} coverage units, "
-        "and 1 architecture recommendation"
+        f"1 architecture example, {len(cost_report['recommendations'])} cost recommendations, and 1 policy"
     )
 
 

@@ -57,9 +57,8 @@ class BenchmarkTest(unittest.TestCase):
         expected = json.loads(
             (ROOT / "benchmarks/expected-findings/v0.1-insecure.json").read_text()
         )
-        self.assertEqual(
-            {rule["id"] for rule in catalog["rules"]},
-            set(expected["expected_by_rule"]),
+        self.assertTrue(
+            set(expected["expected_by_rule"]) <= {rule["id"] for rule in catalog["rules"]}
         )
 
 

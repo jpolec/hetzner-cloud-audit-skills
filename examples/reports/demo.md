@@ -6,6 +6,17 @@
 - Needs validation: 10
 - Rejected: 0
 
+## Evidence scope
+
+- Collected at: 2026-09-22T00:00:00+00:00
+- Collector: normalized snapshot
+- Collector version: unknown
+- Run ID: unknown
+
+## Collection gaps
+
+- None reported by the collector.
+
 ## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary
 
 - **Status:** confirmed

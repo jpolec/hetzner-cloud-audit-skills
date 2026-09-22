@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ..models import Asset, Edge, Evidence, Snapshot
+from ..models import Asset, Edge, Evidence, Fact, Snapshot
 
 
 def load_snapshot(path: Path) -> Snapshot:
@@ -20,8 +20,8 @@ def load_snapshot(path: Path) -> Snapshot:
     return Snapshot(
         assets=assets,
         edges=edges,
+        facts=[Fact(**item) for item in raw.get("facts", [])],
         expectations=raw.get("expectations", []),
         signals=raw.get("signals", []),
         metadata=raw.get("metadata", {}),
     )
-

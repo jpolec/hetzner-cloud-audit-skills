@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:hetzner-cloud-audit-skills:schema:fact:1.0.0",
+  "title": "Temporal infrastructure fact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "kind", "asset_id", "value", "source", "observed_at",
+    "collector_version", "run_id", "path", "freshness_seconds"
+  ],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "kind": {"type": "string", "minLength": 1},
+    "asset_id": {"type": "string", "minLength": 1},
+    "value": {},
+    "source": {"type": "string", "minLength": 1},
+    "observed_at": {"type": "string", "format": "date-time"},
+    "collector_version": {"type": "string", "minLength": 1},
+    "run_id": {"type": "string", "minLength": 1},
+    "path": {"type": ["string", "null"]},
+    "freshness_seconds": {"type": ["integer", "null"], "minimum": 0}
+  }
+}

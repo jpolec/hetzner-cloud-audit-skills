@@ -12,7 +12,7 @@ def render_json(findings: list[Finding]) -> str:
     return json.dumps({"schema_version": "1.0.0", "findings": [f.to_dict() for f in findings]}, indent=2)
 
 
-def render_markdown(findings: list[Finding]) -> str:
+def render_markdown(findings: list[Finding], metadata: dict[str, Any] | None = None) -> str:
     lines = ["# Hetzner Security Audit", ""]
     confirmed = [finding for finding in findings if finding.status == FindingStatus.CONFIRMED]
     pending = [finding for finding in findings if finding.status == FindingStatus.NEEDS_VALIDATION]
@@ -27,6 +27,34 @@ def render_markdown(findings: list[Finding]) -> str:
             "",
         ]
     )
+    if metadata:
+        lines.extend(
+            [
+                "## Evidence scope",
+                "",
+                f"- Collected at: {metadata.get('collected_at', 'unknown')}",
+                f"- Collector: {metadata.get('collector', 'normalized snapshot')}",
+                f"- Collector version: {metadata.get('collector_version', 'unknown')}",
+                f"- Run ID: {metadata.get('run_id', 'unknown')}",
+                "",
+            ]
+        )
+        coverage = metadata.get("coverage", {})
+        if isinstance(coverage, dict):
+            gaps = [
+                name
+                for name, state in coverage.items()
+                if isinstance(state, dict) and state.get("status") not in {"collected", None}
+            ]
+            lines.extend(
+                [
+                    "## Collection gaps",
+                    "",
+                    *(f"- `{name}`: {coverage[name].get('status')}" for name in gaps),
+                    *( ["- None reported by the collector."] if not gaps else [] ),
+                    "",
+                ]
+            )
     for finding in [*confirmed, *pending]:
         lines.extend(
             [
@@ -89,7 +117,7 @@ def render_sarif(findings: list[Finding]) -> str:
                 "tool": {
                     "driver": {
                         "name": "hetzner-cloud-audit-skills",
-                        "version": "0.2.0",
+                        "version": "0.3.0",
                         "rules": list(rules.values()),
                     }
                 },

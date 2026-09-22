@@ -79,6 +79,27 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 "No matching source-to-target path exists.",
                 confidence=0.05,
             )
+
+    if candidate.rule_id == "HETZ-XLY-002":
+        source, target = candidate.assets[:2]
+        paths = graph.paths(source, target, protocol="tcp", max_depth=3)
+        if not paths:
+            return _set(
+                result,
+                FindingStatus.REJECTED,
+                "independent graph traversal",
+                candidate.evidence,
+                "The cited cloud-level path no longer exists in the snapshot.",
+                confidence=0.05,
+            )
+        target_properties = assets[target].properties
+        if not target_properties.get("listening_ports") or not target_properties.get(
+            "host_firewall_allow_ports"
+        ):
+            return _needs(
+                result,
+                "The cloud path is observed, but host firewall, listener/container publication, and application authorization remain decisive.",
+            )
         if assets[target].properties.get("host_firewall_allows_source") is False:
             return _set(
                 result,
@@ -194,4 +215,7 @@ def _candidate_port(candidate: Finding) -> int | None:
             return raw
         if isinstance(raw, str) and raw.isdigit():
             return int(raw)
+    for item in candidate.attack_path:
+        if item.startswith("tcp/") and item.removeprefix("tcp/").isdigit():
+            return int(item.removeprefix("tcp/"))
     return None
