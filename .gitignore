@@ -13,8 +13,7 @@ venv/
 .env
 .env.*
 !.env.example
-audit/
-reports/
+/audit/
+/reports/
 _gtm/
 .DS_Store
-

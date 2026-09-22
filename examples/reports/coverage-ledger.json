@@ -1,0 +1,612 @@
+[
+  {
+    "coverage_id": "coverage/0851067970a93f013d3d",
+    "asset_id": "container:ops-agent",
+    "layer": "container",
+    "attack_class": "runtime-isolation",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "postgres_fixture",
+      "redis_fixture",
+      "trivy"
+    ],
+    "result_fingerprints": [
+      "HETZ-DKR-001-8ca594fb25f70b7c",
+      "HETZ-DKR-002-4819c38217aed79a",
+      "HETZ-DKR-003-f3f060fc4a73a70f",
+      "HETZ-DKR-004-298167e4ca1ea1e0",
+      "HETZ-VULN-001-a4150c6fe1cb49e8",
+      "HETZ-XLY-001-6db24525e173f3de",
+      "HETZ-XLY-001-c3a123a6f4fcbf68"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/089fd24f49c4636943c3",
+    "asset_id": "postgres:prod",
+    "layer": "postgres",
+    "attack_class": "transport",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-3a3e079847492065",
+      "HETZ-PG-001-7162f231c522c52f",
+      "HETZ-PG-002-fe11611b41e10123",
+      "HETZ-XLY-001-09a76238859a6fc6",
+      "HETZ-XLY-001-c3a123a6f4fcbf68"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/0d6a239d9c484d125904",
+    "asset_id": "network:shared",
+    "layer": "network",
+    "attack_class": "segmentation",
+    "status": "covered",
+    "evidence_sources": [
+      "normalized_snapshot"
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "prior_status": "covered"
+  },
+  {
+    "coverage_id": "coverage/0f1a7cf2baf54f52f062",
+    "asset_id": "server:public-redis",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-da23afb6e191edab",
+      "HETZ-NET-004-98cdb1370228a50e"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/0fc1377a1f53b826cb11",
+    "asset_id": "container:stage-worker",
+    "layer": "container",
+    "attack_class": "runtime-isolation",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "grype",
+      "hcloud_fixture",
+      "postgres_fixture",
+      "redis_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-DKR-001-41051b4409ad941e",
+      "HETZ-DKR-002-5579d0b035f5c610",
+      "HETZ-DKR-003-28a17a3edeed3668",
+      "HETZ-DKR-004-37b4b93b17fa9403",
+      "HETZ-VULN-001-64830a860180b16b",
+      "HETZ-XLY-001-09a76238859a6fc6",
+      "HETZ-XLY-001-a741e4e012fa739b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/1ac8b2b13c4ada3523ac",
+    "asset_id": "postgres:prod",
+    "layer": "postgres",
+    "attack_class": "authentication",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-3a3e079847492065",
+      "HETZ-PG-001-7162f231c522c52f",
+      "HETZ-PG-002-fe11611b41e10123",
+      "HETZ-XLY-001-09a76238859a6fc6",
+      "HETZ-XLY-001-c3a123a6f4fcbf68"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/3abb545e991c3533a6da",
+    "asset_id": "redis:prod",
+    "layer": "redis",
+    "attack_class": "command-surface",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "redis_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-657df523d6f5020b",
+      "HETZ-RDS-001-797417d4d7de50f0",
+      "HETZ-XLY-001-6db24525e173f3de",
+      "HETZ-XLY-001-a741e4e012fa739b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/401c909327ab76228241",
+    "asset_id": "network:shared",
+    "layer": "network",
+    "attack_class": "lateral-movement",
+    "status": "covered",
+    "evidence_sources": [
+      "normalized_snapshot"
+    ],
+    "result_fingerprints": [],
+    "unresolved": [],
+    "prior_status": "covered"
+  },
+  {
+    "coverage_id": "coverage/5469075375edac634437",
+    "asset_id": "postgres:prod",
+    "layer": "postgres",
+    "attack_class": "recovery",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-3a3e079847492065",
+      "HETZ-PG-001-7162f231c522c52f",
+      "HETZ-PG-002-fe11611b41e10123",
+      "HETZ-XLY-001-09a76238859a6fc6",
+      "HETZ-XLY-001-c3a123a6f4fcbf68"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/5767441a03c68e9f23e8",
+    "asset_id": "server:admin",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture",
+      "hcloud_api",
+      "repository"
+    ],
+    "result_fingerprints": [
+      "HETZ-IAC-001-9c3eddeb6c5c135a",
+      "HETZ-NET-001-537a129e75138d63"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/659c7dd3365fd80daa7e",
+    "asset_id": "container:internal-api",
+    "layer": "container",
+    "attack_class": "runtime-isolation",
+    "status": "candidate",
+    "evidence_sources": [
+      "trivy"
+    ],
+    "result_fingerprints": [
+      "HETZ-VULN-001-71bfcf71ae61e50c"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/68119878bde090461f99",
+    "asset_id": "container:internal-api",
+    "layer": "container",
+    "attack_class": "secret-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "trivy"
+    ],
+    "result_fingerprints": [
+      "HETZ-VULN-001-71bfcf71ae61e50c"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/69ea87bb299dec791ca6",
+    "asset_id": "server:public-redis",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-da23afb6e191edab",
+      "HETZ-NET-004-98cdb1370228a50e"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/6edbb3af2d413d1eff5d",
+    "asset_id": "server:no-firewall-b",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-005-53061fc23c60befd"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/720ebe7814ea2e463021",
+    "asset_id": "redis:prod",
+    "layer": "redis",
+    "attack_class": "recovery",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "redis_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-657df523d6f5020b",
+      "HETZ-RDS-001-797417d4d7de50f0",
+      "HETZ-XLY-001-6db24525e173f3de",
+      "HETZ-XLY-001-a741e4e012fa739b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/9d756c41ce0904a8544b",
+    "asset_id": "server:kube-api",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-002-a31a4b22fe48e57d"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/a71e0829e79ce0ff70d2",
+    "asset_id": "server:kube-api",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-002-a31a4b22fe48e57d"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/a770ddcded81008face4",
+    "asset_id": "postgres:analytics",
+    "layer": "postgres",
+    "attack_class": "transport",
+    "status": "candidate",
+    "evidence_sources": [
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-63ce14eb9252c10a",
+      "HETZ-PG-001-8c5c845e7a65d727"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/ad2fbac212ddb4575960",
+    "asset_id": "server:no-firewall-a",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-005-22bff27b5830122b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/b17e310688b28a3bdd60",
+    "asset_id": "redis:prod",
+    "layer": "redis",
+    "attack_class": "authentication",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "redis_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-657df523d6f5020b",
+      "HETZ-RDS-001-797417d4d7de50f0",
+      "HETZ-XLY-001-6db24525e173f3de",
+      "HETZ-XLY-001-a741e4e012fa739b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/b6f02838b88314c386f8",
+    "asset_id": "redis:prod",
+    "layer": "redis",
+    "attack_class": "transport",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "redis_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-657df523d6f5020b",
+      "HETZ-RDS-001-797417d4d7de50f0",
+      "HETZ-XLY-001-6db24525e173f3de",
+      "HETZ-XLY-001-a741e4e012fa739b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/cae7d1dc8df02ed85f22",
+    "asset_id": "server:public-pg",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture",
+      "hcloud_api",
+      "repository"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-6deecb58d09f333d",
+      "HETZ-IAC-001-a5aff608f1082162",
+      "HETZ-NET-003-f346f1a613de18fa"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/cc543f933293f3491276",
+    "asset_id": "server:no-firewall-a",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-005-22bff27b5830122b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/d3672c37f8a9cb35b597",
+    "asset_id": "container:ops-agent",
+    "layer": "container",
+    "attack_class": "secret-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "postgres_fixture",
+      "redis_fixture",
+      "trivy"
+    ],
+    "result_fingerprints": [
+      "HETZ-DKR-001-8ca594fb25f70b7c",
+      "HETZ-DKR-002-4819c38217aed79a",
+      "HETZ-DKR-003-f3f060fc4a73a70f",
+      "HETZ-DKR-004-298167e4ca1ea1e0",
+      "HETZ-VULN-001-a4150c6fe1cb49e8",
+      "HETZ-XLY-001-6db24525e173f3de",
+      "HETZ-XLY-001-c3a123a6f4fcbf68"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/dd108cc060273d459f1f",
+    "asset_id": "server:public-pg",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture",
+      "hcloud_api",
+      "repository"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-6deecb58d09f333d",
+      "HETZ-IAC-001-a5aff608f1082162",
+      "HETZ-NET-003-f346f1a613de18fa"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/df3e76336c3ee743a0fb",
+    "asset_id": "postgres:analytics",
+    "layer": "postgres",
+    "attack_class": "recovery",
+    "status": "candidate",
+    "evidence_sources": [
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-63ce14eb9252c10a",
+      "HETZ-PG-001-8c5c845e7a65d727"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/df97bb7d889da58960fb",
+    "asset_id": "server:no-firewall-b",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-005-53061fc23c60befd"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/e7a121a902f28eaedcac",
+    "asset_id": "server:admin",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture",
+      "hcloud_api",
+      "repository"
+    ],
+    "result_fingerprints": [
+      "HETZ-IAC-001-9c3eddeb6c5c135a",
+      "HETZ-NET-001-537a129e75138d63"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/f061a1675b9dabf20247",
+    "asset_id": "server:docker-api",
+    "layer": "server",
+    "attack_class": "backup-resilience",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-002-5438720e6556479e"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/f6527cc12124426daed6",
+    "asset_id": "container:stage-worker",
+    "layer": "container",
+    "attack_class": "secret-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "grype",
+      "hcloud_fixture",
+      "postgres_fixture",
+      "redis_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-DKR-001-41051b4409ad941e",
+      "HETZ-DKR-002-5579d0b035f5c610",
+      "HETZ-DKR-003-28a17a3edeed3668",
+      "HETZ-DKR-004-37b4b93b17fa9403",
+      "HETZ-VULN-001-64830a860180b16b",
+      "HETZ-XLY-001-09a76238859a6fc6",
+      "HETZ-XLY-001-a741e4e012fa739b"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/f811207dc179f39a2fb5",
+    "asset_id": "postgres:analytics",
+    "layer": "postgres",
+    "attack_class": "authorization",
+    "status": "candidate",
+    "evidence_sources": [
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-63ce14eb9252c10a",
+      "HETZ-PG-001-8c5c845e7a65d727"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/f9165a32970779f707a2",
+    "asset_id": "server:docker-api",
+    "layer": "server",
+    "attack_class": "network-exposure",
+    "status": "candidate",
+    "evidence_sources": [
+      "fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-NET-002-5438720e6556479e"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/fbd5715eed8a920c09ff",
+    "asset_id": "postgres:analytics",
+    "layer": "postgres",
+    "attack_class": "authentication",
+    "status": "candidate",
+    "evidence_sources": [
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-63ce14eb9252c10a",
+      "HETZ-PG-001-8c5c845e7a65d727"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  },
+  {
+    "coverage_id": "coverage/fc4c30cd9cf8191e8799",
+    "asset_id": "postgres:prod",
+    "layer": "postgres",
+    "attack_class": "authorization",
+    "status": "candidate",
+    "evidence_sources": [
+      "docker_fixture",
+      "hcloud_fixture",
+      "postgres_fixture"
+    ],
+    "result_fingerprints": [
+      "HETZ-BCP-001-3a3e079847492065",
+      "HETZ-PG-001-7162f231c522c52f",
+      "HETZ-PG-002-fe11611b41e10123",
+      "HETZ-XLY-001-09a76238859a6fc6",
+      "HETZ-XLY-001-c3a123a6f4fcbf68"
+    ],
+    "unresolved": [],
+    "prior_status": "candidate"
+  }
+]

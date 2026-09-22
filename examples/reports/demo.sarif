@@ -1,0 +1,596 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "hetzner-security-skills",
+          "version": "0.1.0",
+          "rules": [
+            {
+              "id": "HETZ-BCP-001",
+              "shortDescription": {
+                "text": "Production stateful asset lacks observed backup coverage"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
+            },
+            {
+              "id": "HETZ-DKR-001",
+              "shortDescription": {
+                "text": "Privileged container crosses the host isolation boundary"
+              },
+              "helpUri": "https://docs.docker.com/engine/security/"
+            },
+            {
+              "id": "HETZ-DKR-002",
+              "shortDescription": {
+                "text": "Container can control the Docker daemon"
+              },
+              "helpUri": "https://docs.docker.com/engine/security/"
+            },
+            {
+              "id": "HETZ-DKR-003",
+              "shortDescription": {
+                "text": "Container shares the host PID namespace"
+              },
+              "helpUri": "https://docs.docker.com/engine/security/"
+            },
+            {
+              "id": "HETZ-DKR-004",
+              "shortDescription": {
+                "text": "Container shares the host network namespace"
+              },
+              "helpUri": "https://docs.docker.com/engine/security/"
+            },
+            {
+              "id": "HETZ-IAC-001",
+              "shortDescription": {
+                "text": "Runtime network access diverges from declared infrastructure"
+              },
+              "helpUri": "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+            },
+            {
+              "id": "HETZ-NET-001",
+              "shortDescription": {
+                "text": "SSH reachable from the public internet"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/firewalls/overview/"
+            },
+            {
+              "id": "HETZ-NET-002",
+              "shortDescription": {
+                "text": "Docker daemon reachable from the public internet"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/firewalls/overview/"
+            },
+            {
+              "id": "HETZ-NET-003",
+              "shortDescription": {
+                "text": "PostgreSQL reachable from the public internet"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/firewalls/overview/"
+            },
+            {
+              "id": "HETZ-NET-004",
+              "shortDescription": {
+                "text": "Redis reachable from the public internet"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/firewalls/overview/"
+            },
+            {
+              "id": "HETZ-NET-005",
+              "shortDescription": {
+                "text": "Internet-facing server has no observed firewall control"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/firewalls/overview/"
+            },
+            {
+              "id": "HETZ-PG-001",
+              "shortDescription": {
+                "text": "Broad PostgreSQL trust authentication bypasses credentials"
+              },
+              "helpUri": "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
+            },
+            {
+              "id": "HETZ-PG-002",
+              "shortDescription": {
+                "text": "Unexpected PostgreSQL roles hold superuser capability"
+              },
+              "helpUri": "https://www.postgresql.org/docs/current/role-attributes.html"
+            },
+            {
+              "id": "HETZ-RDS-001",
+              "shortDescription": {
+                "text": "Redis accepts non-local clients without an authentication control"
+              },
+              "helpUri": "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"
+            },
+            {
+              "id": "HETZ-VULN-001",
+              "shortDescription": {
+                "text": "Vulnerable component in non-public workload"
+              },
+              "helpUri": "https://example.invalid/CVE-DEMO-0002"
+            },
+            {
+              "id": "HETZ-XLY-001",
+              "shortDescription": {
+                "text": "staging workload can reach prod postgres"
+              },
+              "helpUri": "https://docs.hetzner.com/cloud/networks/overview/"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "HETZ-BCP-001",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "postgres:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-BCP-001",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "postgres:analytics"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-BCP-001",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "redis:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-BCP-001",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "server:public-pg"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-BCP-001",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "server:public-redis"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Runtime inspection reports privileged=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Runtime inspection reports privileged=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-002",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Runtime inspection reports docker_socket=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-002",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Runtime inspection reports docker_socket=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-003",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Runtime inspection reports host_pid=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-003",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Runtime inspection reports host_pid=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-004",
+          "level": "warning",
+          "message": {
+            "text": "confirmed: Runtime inspection reports host_network=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-DKR-004",
+          "level": "warning",
+          "message": {
+            "text": "confirmed: Runtime inspection reports host_network=true."
+          },
+          "properties": {
+            "confidence": 0.97,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-IAC-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Declared and observed source ranges differ for a security-sensitive port."
+          },
+          "properties": {
+            "confidence": 0.98,
+            "status": "confirmed",
+            "assets": [
+              "server:admin"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-IAC-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Declared and observed source ranges differ for a security-sensitive port."
+          },
+          "properties": {
+            "confidence": 0.98,
+            "status": "confirmed",
+            "assets": [
+              "server:public-pg"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: An inbound rule admits a public source to TCP/22."
+          },
+          "properties": {
+            "confidence": 0.88,
+            "status": "confirmed",
+            "assets": [
+              "server:admin"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-002",
+          "level": "error",
+          "message": {
+            "text": "confirmed: An inbound rule admits a public source to TCP/2375."
+          },
+          "properties": {
+            "confidence": 0.88,
+            "status": "confirmed",
+            "assets": [
+              "server:docker-api"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-002",
+          "level": "error",
+          "message": {
+            "text": "confirmed: An inbound rule admits a public source to TCP/6443."
+          },
+          "properties": {
+            "confidence": 0.88,
+            "status": "confirmed",
+            "assets": [
+              "server:kube-api"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-003",
+          "level": "error",
+          "message": {
+            "text": "confirmed: An inbound rule admits a public source to TCP/5432."
+          },
+          "properties": {
+            "confidence": 0.88,
+            "status": "confirmed",
+            "assets": [
+              "server:public-pg"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-004",
+          "level": "error",
+          "message": {
+            "text": "confirmed: An inbound rule admits a public source to TCP/6379."
+          },
+          "properties": {
+            "confidence": 0.88,
+            "status": "confirmed",
+            "assets": [
+              "server:public-redis"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-005",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "server:no-firewall-a"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-NET-005",
+          "level": "warning",
+          "message": {
+            "text": "needs_validation: A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present."
+          },
+          "properties": {
+            "confidence": 0.69,
+            "status": "needs_validation",
+            "assets": [
+              "server:no-firewall-b"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-PG-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: pg_hba.conf trusts a broad network range."
+          },
+          "properties": {
+            "confidence": 0.99,
+            "status": "confirmed",
+            "assets": [
+              "postgres:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-PG-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: pg_hba.conf trusts a broad network range."
+          },
+          "properties": {
+            "confidence": 0.99,
+            "status": "confirmed",
+            "assets": [
+              "postgres:analytics"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-PG-002",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Role inventory marks superuser roles outside the declared allowlist."
+          },
+          "properties": {
+            "confidence": 0.93,
+            "status": "confirmed",
+            "assets": [
+              "postgres:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-RDS-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: Broad bind, disabled protected mode, and absent ACL/password evidence coincide."
+          },
+          "properties": {
+            "confidence": 0.99,
+            "status": "confirmed",
+            "assets": [
+              "redis:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-VULN-001",
+          "level": "warning",
+          "message": {
+            "text": "confirmed: grype reports CVE-DEMO-0002 in openssl-demo."
+          },
+          "properties": {
+            "confidence": 0.84,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-VULN-001",
+          "level": "warning",
+          "message": {
+            "text": "confirmed: trivy reports CVE-DEMO-0001 in libdemo."
+          },
+          "properties": {
+            "confidence": 0.84,
+            "status": "confirmed",
+            "assets": [
+              "container:internal-api"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-VULN-001",
+          "level": "warning",
+          "message": {
+            "text": "confirmed: trivy reports CVE-DEMO-0003 in curl-demo."
+          },
+          "properties": {
+            "confidence": 0.84,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-XLY-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: A cross-environment attack-graph path contradicts an explicit isolation declaration."
+          },
+          "properties": {
+            "confidence": 0.96,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker",
+              "postgres:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-XLY-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: A cross-environment attack-graph path contradicts an explicit isolation declaration."
+          },
+          "properties": {
+            "confidence": 0.96,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent",
+              "redis:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-XLY-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: A cross-environment attack-graph path contradicts an explicit isolation declaration."
+          },
+          "properties": {
+            "confidence": 0.96,
+            "status": "confirmed",
+            "assets": [
+              "container:stage-worker",
+              "redis:prod"
+            ]
+          }
+        },
+        {
+          "ruleId": "HETZ-XLY-001",
+          "level": "error",
+          "message": {
+            "text": "confirmed: A cross-environment attack-graph path contradicts an explicit isolation declaration."
+          },
+          "properties": {
+            "confidence": 0.96,
+            "status": "confirmed",
+            "assets": [
+              "container:ops-agent",
+              "postgres:prod"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

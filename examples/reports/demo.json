@@ -1,0 +1,2241 @@
+{
+  "schema_version": "1.0.0",
+  "findings": [
+    {
+      "id": "HETZ-BCP-001-3a3e079847492065",
+      "rule_id": "HETZ-BCP-001",
+      "title": "Production stateful asset lacks observed backup coverage",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "postgres:prod"
+      ],
+      "observation": "The asset is declared production and stateful, but no backup configuration is observed.",
+      "expected_state": "Production state has a tested, declared recovery mechanism.",
+      "actual_state": "backup_enabled=false or absent.",
+      "evidence": [
+        {
+          "source": "postgres_fixture",
+          "kind": "backup_state",
+          "asset_id": "postgres:prod",
+          "observed": false,
+          "path": "properties.backup_enabled",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "postgres:prod",
+        "data loss",
+        "unrecoverable state"
+      ],
+      "prerequisites": [
+        "Collector coverage includes the relevant backup mechanism."
+      ],
+      "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "postgres_fixture",
+            "kind": "backup_state",
+            "asset_id": "postgres:prod",
+            "observed": false,
+            "path": "properties.backup_enabled",
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Enable provider or application-consistent backups and record a restore test.",
+      "references": [
+        "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798991+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-BCP-001-63ce14eb9252c10a",
+      "rule_id": "HETZ-BCP-001",
+      "title": "Production stateful asset lacks observed backup coverage",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "postgres:analytics"
+      ],
+      "observation": "The asset is declared production and stateful, but no backup configuration is observed.",
+      "expected_state": "Production state has a tested, declared recovery mechanism.",
+      "actual_state": "backup_enabled=false or absent.",
+      "evidence": [
+        {
+          "source": "postgres_fixture",
+          "kind": "backup_state",
+          "asset_id": "postgres:analytics",
+          "observed": false,
+          "path": "properties.backup_enabled",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "postgres:analytics",
+        "data loss",
+        "unrecoverable state"
+      ],
+      "prerequisites": [
+        "Collector coverage includes the relevant backup mechanism."
+      ],
+      "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "postgres_fixture",
+            "kind": "backup_state",
+            "asset_id": "postgres:analytics",
+            "observed": false,
+            "path": "properties.backup_enabled",
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Enable provider or application-consistent backups and record a restore test.",
+      "references": [
+        "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798996+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-BCP-001-657df523d6f5020b",
+      "rule_id": "HETZ-BCP-001",
+      "title": "Production stateful asset lacks observed backup coverage",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "redis:prod"
+      ],
+      "observation": "The asset is declared production and stateful, but no backup configuration is observed.",
+      "expected_state": "Production state has a tested, declared recovery mechanism.",
+      "actual_state": "backup_enabled=false or absent.",
+      "evidence": [
+        {
+          "source": "redis_fixture",
+          "kind": "backup_state",
+          "asset_id": "redis:prod",
+          "observed": false,
+          "path": "properties.backup_enabled",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "redis:prod",
+        "data loss",
+        "unrecoverable state"
+      ],
+      "prerequisites": [
+        "Collector coverage includes the relevant backup mechanism."
+      ],
+      "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "redis_fixture",
+            "kind": "backup_state",
+            "asset_id": "redis:prod",
+            "observed": false,
+            "path": "properties.backup_enabled",
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Enable provider or application-consistent backups and record a restore test.",
+      "references": [
+        "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.799001+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-BCP-001-6deecb58d09f333d",
+      "rule_id": "HETZ-BCP-001",
+      "title": "Production stateful asset lacks observed backup coverage",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "server:public-pg"
+      ],
+      "observation": "The asset is declared production and stateful, but no backup configuration is observed.",
+      "expected_state": "Production state has a tested, declared recovery mechanism.",
+      "actual_state": "backup_enabled=false or absent.",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "backup_state",
+          "asset_id": "server:public-pg",
+          "observed": false,
+          "path": "properties.backup_enabled",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "server:public-pg",
+        "data loss",
+        "unrecoverable state"
+      ],
+      "prerequisites": [
+        "Collector coverage includes the relevant backup mechanism."
+      ],
+      "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "backup_state",
+            "asset_id": "server:public-pg",
+            "observed": false,
+            "path": "properties.backup_enabled",
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Enable provider or application-consistent backups and record a restore test.",
+      "references": [
+        "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798979+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-BCP-001-da23afb6e191edab",
+      "rule_id": "HETZ-BCP-001",
+      "title": "Production stateful asset lacks observed backup coverage",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "server:public-redis"
+      ],
+      "observation": "The asset is declared production and stateful, but no backup configuration is observed.",
+      "expected_state": "Production state has a tested, declared recovery mechanism.",
+      "actual_state": "backup_enabled=false or absent.",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "backup_state",
+          "asset_id": "server:public-redis",
+          "observed": false,
+          "path": "properties.backup_enabled",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "server:public-redis",
+        "data loss",
+        "unrecoverable state"
+      ],
+      "prerequisites": [
+        "Collector coverage includes the relevant backup mechanism."
+      ],
+      "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "backup_state",
+            "asset_id": "server:public-redis",
+            "observed": false,
+            "path": "properties.backup_enabled",
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Enable provider or application-consistent backups and record a restore test.",
+      "references": [
+        "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798985+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-001-41051b4409ad941e",
+      "rule_id": "HETZ-DKR-001",
+      "title": "Privileged container crosses the host isolation boundary",
+      "severity": "high",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker"
+      ],
+      "observation": "Runtime inspection reports privileged=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "privileged=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:stage-worker",
+          "observed": {
+            "privileged": true
+          },
+          "path": "properties.privileged",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:stage-worker",
+            "observed": {
+              "privileged": true
+            },
+            "path": "properties.privileged",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable privileged and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798895+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-001-8ca594fb25f70b7c",
+      "rule_id": "HETZ-DKR-001",
+      "title": "Privileged container crosses the host isolation boundary",
+      "severity": "high",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent"
+      ],
+      "observation": "Runtime inspection reports privileged=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "privileged=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:ops-agent",
+          "observed": {
+            "privileged": true
+          },
+          "path": "properties.privileged",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:ops-agent",
+            "observed": {
+              "privileged": true
+            },
+            "path": "properties.privileged",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable privileged and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798920+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-002-4819c38217aed79a",
+      "rule_id": "HETZ-DKR-002",
+      "title": "Container can control the Docker daemon",
+      "severity": "critical",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent"
+      ],
+      "observation": "Runtime inspection reports docker_socket=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "docker_socket=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:ops-agent",
+          "observed": {
+            "docker_socket": true
+          },
+          "path": "properties.docker_socket",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:ops-agent",
+            "observed": {
+              "docker_socket": true
+            },
+            "path": "properties.docker_socket",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable docker_socket and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798925+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-002-5579d0b035f5c610",
+      "rule_id": "HETZ-DKR-002",
+      "title": "Container can control the Docker daemon",
+      "severity": "critical",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker"
+      ],
+      "observation": "Runtime inspection reports docker_socket=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "docker_socket=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:stage-worker",
+          "observed": {
+            "docker_socket": true
+          },
+          "path": "properties.docker_socket",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:stage-worker",
+            "observed": {
+              "docker_socket": true
+            },
+            "path": "properties.docker_socket",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable docker_socket and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798902+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-003-28a17a3edeed3668",
+      "rule_id": "HETZ-DKR-003",
+      "title": "Container shares the host PID namespace",
+      "severity": "high",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker"
+      ],
+      "observation": "Runtime inspection reports host_pid=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "host_pid=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:stage-worker",
+          "observed": {
+            "host_pid": true
+          },
+          "path": "properties.host_pid",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:stage-worker",
+            "observed": {
+              "host_pid": true
+            },
+            "path": "properties.host_pid",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable host_pid and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798909+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-003-f3f060fc4a73a70f",
+      "rule_id": "HETZ-DKR-003",
+      "title": "Container shares the host PID namespace",
+      "severity": "high",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent"
+      ],
+      "observation": "Runtime inspection reports host_pid=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "host_pid=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:ops-agent",
+          "observed": {
+            "host_pid": true
+          },
+          "path": "properties.host_pid",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:ops-agent",
+            "observed": {
+              "host_pid": true
+            },
+            "path": "properties.host_pid",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable host_pid and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798931+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-004-298167e4ca1ea1e0",
+      "rule_id": "HETZ-DKR-004",
+      "title": "Container shares the host network namespace",
+      "severity": "medium",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent"
+      ],
+      "observation": "Runtime inspection reports host_network=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "host_network=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:ops-agent",
+          "observed": {
+            "host_network": true
+          },
+          "path": "properties.host_network",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:ops-agent",
+            "observed": {
+              "host_network": true
+            },
+            "path": "properties.host_network",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable host_network and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798936+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-DKR-004-37b4b93b17fa9403",
+      "rule_id": "HETZ-DKR-004",
+      "title": "Container shares the host network namespace",
+      "severity": "medium",
+      "confidence": 0.97,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker"
+      ],
+      "observation": "Runtime inspection reports host_network=true.",
+      "expected_state": "The workload has only capabilities required by its declared function.",
+      "actual_state": "host_network=true",
+      "evidence": [
+        {
+          "source": "docker_fixture",
+          "kind": "container_runtime",
+          "asset_id": "container:stage-worker",
+          "observed": {
+            "host_network": true
+          },
+          "path": "properties.host_network",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "container_runtime",
+        "host"
+      ],
+      "prerequisites": [
+        "Code execution in the container."
+      ],
+      "impact": "Container compromise can expand to host or sibling-workload control.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "docker_fixture",
+            "kind": "container_runtime",
+            "asset_id": "container:stage-worker",
+            "observed": {
+              "host_network": true
+            },
+            "path": "properties.host_network",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Disable host_network and grant a narrower capability or mediated service.",
+      "references": [
+        "https://docs.docker.com/engine/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798914+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-IAC-001-9c3eddeb6c5c135a",
+      "rule_id": "HETZ-IAC-001",
+      "title": "Runtime network access diverges from declared infrastructure",
+      "severity": "high",
+      "confidence": 0.98,
+      "status": "confirmed",
+      "assets": [
+        "server:admin"
+      ],
+      "observation": "Declared and observed source ranges differ for a security-sensitive port.",
+      "expected_state": "TCP/22 sources equal the declared set ['100.64.0.0/10'].",
+      "actual_state": "Unexpected observed sources: ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "repository",
+          "kind": "declared_expectation",
+          "asset_id": "server:admin",
+          "observed": "SSH only from Tailscale",
+          "path": "examples/intentionally-insecure/main.tf:12",
+          "collected_at": null
+        },
+        {
+          "source": "hcloud_api",
+          "kind": "observed_access",
+          "asset_id": "server:admin",
+          "observed": [
+            "0.0.0.0/0"
+          ],
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "0.0.0.0/0",
+        "tcp/22",
+        "server:admin"
+      ],
+      "prerequisites": [
+        "Repository declaration is current and refers to the observed asset."
+      ],
+      "impact": "A change outside the reviewed IaC path bypasses the intended access boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "repository",
+            "kind": "declared_expectation",
+            "asset_id": "server:admin",
+            "observed": "SSH only from Tailscale",
+            "path": "examples/intentionally-insecure/main.tf:12",
+            "collected_at": null
+          },
+          {
+            "source": "hcloud_api",
+            "kind": "observed_access",
+            "asset_id": "server:admin",
+            "observed": [
+              "0.0.0.0/0"
+            ],
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.",
+      "references": [
+        "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798782+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-IAC-001-a5aff608f1082162",
+      "rule_id": "HETZ-IAC-001",
+      "title": "Runtime network access diverges from declared infrastructure",
+      "severity": "high",
+      "confidence": 0.98,
+      "status": "confirmed",
+      "assets": [
+        "server:public-pg"
+      ],
+      "observation": "Declared and observed source ranges differ for a security-sensitive port.",
+      "expected_state": "TCP/5432 sources equal the declared set ['10.0.0.0/8'].",
+      "actual_state": "Unexpected observed sources: ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "repository",
+          "kind": "declared_expectation",
+          "asset_id": "server:public-pg",
+          "observed": "PostgreSQL only on private network",
+          "path": "examples/intentionally-insecure/main.tf:30",
+          "collected_at": null
+        },
+        {
+          "source": "hcloud_api",
+          "kind": "observed_access",
+          "asset_id": "server:public-pg",
+          "observed": [
+            "0.0.0.0/0"
+          ],
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "0.0.0.0/0",
+        "tcp/5432",
+        "server:public-pg"
+      ],
+      "prerequisites": [
+        "Repository declaration is current and refers to the observed asset."
+      ],
+      "impact": "A change outside the reviewed IaC path bypasses the intended access boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "repository",
+            "kind": "declared_expectation",
+            "asset_id": "server:public-pg",
+            "observed": "PostgreSQL only on private network",
+            "path": "examples/intentionally-insecure/main.tf:30",
+            "collected_at": null
+          },
+          {
+            "source": "hcloud_api",
+            "kind": "observed_access",
+            "asset_id": "server:public-pg",
+            "observed": [
+              "0.0.0.0/0"
+            ],
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.",
+      "references": [
+        "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798792+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-001-537a129e75138d63",
+      "rule_id": "HETZ-NET-001",
+      "title": "SSH reachable from the public internet",
+      "severity": "high",
+      "confidence": 0.88,
+      "status": "confirmed",
+      "assets": [
+        "server:admin"
+      ],
+      "observation": "An inbound rule admits a public source to TCP/22.",
+      "expected_state": "Management and data services are reachable only from declared trusted sources.",
+      "actual_state": "TCP/22 admits ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "firewall_rule",
+          "asset_id": "server:admin",
+          "observed": {
+            "protocol": "tcp",
+            "port": 22,
+            "sources": [
+              "0.0.0.0/0"
+            ]
+          },
+          "path": "properties.inbound",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "tcp/22",
+        "server:admin"
+      ],
+      "prerequisites": [
+        "The rule is attached to the target and no downstream firewall blocks it."
+      ],
+      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "firewall_rule",
+            "asset_id": "server:admin",
+            "observed": {
+              "protocol": "tcp",
+              "port": 22,
+              "sources": [
+                "0.0.0.0/0"
+              ]
+            },
+            "path": "properties.inbound",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798602+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-002-5438720e6556479e",
+      "rule_id": "HETZ-NET-002",
+      "title": "Docker daemon reachable from the public internet",
+      "severity": "critical",
+      "confidence": 0.88,
+      "status": "confirmed",
+      "assets": [
+        "server:docker-api"
+      ],
+      "observation": "An inbound rule admits a public source to TCP/2375.",
+      "expected_state": "Management and data services are reachable only from declared trusted sources.",
+      "actual_state": "TCP/2375 admits ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "firewall_rule",
+          "asset_id": "server:docker-api",
+          "observed": {
+            "protocol": "tcp",
+            "port": 2375,
+            "sources": [
+              "0.0.0.0/0"
+            ]
+          },
+          "path": "properties.inbound",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "tcp/2375",
+        "server:docker-api"
+      ],
+      "prerequisites": [
+        "The rule is attached to the target and no downstream firewall blocks it."
+      ],
+      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "firewall_rule",
+            "asset_id": "server:docker-api",
+            "observed": {
+              "protocol": "tcp",
+              "port": 2375,
+              "sources": [
+                "0.0.0.0/0"
+              ]
+            },
+            "path": "properties.inbound",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798716+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-002-a31a4b22fe48e57d",
+      "rule_id": "HETZ-NET-002",
+      "title": "Kubernetes API reachable from the public internet",
+      "severity": "critical",
+      "confidence": 0.88,
+      "status": "confirmed",
+      "assets": [
+        "server:kube-api"
+      ],
+      "observation": "An inbound rule admits a public source to TCP/6443.",
+      "expected_state": "Management and data services are reachable only from declared trusted sources.",
+      "actual_state": "TCP/6443 admits ['::/0'].",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "firewall_rule",
+          "asset_id": "server:kube-api",
+          "observed": {
+            "protocol": "tcp",
+            "port": 6443,
+            "sources": [
+              "::/0"
+            ]
+          },
+          "path": "properties.inbound",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "tcp/6443",
+        "server:kube-api"
+      ],
+      "prerequisites": [
+        "The rule is attached to the target and no downstream firewall blocks it."
+      ],
+      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "firewall_rule",
+            "asset_id": "server:kube-api",
+            "observed": {
+              "protocol": "tcp",
+              "port": 6443,
+              "sources": [
+                "::/0"
+              ]
+            },
+            "path": "properties.inbound",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798731+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-003-f346f1a613de18fa",
+      "rule_id": "HETZ-NET-003",
+      "title": "PostgreSQL reachable from the public internet",
+      "severity": "high",
+      "confidence": 0.88,
+      "status": "confirmed",
+      "assets": [
+        "server:public-pg"
+      ],
+      "observation": "An inbound rule admits a public source to TCP/5432.",
+      "expected_state": "Management and data services are reachable only from declared trusted sources.",
+      "actual_state": "TCP/5432 admits ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "firewall_rule",
+          "asset_id": "server:public-pg",
+          "observed": {
+            "protocol": "tcp",
+            "port": 5432,
+            "sources": [
+              "0.0.0.0/0"
+            ]
+          },
+          "path": "properties.inbound",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "tcp/5432",
+        "server:public-pg"
+      ],
+      "prerequisites": [
+        "The rule is attached to the target and no downstream firewall blocks it."
+      ],
+      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "firewall_rule",
+            "asset_id": "server:public-pg",
+            "observed": {
+              "protocol": "tcp",
+              "port": 5432,
+              "sources": [
+                "0.0.0.0/0"
+              ]
+            },
+            "path": "properties.inbound",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798741+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-004-98cdb1370228a50e",
+      "rule_id": "HETZ-NET-004",
+      "title": "Redis reachable from the public internet",
+      "severity": "critical",
+      "confidence": 0.88,
+      "status": "confirmed",
+      "assets": [
+        "server:public-redis"
+      ],
+      "observation": "An inbound rule admits a public source to TCP/6379.",
+      "expected_state": "Management and data services are reachable only from declared trusted sources.",
+      "actual_state": "TCP/6379 admits ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "firewall_rule",
+          "asset_id": "server:public-redis",
+          "observed": {
+            "protocol": "tcp",
+            "port": 6379,
+            "sources": [
+              "0.0.0.0/0"
+            ]
+          },
+          "path": "properties.inbound",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "tcp/6379",
+        "server:public-redis"
+      ],
+      "prerequisites": [
+        "The rule is attached to the target and no downstream firewall blocks it."
+      ],
+      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "firewall_rule",
+            "asset_id": "server:public-redis",
+            "observed": {
+              "protocol": "tcp",
+              "port": 6379,
+              "sources": [
+                "0.0.0.0/0"
+              ]
+            },
+            "path": "properties.inbound",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798749+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-005-22bff27b5830122b",
+      "rule_id": "HETZ-NET-005",
+      "title": "Internet-facing server has no observed firewall control",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "server:no-firewall-a"
+      ],
+      "observation": "A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.",
+      "expected_state": "Every public server has an independently evidenced ingress control.",
+      "actual_state": "Public IP present; firewall attachment and host firewall evidence absent.",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "public_interface",
+          "asset_id": "server:no-firewall-a",
+          "observed": "192.0.2.20",
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "server:no-firewall-a"
+      ],
+      "prerequisites": [
+        "Collector coverage includes firewall attachments and host firewall state."
+      ],
+      "impact": "Services that bind broadly may be reachable without a network policy boundary.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "public_interface",
+            "asset_id": "server:no-firewall-a",
+            "observed": "192.0.2.20",
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Attach a least-privilege Hetzner firewall or provide verified host-firewall evidence.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798763+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-NET-005-53061fc23c60befd",
+      "rule_id": "HETZ-NET-005",
+      "title": "Internet-facing server has no observed firewall control",
+      "severity": "medium",
+      "confidence": 0.69,
+      "status": "needs_validation",
+      "assets": [
+        "server:no-firewall-b"
+      ],
+      "observation": "A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.",
+      "expected_state": "Every public server has an independently evidenced ingress control.",
+      "actual_state": "Public IP present; firewall attachment and host firewall evidence absent.",
+      "evidence": [
+        {
+          "source": "fixture",
+          "kind": "public_interface",
+          "asset_id": "server:no-firewall-b",
+          "observed": "2001:db8::20",
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "internet",
+        "server:no-firewall-b"
+      ],
+      "prerequisites": [
+        "Collector coverage includes firewall attachments and host firewall state."
+      ],
+      "impact": "Services that bind broadly may be reachable without a network policy boundary.",
+      "verification": {
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
+        "evidence": [
+          {
+            "source": "fixture",
+            "kind": "public_interface",
+            "asset_id": "server:no-firewall-b",
+            "observed": "2001:db8::20",
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
+      },
+      "remediation": "Attach a least-privilege Hetzner firewall or provide verified host-firewall evidence.",
+      "references": [
+        "https://docs.hetzner.com/cloud/firewalls/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798769+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-PG-001-7162f231c522c52f",
+      "rule_id": "HETZ-PG-001",
+      "title": "Broad PostgreSQL trust authentication bypasses credentials",
+      "severity": "critical",
+      "confidence": 0.99,
+      "status": "confirmed",
+      "assets": [
+        "postgres:prod"
+      ],
+      "observation": "pg_hba.conf trusts a broad network range.",
+      "expected_state": "Remote database connections use authenticated, encrypted methods scoped to required clients.",
+      "actual_state": "HBA rule 0 uses trust for 0.0.0.0/0.",
+      "evidence": [
+        {
+          "source": "postgres_fixture",
+          "kind": "pg_hba_rule",
+          "asset_id": "postgres:prod",
+          "observed": {
+            "type": "host",
+            "database": "all",
+            "user": "all",
+            "address": "0.0.0.0/0",
+            "method": "trust"
+          },
+          "path": "properties.pg_hba[0]",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "0.0.0.0/0",
+        "postgres:prod",
+        "postgres authentication"
+      ],
+      "prerequisites": [
+        "A network path reaches PostgreSQL and the HBA rule is selected."
+      ],
+      "impact": "A reachable client can select an allowed database role without presenting a password.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "postgres_fixture",
+            "kind": "pg_hba_rule",
+            "asset_id": "postgres:prod",
+            "observed": {
+              "type": "host",
+              "database": "all",
+              "user": "all",
+              "address": "0.0.0.0/0",
+              "method": "trust"
+            },
+            "path": "properties.pg_hba[0]",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.",
+      "references": [
+        "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798946+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-PG-001-8c5c845e7a65d727",
+      "rule_id": "HETZ-PG-001",
+      "title": "Broad PostgreSQL trust authentication bypasses credentials",
+      "severity": "critical",
+      "confidence": 0.99,
+      "status": "confirmed",
+      "assets": [
+        "postgres:analytics"
+      ],
+      "observation": "pg_hba.conf trusts a broad network range.",
+      "expected_state": "Remote database connections use authenticated, encrypted methods scoped to required clients.",
+      "actual_state": "HBA rule 0 uses trust for ::/0.",
+      "evidence": [
+        {
+          "source": "postgres_fixture",
+          "kind": "pg_hba_rule",
+          "asset_id": "postgres:analytics",
+          "observed": {
+            "type": "host",
+            "database": "all",
+            "user": "all",
+            "address": "::/0",
+            "method": "trust"
+          },
+          "path": "properties.pg_hba[0]",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "::/0",
+        "postgres:analytics",
+        "postgres authentication"
+      ],
+      "prerequisites": [
+        "A network path reaches PostgreSQL and the HBA rule is selected."
+      ],
+      "impact": "A reachable client can select an allowed database role without presenting a password.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "postgres_fixture",
+            "kind": "pg_hba_rule",
+            "asset_id": "postgres:analytics",
+            "observed": {
+              "type": "host",
+              "database": "all",
+              "user": "all",
+              "address": "::/0",
+              "method": "trust"
+            },
+            "path": "properties.pg_hba[0]",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.",
+      "references": [
+        "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798962+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-PG-002-fe11611b41e10123",
+      "rule_id": "HETZ-PG-002",
+      "title": "Unexpected PostgreSQL roles hold superuser capability",
+      "severity": "high",
+      "confidence": 0.93,
+      "status": "confirmed",
+      "assets": [
+        "postgres:prod"
+      ],
+      "observation": "Role inventory marks superuser roles outside the declared allowlist.",
+      "expected_state": "Only explicitly designated break-glass or administrative roles are superusers.",
+      "actual_state": "Unexpected superusers: ['app', 'migration'].",
+      "evidence": [
+        {
+          "source": "postgres_fixture",
+          "kind": "postgres_roles",
+          "asset_id": "postgres:prod",
+          "observed": [
+            "app",
+            "migration"
+          ],
+          "path": "properties.roles",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "database credentials",
+        "app",
+        "migration",
+        "postgres:prod"
+      ],
+      "prerequisites": [
+        "Ability to authenticate as one of the listed roles."
+      ],
+      "impact": "The roles can bypass database authorization and alter security-sensitive configuration.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "postgres_fixture",
+            "kind": "postgres_roles",
+            "asset_id": "postgres:prod",
+            "observed": [
+              "app",
+              "migration"
+            ],
+            "path": "properties.roles",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Revoke SUPERUSER and grant the minimum object and administrative privileges.",
+      "references": [
+        "https://www.postgresql.org/docs/current/role-attributes.html"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798954+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-RDS-001-797417d4d7de50f0",
+      "rule_id": "HETZ-RDS-001",
+      "title": "Redis accepts non-local clients without an authentication control",
+      "severity": "critical",
+      "confidence": 0.99,
+      "status": "confirmed",
+      "assets": [
+        "redis:prod"
+      ],
+      "observation": "Broad bind, disabled protected mode, and absent ACL/password evidence coincide.",
+      "expected_state": "Redis is limited to trusted clients and requires a scoped ACL identity.",
+      "actual_state": "bind is broad; protected-mode=no; no authentication configured.",
+      "evidence": [
+        {
+          "source": "redis_fixture",
+          "kind": "redis_config",
+          "asset_id": "redis:prod",
+          "observed": {
+            "bind": [
+              "0.0.0.0"
+            ],
+            "protected_mode": false,
+            "acl_enabled": false
+          },
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "reachable network peer",
+        "redis:prod",
+        "redis command surface"
+      ],
+      "prerequisites": [
+        "A network path reaches the Redis listener."
+      ],
+      "impact": "A client can read, alter, or destroy cached or persistent data.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "redis_fixture",
+            "kind": "redis_config",
+            "asset_id": "redis:prod",
+            "observed": {
+              "bind": [
+                "0.0.0.0"
+              ],
+              "protected_mode": false,
+              "acl_enabled": false
+            },
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Bind to the required interface, enable protected mode, and configure least-privilege ACLs.",
+      "references": [
+        "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798971+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-VULN-001-64830a860180b16b",
+      "rule_id": "HETZ-VULN-001",
+      "title": "Vulnerable component in non-public workload",
+      "severity": "medium",
+      "confidence": 0.84,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker"
+      ],
+      "observation": "grype reports CVE-DEMO-0002 in openssl-demo.",
+      "expected_state": "Deployed components have no applicable high-impact known vulnerabilities.",
+      "actual_state": "Installed 2.0; fixed 2.1; internet_reachable=False.",
+      "evidence": [
+        {
+          "source": "grype",
+          "kind": "vulnerability_signal",
+          "asset_id": "container:stage-worker",
+          "observed": {
+            "type": "vulnerability",
+            "scanner": "grype",
+            "asset_id": "container:stage-worker",
+            "vulnerability_id": "CVE-DEMO-0002",
+            "package": "openssl-demo",
+            "installed_version": "2.0",
+            "fixed_version": "2.1",
+            "severity": "HIGH",
+            "primary_url": "https://example.invalid/CVE-DEMO-0002"
+          },
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "local vulnerable component"
+      ],
+      "prerequisites": [
+        "The vulnerable component and affected code path are present at runtime."
+      ],
+      "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "grype",
+            "kind": "vulnerability_signal",
+            "asset_id": "container:stage-worker",
+            "observed": {
+              "type": "vulnerability",
+              "scanner": "grype",
+              "asset_id": "container:stage-worker",
+              "vulnerability_id": "CVE-DEMO-0002",
+              "package": "openssl-demo",
+              "installed_version": "2.0",
+              "fixed_version": "2.1",
+              "severity": "HIGH",
+              "primary_url": "https://example.invalid/CVE-DEMO-0002"
+            },
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Upgrade to the fixed version and verify whether the affected component is loaded or reachable.",
+      "references": [
+        "https://example.invalid/CVE-DEMO-0002"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.799023+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-VULN-001-71bfcf71ae61e50c",
+      "rule_id": "HETZ-VULN-001",
+      "title": "Vulnerable component in non-public workload",
+      "severity": "medium",
+      "confidence": 0.84,
+      "status": "confirmed",
+      "assets": [
+        "container:internal-api"
+      ],
+      "observation": "trivy reports CVE-DEMO-0001 in libdemo.",
+      "expected_state": "Deployed components have no applicable high-impact known vulnerabilities.",
+      "actual_state": "Installed 1.0; fixed 1.1; internet_reachable=False.",
+      "evidence": [
+        {
+          "source": "trivy",
+          "kind": "vulnerability_signal",
+          "asset_id": "container:internal-api",
+          "observed": {
+            "type": "vulnerability",
+            "scanner": "trivy",
+            "asset_id": "container:internal-api",
+            "vulnerability_id": "CVE-DEMO-0001",
+            "package": "libdemo",
+            "installed_version": "1.0",
+            "fixed_version": "1.1",
+            "severity": "CRITICAL",
+            "primary_url": "https://example.invalid/CVE-DEMO-0001"
+          },
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:internal-api",
+        "local vulnerable component"
+      ],
+      "prerequisites": [
+        "The vulnerable component and affected code path are present at runtime."
+      ],
+      "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "trivy",
+            "kind": "vulnerability_signal",
+            "asset_id": "container:internal-api",
+            "observed": {
+              "type": "vulnerability",
+              "scanner": "trivy",
+              "asset_id": "container:internal-api",
+              "vulnerability_id": "CVE-DEMO-0001",
+              "package": "libdemo",
+              "installed_version": "1.0",
+              "fixed_version": "1.1",
+              "severity": "CRITICAL",
+              "primary_url": "https://example.invalid/CVE-DEMO-0001"
+            },
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Upgrade to the fixed version and verify whether the affected component is loaded or reachable.",
+      "references": [
+        "https://example.invalid/CVE-DEMO-0001"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.799013+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-VULN-001-a4150c6fe1cb49e8",
+      "rule_id": "HETZ-VULN-001",
+      "title": "Vulnerable component in non-public workload",
+      "severity": "medium",
+      "confidence": 0.84,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent"
+      ],
+      "observation": "trivy reports CVE-DEMO-0003 in curl-demo.",
+      "expected_state": "Deployed components have no applicable high-impact known vulnerabilities.",
+      "actual_state": "Installed 3.0; fixed 3.1; internet_reachable=False.",
+      "evidence": [
+        {
+          "source": "trivy",
+          "kind": "vulnerability_signal",
+          "asset_id": "container:ops-agent",
+          "observed": {
+            "type": "vulnerability",
+            "scanner": "trivy",
+            "asset_id": "container:ops-agent",
+            "vulnerability_id": "CVE-DEMO-0003",
+            "package": "curl-demo",
+            "installed_version": "3.0",
+            "fixed_version": "3.1",
+            "severity": "HIGH",
+            "primary_url": "https://example.invalid/CVE-DEMO-0003"
+          },
+          "path": null,
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "local vulnerable component"
+      ],
+      "prerequisites": [
+        "The vulnerable component and affected code path are present at runtime."
+      ],
+      "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "trivy",
+            "kind": "vulnerability_signal",
+            "asset_id": "container:ops-agent",
+            "observed": {
+              "type": "vulnerability",
+              "scanner": "trivy",
+              "asset_id": "container:ops-agent",
+              "vulnerability_id": "CVE-DEMO-0003",
+              "package": "curl-demo",
+              "installed_version": "3.0",
+              "fixed_version": "3.1",
+              "severity": "HIGH",
+              "primary_url": "https://example.invalid/CVE-DEMO-0003"
+            },
+            "path": null,
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Upgrade to the fixed version and verify whether the affected component is loaded or reachable.",
+      "references": [
+        "https://example.invalid/CVE-DEMO-0003"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.799030+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-XLY-001-09a76238859a6fc6",
+      "rule_id": "HETZ-XLY-001",
+      "title": "staging workload can reach prod postgres",
+      "severity": "high",
+      "confidence": 0.96,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker",
+        "postgres:prod"
+      ],
+      "observation": "A cross-environment attack-graph path contradicts an explicit isolation declaration.",
+      "expected_state": "staging and prod data planes are isolated.",
+      "actual_state": "A TCP/5432 path exists: container:stage-worker -> network:shared -> postgres:prod",
+      "evidence": [
+        {
+          "source": "hcloud_fixture",
+          "kind": "network_attachment",
+          "asset_id": "container:stage-worker",
+          "observed": "network:shared",
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "hcloud_fixture",
+          "kind": "private_network_path",
+          "asset_id": "postgres:prod",
+          "observed": {
+            "source": "10.20.1.0/24",
+            "port": 5432
+          },
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "docker_fixture",
+          "kind": "environment_label",
+          "asset_id": "container:stage-worker",
+          "observed": "staging",
+          "path": "labels.environment",
+          "collected_at": null
+        },
+        {
+          "source": "postgres_fixture",
+          "kind": "environment_label",
+          "asset_id": "postgres:prod",
+          "observed": "prod",
+          "path": "labels.environment",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "network:shared",
+        "postgres:prod"
+      ],
+      "prerequisites": [
+        "Compromise or malicious execution on container:stage-worker.",
+        "Target service accepts the source identity."
+      ],
+      "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "hcloud_fixture",
+            "kind": "network_attachment",
+            "asset_id": "container:stage-worker",
+            "observed": "network:shared",
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "hcloud_fixture",
+            "kind": "private_network_path",
+            "asset_id": "postgres:prod",
+            "observed": {
+              "source": "10.20.1.0/24",
+              "port": 5432
+            },
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "docker_fixture",
+            "kind": "environment_label",
+            "asset_id": "container:stage-worker",
+            "observed": "staging",
+            "path": "labels.environment",
+            "collected_at": null
+          },
+          {
+            "source": "postgres_fixture",
+            "kind": "environment_label",
+            "asset_id": "postgres:prod",
+            "observed": "prod",
+            "path": "labels.environment",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Separate environment networks and enforce target-side allowlists for the exact clients.",
+      "references": [
+        "https://docs.hetzner.com/cloud/networks/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798836+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-XLY-001-6db24525e173f3de",
+      "rule_id": "HETZ-XLY-001",
+      "title": "dev workload can reach prod redis",
+      "severity": "high",
+      "confidence": 0.96,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent",
+        "redis:prod"
+      ],
+      "observation": "A cross-environment attack-graph path contradicts an explicit isolation declaration.",
+      "expected_state": "dev and prod data planes are isolated.",
+      "actual_state": "A TCP/6379 path exists: container:ops-agent -> network:shared -> redis:prod",
+      "evidence": [
+        {
+          "source": "hcloud_fixture",
+          "kind": "network_attachment",
+          "asset_id": "container:ops-agent",
+          "observed": "network:shared",
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "hcloud_fixture",
+          "kind": "private_network_path",
+          "asset_id": "redis:prod",
+          "observed": {
+            "source": "10.20.2.0/24",
+            "port": 6379
+          },
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "docker_fixture",
+          "kind": "environment_label",
+          "asset_id": "container:ops-agent",
+          "observed": "dev",
+          "path": "labels.environment",
+          "collected_at": null
+        },
+        {
+          "source": "redis_fixture",
+          "kind": "environment_label",
+          "asset_id": "redis:prod",
+          "observed": "prod",
+          "path": "labels.environment",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "network:shared",
+        "redis:prod"
+      ],
+      "prerequisites": [
+        "Compromise or malicious execution on container:ops-agent.",
+        "Target service accepts the source identity."
+      ],
+      "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "hcloud_fixture",
+            "kind": "network_attachment",
+            "asset_id": "container:ops-agent",
+            "observed": "network:shared",
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "hcloud_fixture",
+            "kind": "private_network_path",
+            "asset_id": "redis:prod",
+            "observed": {
+              "source": "10.20.2.0/24",
+              "port": 6379
+            },
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "docker_fixture",
+            "kind": "environment_label",
+            "asset_id": "container:ops-agent",
+            "observed": "dev",
+            "path": "labels.environment",
+            "collected_at": null
+          },
+          {
+            "source": "redis_fixture",
+            "kind": "environment_label",
+            "asset_id": "redis:prod",
+            "observed": "prod",
+            "path": "labels.environment",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Separate environment networks and enforce target-side allowlists for the exact clients.",
+      "references": [
+        "https://docs.hetzner.com/cloud/networks/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798881+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-XLY-001-a741e4e012fa739b",
+      "rule_id": "HETZ-XLY-001",
+      "title": "staging workload can reach prod redis",
+      "severity": "high",
+      "confidence": 0.96,
+      "status": "confirmed",
+      "assets": [
+        "container:stage-worker",
+        "redis:prod"
+      ],
+      "observation": "A cross-environment attack-graph path contradicts an explicit isolation declaration.",
+      "expected_state": "staging and prod data planes are isolated.",
+      "actual_state": "A TCP/6379 path exists: container:stage-worker -> network:shared -> redis:prod",
+      "evidence": [
+        {
+          "source": "hcloud_fixture",
+          "kind": "network_attachment",
+          "asset_id": "container:stage-worker",
+          "observed": "network:shared",
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "hcloud_fixture",
+          "kind": "private_network_path",
+          "asset_id": "redis:prod",
+          "observed": {
+            "source": "10.20.2.0/24",
+            "port": 6379
+          },
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "docker_fixture",
+          "kind": "environment_label",
+          "asset_id": "container:stage-worker",
+          "observed": "staging",
+          "path": "labels.environment",
+          "collected_at": null
+        },
+        {
+          "source": "redis_fixture",
+          "kind": "environment_label",
+          "asset_id": "redis:prod",
+          "observed": "prod",
+          "path": "labels.environment",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:stage-worker",
+        "network:shared",
+        "redis:prod"
+      ],
+      "prerequisites": [
+        "Compromise or malicious execution on container:stage-worker.",
+        "Target service accepts the source identity."
+      ],
+      "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "hcloud_fixture",
+            "kind": "network_attachment",
+            "asset_id": "container:stage-worker",
+            "observed": "network:shared",
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "hcloud_fixture",
+            "kind": "private_network_path",
+            "asset_id": "redis:prod",
+            "observed": {
+              "source": "10.20.2.0/24",
+              "port": 6379
+            },
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "docker_fixture",
+            "kind": "environment_label",
+            "asset_id": "container:stage-worker",
+            "observed": "staging",
+            "path": "labels.environment",
+            "collected_at": null
+          },
+          {
+            "source": "redis_fixture",
+            "kind": "environment_label",
+            "asset_id": "redis:prod",
+            "observed": "prod",
+            "path": "labels.environment",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Separate environment networks and enforce target-side allowlists for the exact clients.",
+      "references": [
+        "https://docs.hetzner.com/cloud/networks/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798853+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-XLY-001-c3a123a6f4fcbf68",
+      "rule_id": "HETZ-XLY-001",
+      "title": "dev workload can reach prod postgres",
+      "severity": "high",
+      "confidence": 0.96,
+      "status": "confirmed",
+      "assets": [
+        "container:ops-agent",
+        "postgres:prod"
+      ],
+      "observation": "A cross-environment attack-graph path contradicts an explicit isolation declaration.",
+      "expected_state": "dev and prod data planes are isolated.",
+      "actual_state": "A TCP/5432 path exists: container:ops-agent -> network:shared -> postgres:prod",
+      "evidence": [
+        {
+          "source": "hcloud_fixture",
+          "kind": "network_attachment",
+          "asset_id": "container:ops-agent",
+          "observed": "network:shared",
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "hcloud_fixture",
+          "kind": "private_network_path",
+          "asset_id": "postgres:prod",
+          "observed": {
+            "source": "10.20.1.0/24",
+            "port": 5432
+          },
+          "path": null,
+          "collected_at": null
+        },
+        {
+          "source": "docker_fixture",
+          "kind": "environment_label",
+          "asset_id": "container:ops-agent",
+          "observed": "dev",
+          "path": "labels.environment",
+          "collected_at": null
+        },
+        {
+          "source": "postgres_fixture",
+          "kind": "environment_label",
+          "asset_id": "postgres:prod",
+          "observed": "prod",
+          "path": "labels.environment",
+          "collected_at": null
+        }
+      ],
+      "attack_path": [
+        "container:ops-agent",
+        "network:shared",
+        "postgres:prod"
+      ],
+      "prerequisites": [
+        "Compromise or malicious execution on container:ops-agent.",
+        "Target service accepts the source identity."
+      ],
+      "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
+      "verification": {
+        "method": "independent deterministic evidence and prerequisite review",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "hcloud_fixture",
+            "kind": "network_attachment",
+            "asset_id": "container:ops-agent",
+            "observed": "network:shared",
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "hcloud_fixture",
+            "kind": "private_network_path",
+            "asset_id": "postgres:prod",
+            "observed": {
+              "source": "10.20.1.0/24",
+              "port": 5432
+            },
+            "path": null,
+            "collected_at": null
+          },
+          {
+            "source": "docker_fixture",
+            "kind": "environment_label",
+            "asset_id": "container:ops-agent",
+            "observed": "dev",
+            "path": "labels.environment",
+            "collected_at": null
+          },
+          {
+            "source": "postgres_fixture",
+            "kind": "environment_label",
+            "asset_id": "postgres:prod",
+            "observed": "prod",
+            "path": "labels.environment",
+            "collected_at": null
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Separate environment networks and enforce target-side allowlists for the exact clients.",
+      "references": [
+        "https://docs.hetzner.com/cloud/networks/overview/"
+      ],
+      "discovered_at": "2026-09-22T05:37:59.798869+00:00",
+      "metadata": {}
+    }
+  ]
+}
