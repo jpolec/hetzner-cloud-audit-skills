@@ -1,5 +1,5 @@
 hetzner-cloud-audit-skills
-Copyright 2026 Hetzner Cloud Audit Skills contributors
+Copyright 2026 Jakub Połeć and Hetzner Cloud Audit Skills contributors
 
 This independent implementation is architecturally inspired by Cloudflare's
 security-audit-skill (MIT licensed). No Cloudflare source code is included.

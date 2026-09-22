@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-v0.1.x receives best-effort security fixes while the project is in alpha.
+v0.3.x receives best-effort security fixes while the project is in alpha.
 
 ## Reporting a vulnerability
 
@@ -11,4 +11,3 @@ Do not open a public issue for a suspected vulnerability that could expose crede
 ## Operator responsibility
 
 Use a read-only Hetzner token, keep SSH disabled unless required, inspect reports before sharing, and treat topology as sensitive. This tool does not authorize scanning or access.
-

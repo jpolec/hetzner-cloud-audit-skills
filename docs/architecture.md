@@ -3,12 +3,12 @@
 ## Collect → reason → verify
 
 ```text
-Hetzner API     repo/IaC     host/SSH*     Docker*     PG/Redis*     scanners*
-     └─────────────── normalized assets, facts, evidence ───────────────┘
+Hetzner API     owner policy     repo/IaC     host/runtime*     scanners*
+     └──────────── temporal facts + normalized evidence ───────────────┘
                                       │
-                         typed directed attack graph
+                    typed evidence and attack graph
                                       │
-                       coverage-led candidate rules
+            path queries + temporal diff + candidate rules
                                       │
                     root-cause fingerprint + dedupe
                                       │
@@ -24,13 +24,16 @@ Collectors do not assign severity. Analyzers generate candidates. The verifier c
 ## Data model
 
 - `Asset`: provider, host, runtime, or service identity with untrusted properties and labels.
+- `Fact`: stable identity, value, observation time, run ID, collector version, source path, and optional freshness budget.
 - `Evidence`: source, kind, asset identity, observed value, optional source path and timestamp.
 - `Edge`: directed relation with optional protocol/port and supporting evidence.
 - `Finding`: observation, expected/actual state, path, prerequisites, impact, severity, confidence, verifier record, and remediation.
 - `CoverageUnit`: stable asset/layer/attack-class identity and current/prior result fingerprints.
 - `ArchitectureRecommendation`: independently reviewed cost/security/reliability decision with timestamped metrics, price basis, risk, confidence, and rollback criteria.
 
-The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.2 fixtures and small-to-medium projects.
+The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.3 and small-to-medium projects. `reachable`, `cloud_path_present`, and `unknown` remain distinct so provider reachability is not mistaken for an observed application path.
+
+Snapshots serialize assets, edges, facts, expectations, signals, endpoint coverage, and run identity. Diff compares stable fact and edge identities and reports coverage regression separately from state removal.
 
 ## Trust boundaries
 
@@ -40,7 +43,7 @@ Control-plane tokens, SSH credentials, repositories, API metadata, external scan
 
 Collectors return a `Snapshot`; integrations return neutral `signals`; rules are functions from `(Snapshot, AttackGraph)` to candidates; reporters consume verified findings. Future providers and services can implement those contracts without changing the verdict model.
 
-Cost analysis uses the same normalized boundary but a separate recommendation schema. Provider adapters own product catalogs, billing semantics, and metric availability; shared reasoning must not contain Hetzner SKU names. See [cost and multi-cloud architecture](finops-architecture.md).
+Cost analysis uses the same normalized boundary but a separate recommendation schema. The headline total selects at most one candidate per asset and separates potential from confirmed savings. Provider adapters own product catalogs, billing semantics, and metric availability. See [cost and multi-cloud architecture](finops-architecture.md).
 
 ## MCP decision
 

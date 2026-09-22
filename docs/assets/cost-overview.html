@@ -14,23 +14,23 @@
 <div class="shell">
   <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">synthetic cost recommendation · read-only · no changes executed</span></div>
   <div class="term">
-    <div><span class="prompt">›</span> <span class="cmd">audit my Hetzner infrastructure costs</span></div>
-    <div class="muted">inventory + 30d metrics + price evidence + workload constraints → independent challenge</div>
+    <div><span class="prompt">›</span> <span class="cmd">hetzner-audit cost --metrics-days 30</span></div>
+    <div class="muted">synthetic inventory + 30d CPU + current catalog → evidence-backed candidates</div>
     <div class="line"></div>
-    <div><span class="rule">HETZ-COST-001</span> Right-size and harden a synthetic database host</div>
     <div class="grid">
-      <div class="card"><div class="n cyan">8 vCPU / 16 GiB</div><div class="label">current host</div></div>
-      <div class="card"><div class="n">18% / 42%</div><div class="label">CPU / RAM p95 · 30d</div></div>
-      <div class="card"><div class="n money">EUR 360/year</div><div class="label">estimated saving</div></div>
+      <div class="card"><div class="n cyan">EUR 220/mo</div><div class="label">current catalog estimate</div></div>
+      <div class="card"><div class="n money">EUR 90/mo</div><div class="label">potential · EUR 1,080/year</div></div>
+      <div class="card"><div class="n risk">EUR 0/mo</div><div class="label">confirmed before validation</div></div>
     </div>
-    <div><span class="cyan">Candidate</span> synthetic-medium · EUR 70/month</div>
-    <div><span class="risk">Risk</span> LOW &nbsp; <span class="cyan">Confidence</span> 0.93</div>
+    <div><span class="rule">HETZ-COST-003</span> x86 → ARM candidate &nbsp; <span class="money">−EUR 50/month</span></div>
+    <div><span class="rule">HETZ-COST-001</span> stopped migration predecessor &nbsp; <span class="money">−EUR 40/month</span></div>
+    <div><span class="rule">HETZ-COST-002</span> alternative x86 downsize &nbsp; <span class="muted">−EUR 40/month · not double-counted</span></div>
     <div class="line"></div>
-    <div><span class="money">Cost</span> validate a smaller compatible server type</div>
-    <div><span class="cyan">Security</span> remove the public database path</div>
-    <div><span class="rule">Reliability</span> complete a restore test before the change window</div>
+    <div><span class="risk">needs_validation</span> guest RAM + filesystem occupancy + owner intent</div>
+    <div><span class="cyan">Security</span> preserve network trust boundaries during migration</div>
+    <div><span class="rule">Reliability</span> require restore evidence and an explicit rollback</div>
     <div class="line"></div>
-    <div class="muted">Guardrails: timestamped prices · memory evidence required · SLO/RPO checked · validation + rollback included</div>
+    <div class="muted">Read-only: no resize · no stop · no delete · potential and confirmed savings remain separate</div>
   </div>
 </div>
 </html>

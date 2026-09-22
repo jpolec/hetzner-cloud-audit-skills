@@ -26,6 +26,14 @@ Default to a representative 30-day window and record gaps. Collect:
 
 Do not treat a stopped server as free: Hetzner bills a server while it exists. Do not infer low utilization from a single point, average-only metric, or missing data.
 
+For the deterministic API-only first pass, run:
+
+```sh
+hetzner-audit cost --metrics-days 30 --format markdown --output cost.md
+```
+
+The first summary must state current estimated monthly/annual cost, maximum non-overlapping potential monthly/annual savings, and confirmed savings. Potential and confirmed savings are separate: if RAM, filesystem, owner intent, price, or rollback evidence is missing, confirmed savings remain zero.
+
 ## Analyze candidates
 
 Cover rightsizing, idle servers, stale snapshots, unattached volumes and IPs, underused load balancers, retention, server-family migration, ARM compatibility, cloud-versus-dedicated economics, traffic, duplicated non-production capacity, scheduling, unnecessary HA, database hosts, and block/object/local-NVMe placement.
@@ -48,6 +56,8 @@ After validating each domain independently, create one architecture recommendati
 Output records compatible with `schemas/architecture-recommendation.schema.json`, including current state, observed window, metrics and gaps, candidate state, monthly/annual saving with currency and basis, risk, confidence, prerequisites, cross-domain impacts, verification, and rollback/validation steps.
 
 A concise human result must show the current resource and cost, the measured window and p95/headroom values, the compatible candidate, monthly and annual estimated saving, risk, confidence, decisive evidence, unresolved gaps, and any security/reliability work that should be combined with the change. Never hide a missing metric behind a confident recommendation.
+
+When several alternatives exist for one asset (for example x86 downsize versus ARM migration), include each candidate but count at most one—the largest defensible candidate—in the headline potential-savings total. Never add mutually exclusive savings together.
 
 ## Verify
 

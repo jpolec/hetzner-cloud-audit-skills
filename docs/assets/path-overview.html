@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hetzner attack path demo</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#071018;color:#dbe8f5;font-family:Inter,ui-sans-serif,system-ui;padding:52px}
+  .shell{max-width:1320px;margin:auto;border:1px solid #29445b;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0009;background:#0b1722}
+  .bar{height:54px;background:#112333;border-bottom:1px solid #29445b;display:flex;align-items:center;padding:0 20px;gap:10px}.dot{width:13px;height:13px;border-radius:50%}.r{background:#ff6b6b}.y{background:#ffd166}.g{background:#4dd599}.title{margin:auto;color:#8da9bf;font:600 14px ui-monospace,SFMono-Regular,monospace}
+  .term{padding:30px 34px 38px;font:17px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.prompt{color:#4dd599}.cmd{color:#e8f2fb}.muted{color:#7894aa}.cyan{color:#50d8ff}.good{color:#54d69d}.warn{color:#ffd166}.purple{color:#b49cff}.line{border-top:1px solid #20394d;margin:18px 0}.path{padding:3px 0 3px 26px;border-left:2px solid #31546e;margin-left:10px}.result{font-size:25px;font-weight:800}
+</style>
+<div class="shell">
+  <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">synthetic attack path · cited evidence · no active probing</span></div>
+  <div class="term">
+    <div><span class="prompt">›</span> <span class="cmd">hetzner-audit path --from staging-worker --to prod-db --protocol tcp --port 5432</span></div>
+    <div class="line"></div>
+    <div class="path"><span class="cyan">staging-worker</span> <span class="muted">environment=staging</span></div>
+    <div class="path">↓ private network <span class="purple">10.20.0.0/16</span> <span class="muted">HETZNER_NETWORK_128</span></div>
+    <div class="path">↓ host firewall accepts tcp/5432 <span class="muted">UFW_RULE_17</span></div>
+    <div class="path">↓ Docker publishes 5432 <span class="muted">DOCKER_PORT_31</span></div>
+    <div class="path"><span class="cyan">prod-db</span> · pg_hba accepts staging CIDR <span class="muted">PG_HBA_04</span></div>
+    <div class="line"></div>
+    <div class="result"><span class="good">REACHABLE</span> &nbsp; confidence 0.97</div>
+    <div>All four necessary conditions are observed. This is not inferred from a provider firewall rule alone.</div>
+    <div class="line"></div>
+    <div class="warn">If host/runtime evidence were absent, the result would be CLOUD_PATH_PRESENT — not confirmed reachability.</div>
+  </div>
+</div>
+</html>

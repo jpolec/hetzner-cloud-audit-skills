@@ -22,7 +22,7 @@ For Hetzner, read-only server metrics provide CPU, disk, and network observation
 
 Prices must be timestamped and treated as estimates unless reconciled with invoice evidence. Region, currency, VAT, IPv4, traffic, legacy pricing, setup fees, billing horizon, and product availability can change the result.
 
-The initial skill covers methodology and a public schema. Automated metrics collection and verified cost rules remain Phase 2; the project must not claim calculated savings before those adapters and benchmarks exist.
+v0.3 includes an experimental read-only catalog and 30-day CPU/disk/network metrics collector plus stopped-resource, same-architecture rightsizing, and ARM migration candidates. It reports current catalog estimate, maximum non-overlapping potential savings, and confirmed savings separately. Guest RAM, filesystem occupancy, invoice terms, owner intent, SLOs, and migration compatibility remain external evidence; without them a proposed saving stays `needs_validation` and confirmed savings remain zero.
 
 Primary references:
 

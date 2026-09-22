@@ -4,9 +4,25 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-22
+
 ### Added
 
-- Illustrated, step-by-step read-only token guide covering Console selection, safe shell and CI loading, verification limits, troubleshooting, and revocation.
+- Temporal fact and snapshot schemas with collector version, run identity, source, and observation time.
+- `snapshot`, coverage-aware `diff`, `path`, `explain`, constrained `ask`, and `cost` commands.
+- API response normalization into firewall, public-interface, and private-network graph edges.
+- Broad lateral-path, deletion-protection, and ownership rules for live Hetzner evidence.
+- JSON/TOML owner policy and an example production trust policy.
+- GitHub composite action with protected live-audit and diff-gate documentation.
+- Catalog cost baseline, stopped-resource and rightsizing/ARM candidates, and non-overlapping monthly/annual potential savings.
+- Maintainer attribution for Jakub Połeć and a discreet QuantJourney affiliation.
+
+### Changed
+
+- Narrowed the first-run product around public exposure, trust-boundary paths, and temporal drift.
+- Repositioned cost analysis as experimental cross-domain architecture advice rather than a co-equal generic FinOps scanner.
+- Collector failures are recorded per endpoint and cannot masquerade as deleted resources in a diff.
+- README now exposes an honest capability matrix and API-only limitations.
 
 ## [0.2.0] - 2026-09-22
 
@@ -50,7 +66,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/releases/tag/v0.1.0

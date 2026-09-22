@@ -1,0 +1,79 @@
+name: Hetzner Cloud Audit
+description: Read-only evidence-backed Hetzner security, diff, and cost audit
+author: Jakub Połeć
+
+inputs:
+  mode:
+    description: audit, snapshot, diff, or cost
+    required: false
+    default: audit
+  input:
+    description: Offline snapshot; for diff this is the newer snapshot
+    required: false
+    default: ""
+  baseline:
+    description: Older snapshot required by diff mode
+    required: false
+    default: ""
+  policy:
+    description: Optional JSON or TOML architecture policy
+    required: false
+    default: ""
+  format:
+    description: json, markdown, or sarif where supported
+    required: false
+    default: markdown
+  output:
+    description: Report path
+    required: false
+    default: hetzner-audit-report.md
+  fail-on-regression:
+    description: Fail diff mode when a new Internet exposure is observed
+    required: false
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: pip
+    - name: Install pinned action source
+      shell: bash
+      run: python -m pip install "$GITHUB_ACTION_PATH"
+    - name: Run read-only audit
+      shell: bash
+      env:
+        AUDIT_MODE: ${{ inputs.mode }}
+        AUDIT_INPUT: ${{ inputs.input }}
+        AUDIT_BASELINE: ${{ inputs.baseline }}
+        AUDIT_POLICY: ${{ inputs.policy }}
+        AUDIT_FORMAT: ${{ inputs.format }}
+        AUDIT_OUTPUT: ${{ inputs.output }}
+        AUDIT_FAIL: ${{ inputs.fail-on-regression }}
+      run: |
+        set -eu
+        common=(--format "$AUDIT_FORMAT" --output "$AUDIT_OUTPUT")
+        if [ -n "$AUDIT_POLICY" ]; then common+=(--policy "$AUDIT_POLICY"); fi
+        case "$AUDIT_MODE" in
+          audit|snapshot|cost)
+            if [ -n "$AUDIT_INPUT" ]; then common+=(--input "$AUDIT_INPUT"); fi
+            hetzner-audit "$AUDIT_MODE" "${common[@]}" --read-only --no-ssh --no-external-tools
+            ;;
+          diff)
+            test -n "$AUDIT_BASELINE" && test -n "$AUDIT_INPUT"
+            failure=()
+            if [ "$AUDIT_FAIL" = "true" ]; then failure+=(--fail-on-regression); fi
+            hetzner-audit diff "$AUDIT_BASELINE" "$AUDIT_INPUT" \
+              --format "$AUDIT_FORMAT" --output "$AUDIT_OUTPUT" "${failure[@]}"
+            ;;
+          *)
+            echo "unsupported mode: $AUDIT_MODE" >&2
+            exit 2
+            ;;
+        esac
+
+branding:
+  icon: shield
+  color: red

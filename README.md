@@ -1,216 +1,253 @@
 # hetzner-cloud-audit-skills
 
-**Two agent skills for evidence-backed Hetzner infrastructure audits: security and cost.**
+**One read-only token. Zero SSH. Evidence for what is exposed, what can cross a trust boundary, and what changed.**
 
-Install one skill, ask one question, and let the agent load only the relevant workflow:
+This project reconstructs Hetzner Cloud topology and turns provider state into cited attack paths. It does not treat a firewall warning as proof of an exploitable service: missing host, container, or database evidence remains explicitly `needs_validation`.
 
-| Skill | Ask your agent | What you get |
-|---|---|---|
-| `hetzner-security-audit` | `audit my Hetzner infrastructure` | Proven exposure and drift paths across cloud, network, host, containers, databases, and IaC |
-| `hetzner-cost-audit` | `audit my Hetzner infrastructure costs` | Rightsizing and waste candidates backed by utilization, prices, constraints, and change risk |
+```text
+staging-worker
+  → shared Hetzner network
+  → prod-db firewall permits tcp/5432
+  → host firewall accepts source
+  → Docker publishes 5432
+  → PostgreSQL HBA accepts staging CIDR
 
-> Independent open-source project. Not affiliated with or endorsed by Hetzner or Cloudflare. v0.2 is alpha and is not production-ready.
+RESULT: REACHABLE
+Evidence: network attachment + firewall rule + host rule + container port + pg_hba
+```
 
-## Install a skill
+> Independent open-source project. Not affiliated with or endorsed by Hetzner or Cloudflare. v0.3 is alpha; review every high-impact result before action.
 
-Security:
+## Install the agent skill
 
 ```sh
 npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills \
   --skill hetzner-security-audit
 ```
 
-Cost:
+Then ask your agent:
+
+```text
+audit my Hetzner infrastructure
+```
+
+Compatible with OpenAI Codex, Claude Code, and other SKILL.md-compatible agents. The top-level skill loads focused network, Linux, Docker, PostgreSQL, Redis, backup, and cost guidance only when evidence makes it applicable.
+
+## First run: API only
+
+Create a project-specific token with **Read** permission using the illustrated [token guide](docs/token-setup.md). Never paste it into an agent prompt, command argument, `.env`, screenshot, or report.
+
+```sh
+uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.3.0' \
+  hetzner-audit audit --read-only --no-ssh --format markdown \
+  --output audit.md
+```
+
+The report separates:
+
+- facts confirmed by the Hetzner API;
+- findings with a complete evidence contract;
+- hypotheses requiring host/runtime evidence;
+- collector gaps and stale evidence;
+- controls that refute an apparent exposure.
+
+The tool performs provider `GET` requests only. It exposes no create, update, resize, power, firewall, or delete operation.
+
+## Three primary questions
+
+### What is publicly reachable?
+
+The API-only core evaluates public interfaces, attached firewall rules, sensitive ports, Cloudflare/Tailscale source controls, missing firewall attachment, IP ownership, and service-policy expectations.
+
+```sh
+hetzner-audit ask \
+  "Can the Internet reach any database?" \
+  --input snapshot.json
+```
+
+An absent graph path is not automatically reported as proof of isolation when collector coverage is incomplete.
+
+### What can cross a trust boundary?
+
+```sh
+hetzner-audit path \
+  --from staging-worker \
+  --to prod-db \
+  --protocol tcp \
+  --port 5432 \
+  --input snapshot.json
+```
+
+Path results have explicit semantics:
+
+| Result | Meaning |
+|---|---|
+| `reachable` | Routing, network decision, listener/runtime, and target control are evidenced |
+| `cloud_path_present` | Hetzner topology permits the path; host/runtime evidence is missing |
+| `unknown` | No allowed path was observed, but evidence is insufficient for a negative proof |
+
+![Synthetic end-to-end attack path with cited evidence](docs/assets/path-overview.png)
+
+### What changed?
+
+```sh
+hetzner-audit snapshot --output before.json --read-only --no-ssh
+hetzner-audit snapshot --output after.json --read-only --no-ssh
+hetzner-audit diff before.json after.json --fail-on-regression
+```
+
+Each temporal fact records its asset, source, observation time, collector version, run ID, evidence path, and value. Diff reports new public edges, asset/fact changes, and collector coverage regressions. A failed collector is not misreported as a removed resource.
+
+Do not commit real snapshots from private infrastructure to a public repository.
+
+## Explain a finding
+
+```sh
+hetzner-audit explain HETZ-XLY-002-0123456789abcdef \
+  --input snapshot.json
+```
+
+`explain` renders the stored evidence chain, attack path, verifier challenge, unresolved prerequisite, and remediation. It does not ask a model to invent a second explanation.
+
+## Owner policy
+
+Generic best practices are weaker than an explicit architecture contract. v0.3 accepts JSON or dependency-free TOML:
+
+```toml
+[environments.production]
+may_receive_from = ["production"]
+
+[services.postgres]
+public = false
+
+[services.redis]
+public = false
+
+[ssh]
+public = false
+```
+
+```sh
+hetzner-audit audit \
+  --policy policies/example-policy.toml \
+  --format markdown --output audit.md
+```
+
+Observed facts, owner policy, IaC declarations, and inferred hypotheses remain separate records.
+
+## Cost audit — experimental
+
+Install the focused workflow when the goal is architecture and cost:
 
 ```sh
 npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills \
   --skill hetzner-cost-audit
 ```
 
-Compatible with OpenAI Codex, Claude Code, and other SKILL.md-compatible agents. Installing a skill installs the agent workflow; the agent can request approval to run the separately packaged CLI when deterministic collection or reporting is needed.
-
-> **Before a live audit:** create a project-specific Hetzner token with **Read** permission. Follow the illustrated [read-only token guide](docs/token-setup.md). Never use `Read & Write` and never paste the token into an agent prompt.
-
-## Security audit: what it does
-
-The security skill answers a concrete question: **who can reach what, through which layers, because of which observed state?**
-
-```text
-Inputs
-  Hetzner API + Terraform + host firewall + Docker + PostgreSQL
-
-Observed
-  staging-worker and prod-db share a private network
-  prod-db listens on 5432
-  host policy permits the staging subnet
-  repository policy says staging must not reach production
-
-Result
-  HIGH · confirmed cross-environment database reachability
-  Path: staging-worker → shared network → tcp/5432 → prod-db
-  Fix: isolate the network or enforce an explicit database access boundary
+```sh
+hetzner-audit cost --metrics-days 30 --format markdown --output cost.md
 ```
 
-What you gain:
-
-- one attack path instead of five unrelated scanner warnings;
-- runtime-versus-Terraform drift with the exact differing source ranges;
-- fewer false positives: a provider firewall rule alone does not prove a listening, reachable service;
-- PostgreSQL and Redis findings evaluated with network, host, container, and authentication context;
-- machine-readable JSON, Markdown, SARIF, and a deterministic coverage ledger;
-- `confirmed`, `needs_validation`, or `rejected`—with severity separate from confidence.
-
-![Synthetic security benchmark showing cross-layer findings](docs/assets/demo-overview.png)
-
-### Security checks
-
-The current 16 rule IDs cover:
-
-| Layer | Checks |
-|---|---|
-| Hetzner/network | Public SSH, Docker API, Kubernetes API, PostgreSQL and Redis; missing firewall evidence |
-| IaC drift | Declared source ranges versus observed provider policy |
-| Cross-layer | Dev/staging paths to production PostgreSQL or Redis |
-| Docker | Privileged mode, Docker socket, host PID, host network |
-| PostgreSQL | Broad `trust` HBA and unexpected superusers |
-| Redis | Broad bind, protected mode off, missing observed authentication |
-| Recovery | Production state without complete backup evidence |
-| CVE context | Scanner signal mapped to runtime applicability and reachability |
-
-External tools such as Trivy and Grype remain signal providers. Their alerts are not copied directly into final findings.
-
-## Cost audit: what it does
-
-The cost skill answers a different question: **which change has defensible savings without silently increasing security, reliability, or performance risk?**
+The first screen gives the number operators need:
 
 ```text
-Current
-  server type: synthetic-large · 8 vCPU · 16 GiB · EUR 100/month
+Current catalog estimate:       EUR 220.00/month
+Potential savings identified:   EUR 90.00/month · EUR 1,080/year
+Confirmed savings:              EUR 0/month
 
-Observed 30 days
-  CPU p95: 18% · RAM p95: 42% · disk p95: 31%
-
-Candidate
-  synthetic-medium · EUR 70/month
-
-Estimated saving
-  EUR 30/month · EUR 360/year
-
-Risk / confidence
-  LOW · 0.93
-
-Combined recommendation
-  validate resize + remove public DB path + complete a restore test
+Why zero confirmed?
+Guest RAM, filesystem occupancy, owner intent, and rollback evidence are incomplete.
 ```
 
-What you gain:
+Recommendations show current type and cost, CPU p95, candidate type, monthly/annual saving, risk, confidence, missing evidence, security/reliability effects, validation, and rollback. The total chooses at most one candidate per asset, so alternative ARM/downsize options are not double-counted.
 
-- rightsizing based on a representative window, not a single average;
-- idle server and duplicated dev/staging candidates;
-- stale snapshot, unattached volume/IP, backup-retention, load-balancer, and traffic review;
-- ARM-versus-x86 and cloud-versus-dedicated comparisons with compatibility and operational constraints;
-- explicit monthly and annual saving basis, currency, price timestamp, confidence, and change risk;
-- one architecture recommendation when a change can improve cost, security, and recovery together.
+Cost is not the primary v0.3 message. It consumes the same evidence graph and remains deliberately conservative:
+
+- a stopped server is still billable;
+- CPU-only rightsizing is never confirmed without guest RAM and disk evidence;
+- ARM savings require image, dependency, and performance validation;
+- storage recommendations require occupancy and access-pattern evidence;
+- no resize, stop, delete, detach, or purchase action exists in the tool.
 
 ![Synthetic cost recommendation with evidence and safeguards](docs/assets/cost-overview.png)
 
-The cost skill does **not** invent current prices or guest-memory usage. Hetzner provider metrics cover CPU, disk, and network; RAM needs an authorized monitoring or host source. Without decisive metrics, prices, or workload constraints, the result stays `needs_validation`. v0.2 provides the skill, schema, and synthetic example; automated production cost collection remains Phase 2.
+## GitHub Action and SARIF
 
-## How both skills work
+```yaml
+- uses: jpolec/hetzner-cloud-audit-skills@v0.3.0
+  env:
+    HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
+  with:
+    mode: audit
+    policy: policies/infrastructure.toml
+    format: sarif
+    output: hetzner-audit.sarif
+```
+
+Run live collection only from protected `schedule` or `workflow_dispatch` jobs. Do not expose the token to untrusted fork code. See the complete [GitHub Action guide](docs/github-action.md).
+
+SARIF is useful when a finding maps to developer workflow or IaC. Runtime-only topology reports remain available as Markdown and JSON instead of being forced into a fake source location.
+
+## Current capability status
+
+| Capability | v0.3 status |
+|---|---|
+| Paginated Hetzner Cloud inventory | Beta |
+| Endpoint-level collection coverage | Beta |
+| Public firewall exposure | Beta |
+| Shared-network/lateral cloud paths | Beta; host/runtime remains `needs_validation` |
+| Temporal facts, snapshots, and diff | Beta |
+| `path`, `explain`, constrained `ask` | Beta |
+| JSON/TOML owner policy | Beta |
+| JSON, Markdown, SARIF | Beta |
+| Cost totals and potential savings | Experimental |
+| Linux/Docker/PostgreSQL/Redis | Fixture and operator-evidence workflow |
+| Live Terraform-state drift | Not complete |
+| Kubernetes/CCM/CSI | Planned after core stabilization |
+| AWS/GCP/Azure/OCI adapters | Future; shared engine, not copied skills |
+| MCP server | Deferred until schema and authorization stabilize |
+
+## API-only rules with immediate value
+
+The provider-only layer covers:
+
+- public SSH, Docker API, Kubernetes API, PostgreSQL, Redis, Elasticsearch, and MongoDB rules;
+- public servers without an attached cloud firewall;
+- broad private paths from unrelated workloads to DB/auth/Vault-labelled hosts;
+- environment-policy violations when labels and policy provide intent;
+- disabled deletion protection on production/foundational resources;
+- production state with missing observed native backup coverage;
+- ownership-label gaps;
+- stopped-but-billed servers, unattached resources, catalog pricing, deprecated types, metrics, and ARM/rightsizing candidates.
+
+Provider evidence cannot prove host listeners, Docker publication, PostgreSQL HBA, Redis ACLs, or guest memory. Those gaps are shown, not guessed.
+
+## Architecture
 
 ```mermaid
 flowchart LR
-  H[Hetzner read-only API] --> F[Normalized facts]
-  R[IaC / repository intent] --> F
-  M[Host / runtime / metrics] --> F
-  P[Prices / billing evidence] --> F
-  F --> G[Topology and dependency graph]
-  G --> S[Security candidates]
-  G --> C[Cost candidates]
-  S --> V{Independent challenge}
+  H[Hetzner GET-only API] --> F[Temporal facts]
+  I[IaC and owner policy] --> F
+  R[Optional host/runtime evidence] --> F
+  F --> G[Typed evidence graph]
+  G --> P[Attack paths]
+  G --> D[Temporal diff]
+  G --> S[Security findings]
+  G --> C[Cost and architecture candidates]
+  P --> V[Independent challenge]
+  D --> V
+  S --> V
   C --> V
-  V --> A[Confirmed / needs validation / rejected]
-  A --> O[Findings and architecture recommendations]
+  V --> O[JSON / Markdown / SARIF]
 ```
 
-The shared method is `collect → reason → verify`. Observed facts, declared expectations, and agent hypotheses remain separate. Confirmed results require the decisive evidence; missing evidence is reported instead of guessed.
-
-## Read-only Hetzner access
-
-![Choose Read—not Read & Write—when generating the audit token](docs/assets/token-read-only.png)
-
-Create a dedicated token in [Hetzner Console](https://console.hetzner.com/):
-
-1. Open the project to audit.
-2. Select **Security → API tokens → Generate API token**.
-3. Choose **Read**, not **Read & Write**.
-4. Save the one-time value in a password manager.
-
-Tokens are project-bound. Load the token without placing it in shell history:
-
-```sh
-printf 'Hetzner read-only token: '
-IFS= read -rs HCLOUD_TOKEN
-printf '\n'
-export HCLOUD_TOKEN
-```
-
-Never paste it into an agent prompt, command argument, `.env`, repository, screenshot, or report. The project performs provider `GET` requests only and never tests permissions with a write. The detailed [read-only token guide](docs/token-setup.md) covers every Console click, safe shell loading, verification limits, CI, troubleshooting, and revocation. Hetzner's source of truth is its [official token guide](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
-
-## CLI and offline demo
-
-Install the tagged CLI:
-
-```sh
-uv tool install 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.2.0'
-hetzner-audit --help
-```
-
-Run the synthetic security demo without a token, SSH, Docker daemon, or network access:
-
-```sh
-hetzner-audit audit \
-  --input benchmarks/scenarios/v0.1-insecure.json \
-  --format markdown \
-  --output report.md \
-  --coverage-ledger coverage-ledger.json
-```
-
-Live read-only inventory and security audit:
-
-```sh
-hetzner-audit inventory --format json --output inventory.json --read-only --no-ssh
-hetzner-audit audit --format json --output findings.json --read-only --no-ssh
-unset HCLOUD_TOKEN
-```
-
-`hetzner-sec` remains a compatibility alias. New examples use `hetzner-audit` because the repository now covers more than security.
-
-## Skills included
-
-- `hetzner-security-audit` — orchestrates reconnaissance, coverage, correlation, verification, and reporting.
-- `hetzner-cost-audit` — rightsizing, waste, pricing evidence, and cross-domain architecture decisions.
-- Focused security modules: cloud, network, Linux, Docker, PostgreSQL, Redis, and backup audits.
-
-The security workflow is inspired by Cloudflare's independent [security-audit-skill](https://github.com/cloudflare/security-audit-skill). This project is not a fork or dependency. See the [reference analysis](docs/cloudflare-reference.md).
-
-## Safety model
-
-- No Hetzner create, update, delete, resize, power, firewall, or backup-policy actions.
-- SSH is off by default and requires explicit operator configuration.
-- No exploitation, brute force, load testing, or third-party probing.
-- Repository text, labels, resource names, prices, invoices, and scanner output are untrusted input.
-- Every proposed cost change includes prerequisites, validation, and rollback; the tool does not execute it.
-
-Read [permissions](docs/permissions.md), the [threat model](docs/threat-model.md), and [security policy](SECURITY.md) before live use.
+The workflow is `collect → reason → verify`. Deterministic verification is component separation, not an independent human or agent reviewer. Agent-generated candidates without an independent verifier stay `needs_validation`.
 
 ## Benchmark and limitations
 
-The synthetic security benchmark plants 33 problems: 23 meet the deterministic evidence contract and 10 remain `needs_validation` by design. This measures fixture behavior, not real-world accuracy.
+The synthetic benchmark plants 33 security problems: 23 meet the deterministic evidence contract and 10 intentionally remain `needs_validation`. New v0.3 tests cover live Hetzner response normalization, temporal facts, coverage-aware diff, attack-path classification, snapshot round trips, and non-overlapping cost totals.
 
-The live Hetzner collector is intentionally minimal and has not been tested against a real project in this environment. Host, Docker, database, Terraform-state, billing, and automated cost adapters are not complete. The deterministic verifier is component separation, not a substitute for a fresh human or agent reviewer. Review every high-impact result before action.
-
-See [benchmark methodology](benchmarks/README.md), [architecture](docs/architecture.md), [cost architecture](docs/finops-architecture.md), [landscape](docs/landscape.md), and [roadmap](docs/roadmap.md).
+This benchmark measures fixture behavior, not real-world detection accuracy. See [benchmark methodology](benchmarks/README.md), [architecture](docs/architecture.md), [Cloudflare reference analysis](docs/cloudflare-reference.md), [threat model](docs/threat-model.md), and [roadmap](docs/roadmap.md).
 
 ## Development
 
@@ -219,8 +256,16 @@ python -m pip install -e '.[dev]'
 ruff check .
 mypy src
 pytest
+./scripts/demo.sh
+python scripts/validate_artifacts.py
 python -m build
 gitleaks detect --no-banner --redact --no-git
 ```
 
-Runtime code has no third-party Python dependencies. The project uses Apache-2.0 for its explicit patent grant. See [LICENSE](LICENSE).
+Runtime code uses the Python standard library. The project uses Apache-2.0 for its explicit patent grant.
+
+## Maintainer
+
+Created and maintained by [Jakub Połeć](https://github.com/jpolec), founder of [QuantJourney](https://quantjourney.cloud).
+
+This is an independent open-source project and is not affiliated with or endorsed by Hetzner or Cloudflare. Security issues should be reported through [GitHub private vulnerability reporting](SECURITY.md), not a public issue.

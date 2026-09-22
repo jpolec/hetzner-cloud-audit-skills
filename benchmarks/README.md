@@ -13,4 +13,8 @@ Ground truth lives in `expected-findings/v0.1-insecure.json`. The test compares 
 
 The benchmark currently measures deterministic fixture recall and verifier state handling, not real-world precision. Its fixture contains no clean lookalike population large enough to calculate a meaningful false-positive rate; focused unit tests cover VPN-scoped SSH and unattached firewall rules. We therefore do not claim “AI found everything,” general recall, or production accuracy.
 
+The separate `v0.3-cost.json` fixture measures accounting semantics rather than a planted-vulnerability count. Its catalog baseline is EUR 220/month. It contains a EUR 40/month stopped server plus two mutually exclusive EUR 40/50 alternatives for one running server. The expected headline is therefore EUR 90/month (EUR 1,080/year), not EUR 130/month. Confirmed savings remain zero because RAM, owner intent, and rollback evidence are absent.
+
+v0.3 unit fixtures additionally verify live-response normalization, temporal fact identity, new-exposure diffing, coverage regression, `cloud_path_present` classification, and architecture-recommendation schema compliance.
+
 Planned benchmark improvements: clean twins for every scenario, independent fixture authorship, mutation tests, stale/conflicting evidence cases, timing and memory measurements, and multiple agent-run coverage comparisons against the Cloudflare UX/methodology baseline.

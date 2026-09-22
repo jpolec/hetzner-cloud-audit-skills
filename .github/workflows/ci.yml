@@ -60,3 +60,15 @@ jobs:
       - uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  action-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./
+        with:
+          mode: cost
+          input: benchmarks/scenarios/v0.3-cost.json
+          format: markdown
+          output: /tmp/cost-audit.md
+      - run: grep -F 'EUR 90.00/month' /tmp/cost-audit.md

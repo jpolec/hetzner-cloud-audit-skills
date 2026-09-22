@@ -4,12 +4,12 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hetzner-cloud-audit-skills"
-version = "0.2.0"
-description = "Agentic security and cost auditing for Hetzner infrastructure"
+version = "0.3.0"
+description = "Evidence-backed attack paths, drift, and cost auditing for Hetzner Cloud"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
-authors = [{name = "Hetzner Cloud Audit Skills contributors"}]
+authors = [{name = "Jakub Połeć"}]
 keywords = ["hetzner", "cloud-security", "finops", "devsecops", "ai-agents"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -35,6 +35,8 @@ hetzner-sec = "hetzner_security.cli.main:main"
 [project.urls]
 Homepage = "https://github.com/jpolec/hetzner-cloud-audit-skills"
 Issues = "https://github.com/jpolec/hetzner-cloud-audit-skills/issues"
+Maintainer = "https://github.com/jpolec"
+QuantJourney = "https://quantjourney.cloud"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/hetzner_security"]
