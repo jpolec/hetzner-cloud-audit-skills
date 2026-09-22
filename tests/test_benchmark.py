@@ -32,6 +32,16 @@ class BenchmarkTest(unittest.TestCase):
         self.assertIn('"synthetic": true', raw)
         self.assertNotIn("HCLOUD_TOKEN", raw)
 
+    def test_policy_catalog_matches_benchmark_rule_inventory(self) -> None:
+        catalog = json.loads((ROOT / "policies/catalog.json").read_text())
+        expected = json.loads(
+            (ROOT / "benchmarks/expected-findings/v0.1-insecure.json").read_text()
+        )
+        self.assertEqual(
+            {rule["id"] for rule in catalog["rules"]},
+            set(expected["expected_by_rule"]),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

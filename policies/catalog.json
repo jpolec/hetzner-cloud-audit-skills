@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "rules": [
+    {"id":"HETZ-NET-001","category":"hetzner","layers":["cloud_firewall","network"],"title":"Public SSH exposure"},
+    {"id":"HETZ-NET-002","category":"hetzner","layers":["cloud_firewall","network","management_service"],"title":"Public management-plane exposure"},
+    {"id":"HETZ-NET-003","category":"hetzner","layers":["cloud_firewall","network","postgres"],"title":"Public PostgreSQL exposure"},
+    {"id":"HETZ-NET-004","category":"hetzner","layers":["cloud_firewall","network","redis"],"title":"Public Redis exposure"},
+    {"id":"HETZ-NET-005","category":"hetzner","layers":["public_interface","cloud_firewall","host_firewall"],"title":"Public host without complete firewall evidence","absence_requires_validation":true},
+    {"id":"HETZ-IAC-001","category":"hetzner","layers":["repository_intent","runtime_cloud_state"],"title":"Declared/observed network drift"},
+    {"id":"HETZ-XLY-001","category":"hetzner","layers":["environment_intent","private_network","service","host_firewall"],"title":"Cross-environment data-service reachability"},
+    {"id":"HETZ-DKR-001","category":"docker","layers":["container","host"],"title":"Privileged container"},
+    {"id":"HETZ-DKR-002","category":"docker","layers":["container","docker_daemon","host"],"title":"Docker socket control"},
+    {"id":"HETZ-DKR-003","category":"docker","layers":["container","host_pid_namespace"],"title":"Host PID namespace"},
+    {"id":"HETZ-DKR-004","category":"docker","layers":["container","host_network_namespace"],"title":"Host network namespace"},
+    {"id":"HETZ-PG-001","category":"postgres","layers":["network","pg_hba","authentication"],"title":"Broad trust authentication"},
+    {"id":"HETZ-PG-002","category":"postgres","layers":["postgres_role","authorization"],"title":"Unexpected superuser"},
+    {"id":"HETZ-RDS-001","category":"redis","layers":["network_bind","protected_mode","authentication"],"title":"Unauthenticated non-local Redis"},
+    {"id":"HETZ-BCP-001","category":"backup","layers":["asset_criticality","backup_coverage"],"title":"Missing production backup evidence","absence_requires_validation":true},
+    {"id":"HETZ-VULN-001","category":"integration","layers":["scanner_signal","asset_identity","reachability"],"title":"Contextualized vulnerability signal"}
+  ]
+}
