@@ -4,6 +4,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- Illustrated, step-by-step read-only token guide covering Console selection, safe shell and CI loading, verification limits, troubleshooting, and revocation.
+
 ## [0.2.0] - 2026-09-22
 
 ### Added

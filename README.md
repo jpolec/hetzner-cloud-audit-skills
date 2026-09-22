@@ -29,6 +29,8 @@ npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills \
 
 Compatible with OpenAI Codex, Claude Code, and other SKILL.md-compatible agents. Installing a skill installs the agent workflow; the agent can request approval to run the separately packaged CLI when deterministic collection or reporting is needed.
 
+> **Before a live audit:** create a project-specific Hetzner token with **Read** permission. Follow the illustrated [read-only token guide](docs/token-setup.md). Never use `Read & Write` and never paste the token into an agent prompt.
+
 ## Security audit: what it does
 
 The security skill answers a concrete question: **who can reach what, through which layers, because of which observed state?**
@@ -135,6 +137,8 @@ The shared method is `collect → reason → verify`. Observed facts, declared e
 
 ## Read-only Hetzner access
 
+![Choose Read—not Read & Write—when generating the audit token](docs/assets/token-read-only.png)
+
 Create a dedicated token in [Hetzner Console](https://console.hetzner.com/):
 
 1. Open the project to audit.
@@ -151,7 +155,7 @@ printf '\n'
 export HCLOUD_TOKEN
 ```
 
-Never paste it into an agent prompt, command argument, `.env`, repository, or report. The project performs provider `GET` requests only and never tests permissions with a write. See [token setup and revocation](docs/token-setup.md) and Hetzner's [official token guide](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
+Never paste it into an agent prompt, command argument, `.env`, repository, screenshot, or report. The project performs provider `GET` requests only and never tests permissions with a write. The detailed [read-only token guide](docs/token-setup.md) covers every Console click, safe shell loading, verification limits, CI, troubleshooting, and revocation. Hetzner's source of truth is its [official token guide](https://docs.hetzner.com/cloud/api/getting-started/generating-api-token/).
 
 ## CLI and offline demo
 

@@ -12,4 +12,4 @@ SSH is disabled by default. Enabling a host audit requires separate operator aut
 hetzner-audit audit --input snapshot.json --read-only --no-ssh
 ```
 
-See [token setup](token-setup.md) for masked shell input, multi-project use, CI guidance, rotation, and revocation.
+See the [illustrated read-only token guide](token-setup.md) for every Console click, masked shell input, multi-project use, CI guidance, troubleshooting, rotation, and revocation.

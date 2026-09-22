@@ -7,7 +7,7 @@ description: Collect and assess authorized Hetzner Cloud assets in read-only mod
 
 Use for Hetzner servers, types, images, locations, networks/routes, firewalls, IPs, load balancers, volumes, snapshots/backups, SSH keys, labels, placement groups, and certificates.
 
-Required permission: authorized project token, preferably read-only, supplied only as `HCLOUD_TOKEN`. Allowed actions are API `GET` operations. Never log the token. Provider changes, power actions, console access, deletes, or firewall edits are prohibited.
+Required permission: an authorized project token created with **Read** permission and supplied only as `HCLOUD_TOKEN`. Allowed actions are API `GET` operations. Never log the token. Provider changes, power actions, console access, deletes, or firewall edits are prohibited. For exact setup and revocation, use the project's [read-only token guide](https://github.com/jpolec/hetzner-cloud-audit-skills/blob/main/docs/token-setup.md).
 
 For live collection, direct the operator to the target project in Hetzner Console: **Security → API tokens → Generate API token → Read**. Do not ask them to paste the value into chat. Hetzner shows the full token only once and binds it to that project. The collector must not attempt a write to prove that the permission is read-only.
 

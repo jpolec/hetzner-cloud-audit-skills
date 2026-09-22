@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Read-only Hetzner token setup</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;background:#071018;color:#dbe8f5;font-family:Inter,ui-sans-serif,system-ui;padding:52px}
+  .shell{max-width:1320px;margin:auto;border:1px solid #29445b;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0009;background:#0b1722}
+  .bar{height:54px;background:#112333;border-bottom:1px solid #29445b;display:flex;align-items:center;padding:0 22px}.title{margin:auto;color:#8da9bf;font:600 14px ui-monospace,SFMono-Regular,monospace}
+  .content{padding:34px}.path{display:flex;align-items:center;justify-content:center;gap:13px;font:700 21px ui-monospace,SFMono-Regular,monospace}.box{border:1px solid #31516a;background:#102434;padding:14px 20px;border-radius:10px}.arrow{color:#7894aa}
+  .panel{margin:30px auto 22px;max-width:820px;border:1px solid #31516a;background:#0e1e2b;border-radius:14px;padding:26px}.label{color:#91abc0;font-size:14px;text-transform:uppercase;letter-spacing:.08em}.input{margin:10px 0 24px;border:1px solid #34546d;border-radius:8px;padding:13px 15px;color:#b9cada;font:16px ui-monospace,SFMono-Regular,monospace}.option{display:flex;align-items:center;gap:13px;border:1px solid #31516a;padding:15px;border-radius:9px;margin-top:10px}.selected{border:2px solid #54d69d;background:#102b2b}.radio{width:19px;height:19px;border:2px solid #66879e;border-radius:50%}.selected .radio{border:5px solid #54d69d}.name{font-weight:800;font-size:18px}.detail{margin-left:auto;color:#8ca5b8;font:14px ui-monospace,SFMono-Regular,monospace}.good{color:#54d69d}.bad{color:#ff7f88}.footer{text-align:center;color:#9bb2c4;font:16px/1.6 ui-monospace,SFMono-Regular,monospace}.strong{color:#e7f1fb;font-weight:800}
+</style>
+<div class="shell">
+  <div class="bar"><span class="title">illustrated setup · verify the permission before generating the token</span></div>
+  <div class="content">
+    <div class="path"><span class="box">Project</span><span class="arrow">→</span><span class="box">Security</span><span class="arrow">→</span><span class="box">API tokens</span><span class="arrow">→</span><span class="box">Generate API token</span></div>
+    <div class="panel">
+      <div class="label">Description</div>
+      <div class="input">cloud-audit-2026-09-22</div>
+      <div class="label">Permissions</div>
+      <div class="option selected"><span class="radio"></span><span class="name good">Read</span><span class="detail">GET only · choose this</span></div>
+      <div class="option"><span class="radio"></span><span class="name bad">Read &amp; Write</span><span class="detail">GET + POST + PUT + DELETE · do not choose</span></div>
+    </div>
+    <div class="footer"><span class="strong">Copy once → password manager → HCLOUD_TOKEN → audit → unset → revoke</span><br>Never paste the token into chat, a command argument, .env, repository, screenshot, or report.</div>
+  </div>
+</div>
+</html>
