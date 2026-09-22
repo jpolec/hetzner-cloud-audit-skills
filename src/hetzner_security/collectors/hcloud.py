@@ -9,6 +9,7 @@ import json
 import os
 import urllib.parse
 import urllib.request
+from datetime import UTC, datetime
 from typing import Any
 
 from ..models import Asset, Edge, Evidence, Snapshot
@@ -122,7 +123,11 @@ class ReadOnlyHCloudCollector:
         return Snapshot(
             assets=assets,
             edges=edges,
-            metadata={"collector": "hcloud_api", "read_only": True},
+            metadata={
+                "collector": "hcloud_api",
+                "read_only": True,
+                "collected_at": datetime.now(UTC).isoformat(),
+            },
         )
 
 

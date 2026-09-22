@@ -1,5 +1,5 @@
 {
-  "metadata": {"scenario": "v0.1-insecure", "synthetic": true, "known_problems": 33},
+  "metadata": {"scenario": "v0.1-insecure", "synthetic": true, "known_problems": 33, "collected_at": "2026-09-22T00:00:00+00:00"},
   "assets": [
     {"id":"server:admin","type":"server","name":"demo-admin","properties":{"public_ip":"192.0.2.10","firewall_attached":true,"inbound":[{"protocol":"tcp","port":22,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
     {"id":"server:docker-api","type":"server","name":"demo-docker-api","properties":{"public_ip":"192.0.2.11","firewall_attached":true,"inbound":[{"protocol":"tcp","port":2375,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"dev"},"source":"fixture"},

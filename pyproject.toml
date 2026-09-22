@@ -32,8 +32,8 @@ dev = [
 hetzner-sec = "hetzner_security.cli.main:main"
 
 [project.urls]
-Homepage = "https://github.com/OWNER/hetzner-security-skills"
-Issues = "https://github.com/OWNER/hetzner-security-skills/issues"
+Homepage = "https://github.com/jpolec/hetzner-security-skills"
+Issues = "https://github.com/jpolec/hetzner-security-skills/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/hetzner_security"]

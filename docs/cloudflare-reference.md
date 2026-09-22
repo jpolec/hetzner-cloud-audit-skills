@@ -57,11 +57,10 @@ Public release is blocked unless the installable top-level skill is comparable t
 The intended experience is:
 
 ```sh
-npx skills add https://github.com/<owner>/hetzner-security-skills \
+npx skills add https://github.com/jpolec/hetzner-security-skills \
   --skill hetzner-security-audit
 ```
 
 Then ask the agent: `audit my Hetzner infrastructure`. The orchestrator loads only relevant modules.
 
 Cloudflare is a reference architecture, not a dependency, and neither project implies affiliation with the other.
-

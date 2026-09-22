@@ -457,5 +457,9 @@ RULES: tuple[Rule, ...] = (
 def hunt(snapshot: Snapshot) -> list[Finding]:
     graph = AttackGraph(snapshot)
     candidates = [finding for rule in RULES for finding in rule(snapshot, graph)]
+    collected_at = snapshot.metadata.get("collected_at")
+    if isinstance(collected_at, str):
+        for candidate in candidates:
+            candidate.discovered_at = collected_at
     deduplicated = {finding.id: finding for finding in candidates}
     return sorted(deduplicated.values(), key=lambda finding: finding.id)

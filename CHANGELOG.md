@@ -14,6 +14,5 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/OWNER/hetzner-security-skills/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/OWNER/hetzner-security-skills/releases/tag/v0.1.0
-
+[Unreleased]: https://github.com/jpolec/hetzner-security-skills/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/jpolec/hetzner-security-skills/releases/tag/v0.1.0

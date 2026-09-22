@@ -41,7 +41,7 @@ flowchart LR
 The intended UX is one top-level skill that loads only the relevant modules:
 
 ```sh
-npx skills add https://github.com/OWNER/hetzner-security-skills \
+npx skills add https://github.com/jpolec/hetzner-security-skills \
   --skill hetzner-security-audit
 ```
 
@@ -51,7 +51,7 @@ Then ask your agent:
 audit my Hetzner infrastructure
 ```
 
-`OWNER` will be replaced with the authenticated GitHub account before publication. The skill is agent-neutral and designed for Claude Code, OpenAI Codex, and other SKILL.md-compatible agents.
+The skill is agent-neutral and designed for Claude Code, OpenAI Codex, and other SKILL.md-compatible agents.
 
 ## Install the CLI
 

@@ -52,7 +52,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798991+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -106,7 +106,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798996+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -160,7 +160,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.799001+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -214,7 +214,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798979+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -268,7 +268,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798985+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -326,7 +326,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798895+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -384,7 +384,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798920+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -442,7 +442,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798925+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -500,7 +500,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798902+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -558,7 +558,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798909+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -616,7 +616,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798931+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -674,7 +674,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798936+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -732,7 +732,7 @@
       "references": [
         "https://docs.docker.com/engine/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798914+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -806,7 +806,7 @@
       "references": [
         "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798782+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -880,7 +880,7 @@
       "references": [
         "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798792+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -946,7 +946,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798602+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1012,7 +1012,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798716+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1078,7 +1078,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798731+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1144,7 +1144,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798741+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1210,7 +1210,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798749+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1263,7 +1263,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798763+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1316,7 +1316,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798769+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1382,7 +1382,7 @@
       "references": [
         "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798946+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1448,7 +1448,7 @@
       "references": [
         "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798962+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1509,7 +1509,7 @@
       "references": [
         "https://www.postgresql.org/docs/current/role-attributes.html"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798954+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1575,7 +1575,7 @@
       "references": [
         "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798971+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1648,7 +1648,7 @@
       "references": [
         "https://example.invalid/CVE-DEMO-0002"
       ],
-      "discovered_at": "2026-09-22T05:37:59.799023+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1721,7 +1721,7 @@
       "references": [
         "https://example.invalid/CVE-DEMO-0001"
       ],
-      "discovered_at": "2026-09-22T05:37:59.799013+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1794,7 +1794,7 @@
       "references": [
         "https://example.invalid/CVE-DEMO-0003"
       ],
-      "discovered_at": "2026-09-22T05:37:59.799030+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -1904,7 +1904,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798836+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -2014,7 +2014,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798881+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -2124,7 +2124,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798853+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     },
     {
@@ -2234,7 +2234,7 @@
       "references": [
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
-      "discovered_at": "2026-09-22T05:37:59.798869+00:00",
+      "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {}
     }
   ]
