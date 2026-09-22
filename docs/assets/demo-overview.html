@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>hetzner-security-skills demo</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;background:#071018;color:#dbe8f5;font-family:Inter,ui-sans-serif,system-ui;padding:52px}
+  .shell{max-width:1320px;margin:auto;border:1px solid #29445b;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0009;background:#0b1722}
+  .bar{height:54px;background:#112333;border-bottom:1px solid #29445b;display:flex;align-items:center;padding:0 20px;gap:10px}
+  .dot{width:13px;height:13px;border-radius:50%}.r{background:#ff6b6b}.y{background:#ffd166}.g{background:#4dd599}.title{margin:auto;color:#8da9bf;font:600 14px ui-monospace,SFMono-Regular,monospace}
+  .term{padding:30px 34px 38px;font:17px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace}.prompt{color:#4dd599}.cmd{color:#e8f2fb}.muted{color:#7894aa}.cyan{color:#50d8ff}.high{color:#ffb454}.critical{color:#ff6b78}.ok{color:#54d69d}.rule{color:#b49cff}.line{border-top:1px solid #20394d;margin:22px 0}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}.card{background:#102434;border:1px solid #29485f;padding:16px;border-radius:10px}.n{font-size:30px;font-weight:800}.label{color:#91abc0;font:13px ui-sans-serif,system-ui;text-transform:uppercase;letter-spacing:.08em}
+</style>
+<div class="shell">
+  <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">synthetic v0.1 benchmark · read-only</span></div>
+  <div class="term">
+    <div><span class="prompt">$</span> <span class="cmd">hetzner-sec audit --input benchmarks/scenarios/v0.1-insecure.json --verify</span></div>
+    <div class="muted">collect → normalize → graph → hunt → independently verify → report</div>
+    <div class="grid">
+      <div class="card"><div class="n ok">26</div><div class="label">confirmed</div></div>
+      <div class="card"><div class="n high">7</div><div class="label">needs validation</div></div>
+      <div class="card"><div class="n cyan">33</div><div class="label">planted problems</div></div>
+    </div>
+    <div class="line"></div>
+    <div><span class="high">HIGH</span> <span class="rule">HETZ-IAC-001</span> Runtime network access diverges from declared infrastructure</div>
+    <div class="muted">Terraform: SSH from 100.64.0.0/10 · Runtime: 0.0.0.0/0 → tcp/22 → server:admin</div>
+    <br>
+    <div><span class="high">HIGH</span> <span class="rule">HETZ-XLY-001</span> staging workload can reach prod postgres</div>
+    <div class="muted">container:stage-worker → network:shared → tcp/5432 → postgres:prod</div>
+    <br>
+    <div><span class="cyan">MEDIUM</span> <span class="rule">HETZ-VULN-001</span> Vulnerable component in non-public workload</div>
+    <div class="muted">Trivy CVE signal retained · no Internet path observed · priority reduced, not discarded</div>
+    <div class="line"></div>
+    <div><span class="ok">✓</span> JSON &nbsp; <span class="ok">✓</span> Markdown &nbsp; <span class="ok">✓</span> SARIF &nbsp; <span class="ok">✓</span> coverage ledger &nbsp; <span class="ok">✓</span> no provider writes</div>
+  </div>
+</div>
+</html>

@@ -1,0 +1,30 @@
+name: Rule proposal
+description: Propose an evidence-backed cross-layer rule.
+title: "rule: "
+labels: [enhancement, rule]
+body:
+  - type: textarea
+    id: boundary
+    attributes:
+      label: Trust boundary and affected asset
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Required evidence and layers
+    validations:
+      required: true
+  - type: textarea
+    id: controls
+    attributes:
+      label: Compensating controls and false-positive cases
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Demonstrable impact and safe verification
+    validations:
+      required: true
+

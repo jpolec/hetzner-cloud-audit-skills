@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cross-layer finding</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;background:#071018;color:#e8f0f8;font-family:Inter,system-ui;padding:48px}.wrap{max-width:1320px;margin:auto}.eyebrow{color:#54d69d;font-weight:800;letter-spacing:.14em;font-size:13px}.h{font-size:38px;font-weight:850;margin:8px 0 12px}.sub{color:#91a8bb;font-size:18px;margin-bottom:32px}.flow{display:grid;grid-template-columns:1fr 70px 1fr 70px 1fr;align-items:center}.box{min-height:180px;border:1px solid #29485f;border-radius:14px;background:#0f2130;padding:22px}.box strong{display:block;color:#55d8ff;margin-bottom:12px}.arrow{text-align:center;font-size:36px;color:#657f94}.bad{color:#ffb454}.detail{margin-top:30px;display:grid;grid-template-columns:1.15fr .85fr;gap:18px}.panel{background:#0b1722;border:1px solid #29445b;border-radius:14px;padding:24px}.label{font-size:12px;color:#8ba2b5;text-transform:uppercase;letter-spacing:.12em}.value{font:17px/1.55 ui-monospace,SFMono-Regular,monospace;margin:8px 0 18px}.status{display:inline-block;background:#123c31;color:#62e1ad;border:1px solid #28775f;padding:8px 13px;border-radius:999px;font-weight:750}
+</style>
+<div class="wrap">
+  <div class="eyebrow">CROSS-LAYER FINDING · SYNTHETIC DEMO</div>
+  <div class="h">Staging can reach production PostgreSQL</div>
+  <div class="sub">No public database port—and still a real environment boundary failure.</div>
+  <div class="flow">
+    <div class="box"><strong>STAGING RUNTIME</strong>container:stage-worker<br><span class="bad">environment=staging</span><br><br>Compromise starts with code execution in this workload.</div>
+    <div class="arrow">→</div>
+    <div class="box"><strong>HETZNER NETWORK</strong>network:shared<br>10.20.0.0/16<br><br>Directed evidence permits TCP/5432 to the database.</div>
+    <div class="arrow">→</div>
+    <div class="box"><strong>POSTGRESQL</strong>postgres:prod<br><span class="bad">listen_addresses='*'</span><br><br>Host firewall evidence allows the source.</div>
+  </div>
+  <div class="detail">
+    <div class="panel"><div class="label">Declared expectation</div><div class="value">prod and staging are isolated</div><div class="label">Observed attack path</div><div class="value">stage-worker → shared network → tcp/5432 → prod postgres</div></div>
+    <div class="panel"><div class="label">Independent verification</div><div class="value">Graph path rebuilt; target-side block not observed; evidence internally consistent.</div><span class="status">CONFIRMED · 0.96</span></div>
+  </div>
+</div>
+</html>
