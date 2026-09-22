@@ -1,0 +1,24 @@
+{
+  "scenario": "v0.1-insecure",
+  "known_problem_count": 33,
+  "expected_by_rule": {
+    "HETZ-NET-001": 1,
+    "HETZ-NET-002": 2,
+    "HETZ-NET-003": 1,
+    "HETZ-NET-004": 1,
+    "HETZ-NET-005": 2,
+    "HETZ-IAC-001": 2,
+    "HETZ-XLY-001": 4,
+    "HETZ-DKR-001": 2,
+    "HETZ-DKR-002": 2,
+    "HETZ-DKR-003": 2,
+    "HETZ-DKR-004": 2,
+    "HETZ-PG-001": 2,
+    "HETZ-PG-002": 1,
+    "HETZ-RDS-001": 1,
+    "HETZ-BCP-001": 5,
+    "HETZ-VULN-001": 3
+  },
+  "expected_verifier": {"confirmed": 26, "needs_validation": 7, "rejected": 0},
+  "notes": "All names, addresses, and CVE identifiers are synthetic documentation ranges or placeholders."
+}

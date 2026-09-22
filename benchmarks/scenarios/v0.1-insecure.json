@@ -1,0 +1,36 @@
+{
+  "metadata": {"scenario": "v0.1-insecure", "synthetic": true, "known_problems": 33},
+  "assets": [
+    {"id":"server:admin","type":"server","name":"demo-admin","properties":{"public_ip":"192.0.2.10","firewall_attached":true,"inbound":[{"protocol":"tcp","port":22,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:docker-api","type":"server","name":"demo-docker-api","properties":{"public_ip":"192.0.2.11","firewall_attached":true,"inbound":[{"protocol":"tcp","port":2375,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"dev"},"source":"fixture"},
+    {"id":"server:kube-api","type":"server","name":"demo-kube-api","properties":{"public_ip":"192.0.2.12","firewall_attached":true,"inbound":[{"protocol":"tcp","port":6443,"sources":["::/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:public-pg","type":"server","name":"demo-public-pg","properties":{"public_ip":"192.0.2.13","firewall_attached":true,"stateful":true,"backup_enabled":false,"inbound":[{"protocol":"tcp","port":5432,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:public-redis","type":"server","name":"demo-public-redis","properties":{"public_ip":"192.0.2.14","firewall_attached":true,"stateful":true,"backup_enabled":false,"inbound":[{"protocol":"tcp","port":6379,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:no-firewall-a","type":"server","name":"demo-no-firewall-a","properties":{"public_ip":"192.0.2.20"},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:no-firewall-b","type":"server","name":"demo-no-firewall-b","properties":{"public_ip":"2001:db8::20"},"labels":{"environment":"staging"},"source":"fixture"},
+    {"id":"container:stage-worker","type":"container","name":"demo-stage-worker","properties":{"privileged":true,"docker_socket":true,"host_pid":true,"host_network":true},"labels":{"environment":"staging"},"source":"docker_fixture"},
+    {"id":"container:ops-agent","type":"container","name":"demo-ops-agent","properties":{"privileged":true,"docker_socket":true,"host_pid":true,"host_network":true},"labels":{"environment":"dev"},"source":"docker_fixture"},
+    {"id":"container:internal-api","type":"container","name":"demo-internal-api","properties":{},"labels":{"environment":"prod"},"source":"docker_fixture"},
+    {"id":"postgres:prod","type":"postgres","name":"demo-prod-postgres","properties":{"service":"postgres","port":5432,"listen_addresses":["*"],"host_firewall_allows_source":true,"stateful":true,"backup_enabled":false,"pg_hba":[{"type":"host","database":"all","user":"all","address":"0.0.0.0/0","method":"trust"}],"roles":[{"name":"app","superuser":true,"expected_superuser":false},{"name":"migration","superuser":true,"expected_superuser":false}]},"labels":{"environment":"prod"},"source":"postgres_fixture"},
+    {"id":"postgres:analytics","type":"postgres","name":"demo-analytics-postgres","properties":{"service":"postgres","port":5432,"stateful":true,"backup_enabled":false,"pg_hba":[{"type":"host","database":"all","user":"all","address":"::/0","method":"trust"}],"roles":[]},"labels":{"environment":"prod"},"source":"postgres_fixture"},
+    {"id":"redis:prod","type":"redis","name":"demo-prod-redis","properties":{"service":"redis","port":6379,"bind":["0.0.0.0"],"protected_mode":false,"acl_enabled":false,"requirepass":false,"stateful":true,"backup_enabled":false},"labels":{"environment":"prod"},"source":"redis_fixture"},
+    {"id":"network:shared","type":"network","name":"demo-shared","properties":{"cidr":"10.20.0.0/16"},"labels":{},"source":"fixture"}
+  ],
+  "edges": [
+    {"source":"container:stage-worker","target":"network:shared","relation":"attached_to","evidence":[{"source":"hcloud_fixture","kind":"network_attachment","asset_id":"container:stage-worker","observed":"network:shared"}]},
+    {"source":"network:shared","target":"postgres:prod","relation":"allows","protocol":"tcp","port":5432,"evidence":[{"source":"hcloud_fixture","kind":"private_network_path","asset_id":"postgres:prod","observed":{"source":"10.20.1.0/24","port":5432}}]},
+    {"source":"container:ops-agent","target":"network:shared","relation":"attached_to","evidence":[{"source":"hcloud_fixture","kind":"network_attachment","asset_id":"container:ops-agent","observed":"network:shared"}]},
+    {"source":"network:shared","target":"redis:prod","relation":"allows","protocol":"tcp","port":6379,"evidence":[{"source":"hcloud_fixture","kind":"private_network_path","asset_id":"redis:prod","observed":{"source":"10.20.2.0/24","port":6379}}]}
+  ],
+  "expectations": [
+    {"kind":"network_access","target":"server:admin","port":22,"allowed_sources":["100.64.0.0/10"],"observed_sources":["0.0.0.0/0"],"declared":"SSH only from Tailscale","path":"examples/intentionally-insecure/main.tf:12"},
+    {"kind":"network_access","target":"server:public-pg","port":5432,"allowed_sources":["10.0.0.0/8"],"observed_sources":["0.0.0.0/0"],"declared":"PostgreSQL only on private network","path":"examples/intentionally-insecure/main.tf:30"},
+    {"kind":"environment_isolation","separate":["prod","staging"]},
+    {"kind":"environment_isolation","separate":["prod","dev"]}
+  ],
+  "signals": [
+    {"type":"vulnerability","scanner":"trivy","asset_id":"container:internal-api","vulnerability_id":"CVE-DEMO-0001","package":"libdemo","installed_version":"1.0","fixed_version":"1.1","severity":"CRITICAL","primary_url":"https://example.invalid/CVE-DEMO-0001"},
+    {"type":"vulnerability","scanner":"grype","asset_id":"container:stage-worker","vulnerability_id":"CVE-DEMO-0002","package":"openssl-demo","installed_version":"2.0","fixed_version":"2.1","severity":"HIGH","primary_url":"https://example.invalid/CVE-DEMO-0002"},
+    {"type":"vulnerability","scanner":"trivy","asset_id":"container:ops-agent","vulnerability_id":"CVE-DEMO-0003","package":"curl-demo","installed_version":"3.0","fixed_version":"3.1","severity":"HIGH","primary_url":"https://example.invalid/CVE-DEMO-0003"}
+  ]
+}
