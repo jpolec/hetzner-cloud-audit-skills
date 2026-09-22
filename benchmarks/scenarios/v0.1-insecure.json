@@ -2,10 +2,10 @@
   "metadata": {"scenario": "v0.1-insecure", "synthetic": true, "known_problems": 33, "collected_at": "2026-09-22T00:00:00+00:00"},
   "assets": [
     {"id":"server:admin","type":"server","name":"demo-admin","properties":{"public_ip":"192.0.2.10","firewall_attached":true,"inbound":[{"protocol":"tcp","port":22,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
-    {"id":"server:docker-api","type":"server","name":"demo-docker-api","properties":{"public_ip":"192.0.2.11","firewall_attached":true,"inbound":[{"protocol":"tcp","port":2375,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"dev"},"source":"fixture"},
-    {"id":"server:kube-api","type":"server","name":"demo-kube-api","properties":{"public_ip":"192.0.2.12","firewall_attached":true,"inbound":[{"protocol":"tcp","port":6443,"sources":["::/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
-    {"id":"server:public-pg","type":"server","name":"demo-public-pg","properties":{"public_ip":"192.0.2.13","firewall_attached":true,"stateful":true,"backup_enabled":false,"inbound":[{"protocol":"tcp","port":5432,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
-    {"id":"server:public-redis","type":"server","name":"demo-public-redis","properties":{"public_ip":"192.0.2.14","firewall_attached":true,"stateful":true,"backup_enabled":false,"inbound":[{"protocol":"tcp","port":6379,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:docker-api","type":"server","name":"demo-docker-api","properties":{"public_ip":"192.0.2.11","firewall_attached":true,"listening_ports":[2375],"host_firewall_allow_ports":[2375],"inbound":[{"protocol":"tcp","port":2375,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"dev"},"source":"fixture"},
+    {"id":"server:kube-api","type":"server","name":"demo-kube-api","properties":{"public_ip":"192.0.2.12","firewall_attached":true,"listening_ports":[6443],"host_firewall_allow_ports":[6443],"inbound":[{"protocol":"tcp","port":6443,"sources":["::/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:public-pg","type":"server","name":"demo-public-pg","properties":{"public_ip":"192.0.2.13","firewall_attached":true,"listening_ports":[5432],"host_firewall_allow_ports":[5432],"stateful":true,"backup_enabled":false,"inbound":[{"protocol":"tcp","port":5432,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
+    {"id":"server:public-redis","type":"server","name":"demo-public-redis","properties":{"public_ip":"192.0.2.14","firewall_attached":true,"listening_ports":[6379],"host_firewall_allow_ports":[6379],"stateful":true,"backup_enabled":false,"inbound":[{"protocol":"tcp","port":6379,"sources":["0.0.0.0/0"]}]},"labels":{"environment":"prod"},"source":"fixture"},
     {"id":"server:no-firewall-a","type":"server","name":"demo-no-firewall-a","properties":{"public_ip":"192.0.2.20"},"labels":{"environment":"prod"},"source":"fixture"},
     {"id":"server:no-firewall-b","type":"server","name":"demo-no-firewall-b","properties":{"public_ip":"2001:db8::20"},"labels":{"environment":"staging"},"source":"fixture"},
     {"id":"container:stage-worker","type":"container","name":"demo-stage-worker","properties":{"privileged":true,"docker_socket":true,"host_pid":true,"host_network":true},"labels":{"environment":"staging"},"source":"docker_fixture"},
@@ -30,7 +30,7 @@
   ],
   "signals": [
     {"type":"vulnerability","scanner":"trivy","asset_id":"container:internal-api","vulnerability_id":"CVE-DEMO-0001","package":"libdemo","installed_version":"1.0","fixed_version":"1.1","severity":"CRITICAL","primary_url":"https://example.invalid/CVE-DEMO-0001"},
-    {"type":"vulnerability","scanner":"grype","asset_id":"container:stage-worker","vulnerability_id":"CVE-DEMO-0002","package":"openssl-demo","installed_version":"2.0","fixed_version":"2.1","severity":"HIGH","primary_url":"https://example.invalid/CVE-DEMO-0002"},
-    {"type":"vulnerability","scanner":"trivy","asset_id":"container:ops-agent","vulnerability_id":"CVE-DEMO-0003","package":"curl-demo","installed_version":"3.0","fixed_version":"3.1","severity":"HIGH","primary_url":"https://example.invalid/CVE-DEMO-0003"}
+    {"type":"vulnerability","scanner":"grype","asset_id":"container:stage-worker","vulnerability_id":"CVE-DEMO-0002","package":"openssl-demo","installed_version":"2.0","fixed_version":"2.1","severity":"HIGH","runtime_present":true,"affected_code_path":true,"primary_url":"https://example.invalid/CVE-DEMO-0002"},
+    {"type":"vulnerability","scanner":"trivy","asset_id":"container:ops-agent","vulnerability_id":"CVE-DEMO-0003","package":"curl-demo","installed_version":"3.0","fixed_version":"3.1","severity":"HIGH","runtime_present":true,"affected_code_path":true,"primary_url":"https://example.invalid/CVE-DEMO-0003"}
   ]
 }

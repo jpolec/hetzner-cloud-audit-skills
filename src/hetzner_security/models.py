@@ -76,7 +76,7 @@ class Finding:
     id: str
     rule_id: str
     title: str
-    severity: Severity
+    severity: Severity | None
     confidence: float
     status: FindingStatus
     assets: list[str]
@@ -95,7 +95,7 @@ class Finding:
 
     def to_dict(self) -> dict[str, Any]:
         data = asdict(self)
-        data["severity"] = self.severity.value
+        data["severity"] = self.severity.value if self.severity is not None else None
         data["status"] = self.status.value
         data["verification"]["result"] = self.verification.result.value
         return data
@@ -111,4 +111,3 @@ class Snapshot:
 
     def asset_map(self) -> dict[str, Asset]:
         return {asset.id: asset for asset in self.assets}
-

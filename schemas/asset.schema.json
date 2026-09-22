@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/hetzner-security/asset.schema.json",
+  "$id": "urn:hetzner-security-skills:schema:asset:1.0.0",
   "title": "Normalized asset",
   "type": "object",
   "additionalProperties": false,

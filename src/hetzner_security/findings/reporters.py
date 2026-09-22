@@ -30,11 +30,11 @@ def render_markdown(findings: list[Finding]) -> str:
     for finding in [*confirmed, *pending]:
         lines.extend(
             [
-                f"## {finding.severity.value.upper()} · {finding.rule_id} · {finding.title}",
+                f"## {(finding.severity.value.upper() if finding.severity else 'UNSCORED')} · {finding.rule_id} · {finding.title}",
                 "",
-                f"**Status:** {finding.status.value}  ",
-                f"**Confidence:** {finding.confidence:.2f}  ",
-                f"**Assets:** {', '.join(finding.assets)}",
+                f"- **Status:** {finding.status.value}",
+                f"- **Confidence:** {finding.confidence:.2f}",
+                f"- **Assets:** {', '.join(finding.assets)}",
                 "",
                 "**Observation:** " + finding.observation,
                 "",
@@ -72,7 +72,7 @@ def render_sarif(findings: list[Finding]) -> str:
         results.append(
             {
                 "ruleId": finding.rule_id,
-                "level": level[finding.severity.value],
+                "level": level[finding.severity.value] if finding.severity else "none",
                 "message": {"text": f"{finding.status.value}: {finding.observation}"},
                 "properties": {
                     "confidence": finding.confidence,
@@ -89,7 +89,7 @@ def render_sarif(findings: list[Finding]) -> str:
                 "tool": {
                     "driver": {
                         "name": "hetzner-security-skills",
-                        "version": "0.1.0",
+                        "version": "0.1.1",
                         "rules": list(rules.values()),
                     }
                 },
@@ -98,4 +98,3 @@ def render_sarif(findings: list[Finding]) -> str:
         ],
     }
     return json.dumps(payload, indent=2)
-

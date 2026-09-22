@@ -1,0 +1,60 @@
+{
+  "id": "HETZ-COST-001-demo-db",
+  "rule_id": "HETZ-COST-001",
+  "title": "Right-size and harden a synthetic database host",
+  "provider": "hetzner",
+  "status": "confirmed",
+  "assets": ["server:demo-db"],
+  "observation_window": {
+    "start": "2026-08-23T00:00:00Z",
+    "end": "2026-09-22T00:00:00Z",
+    "days": 30
+  },
+  "current_state": {
+    "server_type": "synthetic-large",
+    "vcpu": 8,
+    "memory_gib": 16,
+    "monthly_cost": 100,
+    "currency": "EUR"
+  },
+  "metrics": [
+    {"name": "cpu", "statistic": "p95", "value": 18, "unit": "percent", "source": "synthetic_provider_metrics", "collected_at": "2026-09-22T00:00:00Z"},
+    {"name": "memory", "statistic": "p95", "value": 42, "unit": "percent", "source": "synthetic_host_metrics", "collected_at": "2026-09-22T00:00:00Z"},
+    {"name": "disk", "statistic": "p95", "value": 31, "unit": "percent", "source": "synthetic_provider_metrics", "collected_at": "2026-09-22T00:00:00Z"}
+  ],
+  "data_gaps": [],
+  "candidate_state": {
+    "server_type": "synthetic-medium",
+    "monthly_cost": 70,
+    "currency": "EUR"
+  },
+  "estimated_savings": {
+    "monthly": 30,
+    "annual": 360,
+    "currency": "EUR",
+    "basis": "synthetic catalog comparison; excludes tax and traffic",
+    "price_observed_at": "2026-09-22T00:00:00Z"
+  },
+  "risk": "low",
+  "confidence": 0.93,
+  "prerequisites": ["Target type remains available", "Workload supports planned restart"],
+  "evidence": [
+    {"source": "synthetic_fixture", "kind": "utilization_window", "asset_id": "server:demo-db"}
+  ],
+  "cross_domain_impacts": {
+    "security": ["Move database access to a private network"],
+    "reliability": ["Retain recovery capacity and complete a restore test"],
+    "performance": ["Preserve measured headroom and validate database latency"]
+  },
+  "verification": {
+    "method": "fresh synthetic architecture review",
+    "result": "confirmed",
+    "notes": "All decisive synthetic metrics and constraints are present; production change still requires operator approval."
+  },
+  "implementation": {
+    "steps": ["Prepare a reviewed resize and network migration plan"],
+    "validation": ["Compare latency, CPU, memory, disk, and error rates against the baseline"],
+    "rollback": ["Return to the prior server type if agreed performance thresholds fail"]
+  },
+  "discovered_at": "2026-09-22T00:00:00Z"
+}

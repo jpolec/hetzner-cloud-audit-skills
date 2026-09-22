@@ -2,15 +2,15 @@
 
 ## Summary
 
-- Confirmed: 26
-- Needs validation: 7
+- Confirmed: 23
+- Needs validation: 10
 - Rejected: 0
 
 ## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:stage-worker
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:stage-worker
 
 **Observation:** Runtime inspection reports privileged=true.
 
@@ -28,9 +28,9 @@
 
 ## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:ops-agent
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:ops-agent
 
 **Observation:** Runtime inspection reports privileged=true.
 
@@ -48,9 +48,9 @@
 
 ## CRITICAL · HETZ-DKR-002 · Container can control the Docker daemon
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:ops-agent
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:ops-agent
 
 **Observation:** Runtime inspection reports docker_socket=true.
 
@@ -68,9 +68,9 @@
 
 ## CRITICAL · HETZ-DKR-002 · Container can control the Docker daemon
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:stage-worker
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:stage-worker
 
 **Observation:** Runtime inspection reports docker_socket=true.
 
@@ -88,9 +88,9 @@
 
 ## HIGH · HETZ-DKR-003 · Container shares the host PID namespace
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:stage-worker
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:stage-worker
 
 **Observation:** Runtime inspection reports host_pid=true.
 
@@ -108,9 +108,9 @@
 
 ## HIGH · HETZ-DKR-003 · Container shares the host PID namespace
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:ops-agent
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:ops-agent
 
 **Observation:** Runtime inspection reports host_pid=true.
 
@@ -128,9 +128,9 @@
 
 ## MEDIUM · HETZ-DKR-004 · Container shares the host network namespace
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:ops-agent
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:ops-agent
 
 **Observation:** Runtime inspection reports host_network=true.
 
@@ -148,9 +148,9 @@
 
 ## MEDIUM · HETZ-DKR-004 · Container shares the host network namespace
 
-**Status:** confirmed  
-**Confidence:** 0.97  
-**Assets:** container:stage-worker
+- **Status:** confirmed
+- **Confidence:** 0.97
+- **Assets:** container:stage-worker
 
 **Observation:** Runtime inspection reports host_network=true.
 
@@ -166,11 +166,11 @@
 
 **Remediation:** Disable host_network and grant a narrower capability or mediated service.
 
-## HIGH · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure
+## MEDIUM · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure
 
-**Status:** confirmed  
-**Confidence:** 0.98  
-**Assets:** server:admin
+- **Status:** confirmed
+- **Confidence:** 0.98
+- **Assets:** server:admin
 
 **Observation:** Declared and observed source ranges differ for a security-sensitive port.
 
@@ -178,19 +178,19 @@
 
 **Actual:** Unexpected observed sources: ['0.0.0.0/0'].
 
-**Attack path:** 0.0.0.0/0 → tcp/22 → server:admin
+**Attack path:** 0.0.0.0/0 → tcp/22 → provider-policy:server:admin
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
-**Impact:** A change outside the reviewed IaC path bypasses the intended access boundary.
+**Impact:** The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.
 
 **Remediation:** Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.
 
-## HIGH · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure
+## MEDIUM · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure
 
-**Status:** confirmed  
-**Confidence:** 0.98  
-**Assets:** server:public-pg
+- **Status:** confirmed
+- **Confidence:** 0.98
+- **Assets:** server:public-pg
 
 **Observation:** Declared and observed source ranges differ for a security-sensitive port.
 
@@ -198,39 +198,19 @@
 
 **Actual:** Unexpected observed sources: ['0.0.0.0/0'].
 
-**Attack path:** 0.0.0.0/0 → tcp/5432 → server:public-pg
+**Attack path:** 0.0.0.0/0 → tcp/5432 → provider-policy:server:public-pg
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
-**Impact:** A change outside the reviewed IaC path bypasses the intended access boundary.
+**Impact:** The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.
 
 **Remediation:** Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.
 
-## HIGH · HETZ-NET-001 · SSH reachable from the public internet
-
-**Status:** confirmed  
-**Confidence:** 0.88  
-**Assets:** server:admin
-
-**Observation:** An inbound rule admits a public source to TCP/22.
-
-**Expected:** Management and data services are reachable only from declared trusted sources.
-
-**Actual:** TCP/22 admits ['0.0.0.0/0'].
-
-**Attack path:** internet → tcp/22 → server:admin
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
-
-**Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
-
 ## CRITICAL · HETZ-NET-002 · Docker daemon reachable from the public internet
 
-**Status:** confirmed  
-**Confidence:** 0.88  
-**Assets:** server:docker-api
+- **Status:** confirmed
+- **Confidence:** 0.88
+- **Assets:** server:docker-api
 
 **Observation:** An inbound rule admits a public source to TCP/2375.
 
@@ -248,9 +228,9 @@
 
 ## CRITICAL · HETZ-NET-002 · Kubernetes API reachable from the public internet
 
-**Status:** confirmed  
-**Confidence:** 0.88  
-**Assets:** server:kube-api
+- **Status:** confirmed
+- **Confidence:** 0.88
+- **Assets:** server:kube-api
 
 **Observation:** An inbound rule admits a public source to TCP/6443.
 
@@ -268,9 +248,9 @@
 
 ## HIGH · HETZ-NET-003 · PostgreSQL reachable from the public internet
 
-**Status:** confirmed  
-**Confidence:** 0.88  
-**Assets:** server:public-pg
+- **Status:** confirmed
+- **Confidence:** 0.88
+- **Assets:** server:public-pg
 
 **Observation:** An inbound rule admits a public source to TCP/5432.
 
@@ -288,9 +268,9 @@
 
 ## CRITICAL · HETZ-NET-004 · Redis reachable from the public internet
 
-**Status:** confirmed  
-**Confidence:** 0.88  
-**Assets:** server:public-redis
+- **Status:** confirmed
+- **Confidence:** 0.88
+- **Assets:** server:public-redis
 
 **Observation:** An inbound rule admits a public source to TCP/6379.
 
@@ -308,9 +288,9 @@
 
 ## CRITICAL · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
 
-**Status:** confirmed  
-**Confidence:** 0.99  
-**Assets:** postgres:prod
+- **Status:** confirmed
+- **Confidence:** 0.99
+- **Assets:** postgres:prod
 
 **Observation:** pg_hba.conf trusts a broad network range.
 
@@ -326,31 +306,11 @@
 
 **Remediation:** Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.
 
-## CRITICAL · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
-
-**Status:** confirmed  
-**Confidence:** 0.99  
-**Assets:** postgres:analytics
-
-**Observation:** pg_hba.conf trusts a broad network range.
-
-**Expected:** Remote database connections use authenticated, encrypted methods scoped to required clients.
-
-**Actual:** HBA rule 0 uses trust for ::/0.
-
-**Attack path:** ::/0 → postgres:analytics → postgres authentication
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** A reachable client can select an allowed database role without presenting a password.
-
-**Remediation:** Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.
-
 ## HIGH · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability
 
-**Status:** confirmed  
-**Confidence:** 0.93  
-**Assets:** postgres:prod
+- **Status:** confirmed
+- **Confidence:** 0.93
+- **Assets:** postgres:prod
 
 **Observation:** Role inventory marks superuser roles outside the declared allowlist.
 
@@ -368,9 +328,9 @@
 
 ## CRITICAL · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control
 
-**Status:** confirmed  
-**Confidence:** 0.99  
-**Assets:** redis:prod
+- **Status:** confirmed
+- **Confidence:** 0.99
+- **Assets:** redis:prod
 
 **Observation:** Broad bind, disabled protected mode, and absent ACL/password evidence coincide.
 
@@ -388,9 +348,9 @@
 
 ## MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload
 
-**Status:** confirmed  
-**Confidence:** 0.84  
-**Assets:** container:stage-worker
+- **Status:** confirmed
+- **Confidence:** 0.84
+- **Assets:** container:stage-worker
 
 **Observation:** grype reports CVE-DEMO-0002 in openssl-demo.
 
@@ -408,29 +368,9 @@
 
 ## MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload
 
-**Status:** confirmed  
-**Confidence:** 0.84  
-**Assets:** container:internal-api
-
-**Observation:** trivy reports CVE-DEMO-0001 in libdemo.
-
-**Expected:** Deployed components have no applicable high-impact known vulnerabilities.
-
-**Actual:** Installed 1.0; fixed 1.1; internet_reachable=False.
-
-**Attack path:** container:internal-api → local vulnerable component
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.
-
-**Remediation:** Upgrade to the fixed version and verify whether the affected component is loaded or reachable.
-
-## MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload
-
-**Status:** confirmed  
-**Confidence:** 0.84  
-**Assets:** container:ops-agent
+- **Status:** confirmed
+- **Confidence:** 0.84
+- **Assets:** container:ops-agent
 
 **Observation:** trivy reports CVE-DEMO-0003 in curl-demo.
 
@@ -448,9 +388,9 @@
 
 ## HIGH · HETZ-XLY-001 · staging workload can reach prod postgres
 
-**Status:** confirmed  
-**Confidence:** 0.96  
-**Assets:** container:stage-worker, postgres:prod
+- **Status:** confirmed
+- **Confidence:** 0.96
+- **Assets:** container:stage-worker, postgres:prod
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -468,9 +408,9 @@
 
 ## HIGH · HETZ-XLY-001 · dev workload can reach prod redis
 
-**Status:** confirmed  
-**Confidence:** 0.96  
-**Assets:** container:ops-agent, redis:prod
+- **Status:** confirmed
+- **Confidence:** 0.96
+- **Assets:** container:ops-agent, redis:prod
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -488,9 +428,9 @@
 
 ## HIGH · HETZ-XLY-001 · staging workload can reach prod redis
 
-**Status:** confirmed  
-**Confidence:** 0.96  
-**Assets:** container:stage-worker, redis:prod
+- **Status:** confirmed
+- **Confidence:** 0.96
+- **Assets:** container:stage-worker, redis:prod
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -508,9 +448,9 @@
 
 ## HIGH · HETZ-XLY-001 · dev workload can reach prod postgres
 
-**Status:** confirmed  
-**Confidence:** 0.96  
-**Assets:** container:ops-agent, postgres:prod
+- **Status:** confirmed
+- **Confidence:** 0.96
+- **Assets:** container:ops-agent, postgres:prod
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -526,11 +466,11 @@
 
 **Remediation:** Separate environment networks and enforce target-side allowlists for the exact clients.
 
-## MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
+## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** postgres:prod
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** postgres:prod
 
 **Observation:** The asset is declared production and stateful, but no backup configuration is observed.
 
@@ -546,11 +486,11 @@
 
 **Remediation:** Enable provider or application-consistent backups and record a restore test.
 
-## MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
+## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** postgres:analytics
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** postgres:analytics
 
 **Observation:** The asset is declared production and stateful, but no backup configuration is observed.
 
@@ -566,11 +506,11 @@
 
 **Remediation:** Enable provider or application-consistent backups and record a restore test.
 
-## MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
+## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** redis:prod
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** redis:prod
 
 **Observation:** The asset is declared production and stateful, but no backup configuration is observed.
 
@@ -586,11 +526,11 @@
 
 **Remediation:** Enable provider or application-consistent backups and record a restore test.
 
-## MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
+## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** server:public-pg
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** server:public-pg
 
 **Observation:** The asset is declared production and stateful, but no backup configuration is observed.
 
@@ -606,11 +546,11 @@
 
 **Remediation:** Enable provider or application-consistent backups and record a restore test.
 
-## MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
+## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** server:public-redis
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** server:public-redis
 
 **Observation:** The asset is declared production and stateful, but no backup configuration is observed.
 
@@ -626,11 +566,31 @@
 
 **Remediation:** Enable provider or application-consistent backups and record a restore test.
 
-## MEDIUM · HETZ-NET-005 · Internet-facing server has no observed firewall control
+## UNSCORED · HETZ-NET-001 · SSH reachable from the public internet
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** server:no-firewall-a
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** server:admin
+
+**Observation:** An inbound rule admits a public source to TCP/22.
+
+**Expected:** Management and data services are reachable only from declared trusted sources.
+
+**Actual:** TCP/22 admits ['0.0.0.0/0'].
+
+**Attack path:** internet → tcp/22 → server:admin
+
+**Verification:** The provider rule is attached, but listener and host-firewall evidence are incomplete; validate end-to-end reachability safely.
+
+**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
+
+**Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
+
+## UNSCORED · HETZ-NET-005 · Internet-facing server has no observed firewall control
+
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** server:no-firewall-a
 
 **Observation:** A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.
 
@@ -646,11 +606,11 @@
 
 **Remediation:** Attach a least-privilege Hetzner firewall or provide verified host-firewall evidence.
 
-## MEDIUM · HETZ-NET-005 · Internet-facing server has no observed firewall control
+## UNSCORED · HETZ-NET-005 · Internet-facing server has no observed firewall control
 
-**Status:** needs_validation  
-**Confidence:** 0.69  
-**Assets:** server:no-firewall-b
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** server:no-firewall-b
 
 **Observation:** A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.
 
@@ -665,3 +625,43 @@
 **Impact:** Services that bind broadly may be reachable without a network policy boundary.
 
 **Remediation:** Attach a least-privilege Hetzner firewall or provide verified host-firewall evidence.
+
+## UNSCORED · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
+
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** postgres:analytics
+
+**Observation:** pg_hba.conf trusts a broad network range.
+
+**Expected:** Remote database connections use authenticated, encrypted methods scoped to required clients.
+
+**Actual:** HBA rule 0 uses trust for ::/0.
+
+**Attack path:** ::/0 → postgres:analytics → postgres authentication
+
+**Verification:** The HBA rule is unsafe if selected, but no source-to-PostgreSQL network path is evidenced.
+
+**Impact:** A reachable client can select an allowed database role without presenting a password.
+
+**Remediation:** Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.
+
+## UNSCORED · HETZ-VULN-001 · Vulnerable component in non-public workload
+
+- **Status:** needs_validation
+- **Confidence:** 0.69
+- **Assets:** container:internal-api
+
+**Observation:** trivy reports CVE-DEMO-0001 in libdemo.
+
+**Expected:** Deployed components have no applicable high-impact known vulnerabilities.
+
+**Actual:** Installed 1.0; fixed 1.1; internet_reachable=False.
+
+**Attack path:** container:internal-api → local vulnerable component
+
+**Verification:** Scanner signal is not enough to confirm runtime applicability; safely verify: runtime_present, affected_code_path.
+
+**Impact:** Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.
+
+**Remediation:** Upgrade to the fixed version and verify whether the affected component is loaded or reachable.

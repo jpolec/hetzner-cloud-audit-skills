@@ -14,7 +14,10 @@ def verify_all(candidates: list[Finding], snapshot: Snapshot) -> list[Finding]:
 
 
 def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Finding:
-    """Verify from normalized facts, never from analyzer assertions alone."""
+    """Check a candidate's deterministic evidence contract.
+
+    This is component separation, not an independent human or agent review.
+    """
     result = deepcopy(candidate)
     assets = snapshot.asset_map()
     missing_assets = [asset_id for asset_id in candidate.assets if asset_id not in assets]
@@ -51,6 +54,17 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 "The broad rule is not attached to the cited asset.",
                 confidence=0.1,
             )
+        port = _candidate_port(candidate)
+        downstream_evidence = [
+            evidence
+            for evidence in candidate.evidence
+            if evidence.kind in {"listening_socket", "host_firewall_allow"}
+        ]
+        if port is None or len(downstream_evidence) < 2:
+            return _needs(
+                result,
+                "The provider rule is attached, but listener and host-firewall evidence are incomplete; validate end-to-end reachability safely.",
+            )
 
     if candidate.rule_id == "HETZ-XLY-001":
         source, target = candidate.assets[:2]
@@ -75,8 +89,57 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 confidence=0.1,
             )
 
-    if candidate.rule_id == "HETZ-VULN-001" and not candidate.evidence[0].observed.get("fixed_version"):
-        return _needs(result, "Scanner signal has no fixed version and affected runtime path is unverified.")
+    if candidate.rule_id == "HETZ-PG-001":
+        target = candidate.assets[0]
+        if not any(
+            graph.reachable(source, target, protocol="tcp", port=5432)
+            for source in ["internet", *assets]
+            if source != target
+        ):
+            return _needs(
+                result,
+                "The HBA rule is unsafe if selected, but no source-to-PostgreSQL network path is evidenced.",
+            )
+
+    if candidate.rule_id == "HETZ-RDS-001":
+        target = candidate.assets[0]
+        if not any(
+            graph.reachable(source, target, protocol="tcp", port=6379)
+            for source in ["internet", *assets]
+            if source != target
+        ):
+            return _needs(
+                result,
+                "The Redis configuration is unsafe if reachable, but no source-to-Redis network path is evidenced.",
+            )
+
+    if candidate.rule_id == "HETZ-VULN-001":
+        signal = candidate.evidence[0].observed
+        if not isinstance(signal, dict):
+            return _needs(result, "Scanner output is not a structured vulnerability signal.")
+        if signal.get("runtime_present") is False or signal.get("affected_code_path") is False:
+            return _set(
+                result,
+                FindingStatus.REJECTED,
+                "deterministic runtime-applicability challenge",
+                candidate.evidence,
+                "Runtime evidence refutes applicability of the scanner signal.",
+                confidence=0.05,
+            )
+        missing = [
+            field
+            for field in ("runtime_present", "affected_code_path")
+            if signal.get(field) is not True
+        ]
+        if missing:
+            return _needs(
+                result,
+                "Scanner signal is not enough to confirm runtime applicability; safely verify: "
+                + ", ".join(missing)
+                + ".",
+            )
+        if not signal.get("fixed_version"):
+            return _needs(result, "Runtime applicability is evidenced, but no fixed version is identified.")
 
     if candidate.rule_id in {"HETZ-NET-005", "HETZ-BCP-001"}:
         return _needs(
@@ -87,7 +150,7 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
     return _set(
         result,
         FindingStatus.CONFIRMED,
-        "independent deterministic evidence and prerequisite review",
+        "deterministic evidence-contract verification",
         candidate.evidence,
         "Evidence is internally consistent and no observed compensating control refutes the path.",
         confidence=min(0.99, candidate.confidence + 0.02),
@@ -116,5 +179,19 @@ def _set(
 ) -> Finding:
     finding.status = status
     finding.confidence = confidence
+    if status != FindingStatus.CONFIRMED:
+        finding.severity = None
     finding.verification = Verification(method=method, result=status, evidence=evidence, notes=notes)
     return finding
+
+
+def _candidate_port(candidate: Finding) -> int | None:
+    for evidence in candidate.evidence:
+        if evidence.kind != "firewall_rule" or not isinstance(evidence.observed, dict):
+            continue
+        raw = evidence.observed.get("port", evidence.observed.get("port_from"))
+        if isinstance(raw, int):
+            return raw
+        if isinstance(raw, str) and raw.isdigit():
+            return int(raw)
+    return None

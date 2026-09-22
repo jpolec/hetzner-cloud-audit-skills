@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hetzner-security-skills"
-version = "0.1.0"
+version = "0.1.1"
 description = "Agentic cross-layer security auditing for Hetzner infrastructure"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -53,4 +53,5 @@ packages = ["hetzner_security"]
 
 [tool.pytest.ini_options]
 addopts = "-q"
+pythonpath = ["src"]
 testpaths = ["tests"]

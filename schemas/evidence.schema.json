@@ -1,10 +1,10 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.invalid/hetzner-security/evidence.schema.json",
+  "$id": "urn:hetzner-security-skills:schema:evidence:1.0.0",
   "title": "Evidence",
   "type": "object",
   "additionalProperties": false,
-  "required": ["source", "kind", "asset_id", "observed"],
+  "required": ["source", "kind", "asset_id", "observed", "path", "collected_at"],
   "properties": {
     "source": {"type": "string", "minLength": 1},
     "kind": {"type": "string", "minLength": 1},

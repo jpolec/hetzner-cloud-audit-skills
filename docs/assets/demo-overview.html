@@ -15,21 +15,21 @@
   <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">synthetic v0.1 benchmark · read-only</span></div>
   <div class="term">
     <div><span class="prompt">$</span> <span class="cmd">hetzner-sec audit --input benchmarks/scenarios/v0.1-insecure.json --verify</span></div>
-    <div class="muted">collect → normalize → graph → hunt → independently verify → report</div>
+    <div class="muted">collect → normalize → graph → hunt → evidence-contract verify → report</div>
     <div class="grid">
-      <div class="card"><div class="n ok">26</div><div class="label">confirmed</div></div>
-      <div class="card"><div class="n high">7</div><div class="label">needs validation</div></div>
+      <div class="card"><div class="n ok">23</div><div class="label">confirmed</div></div>
+      <div class="card"><div class="n high">10</div><div class="label">needs validation</div></div>
       <div class="card"><div class="n cyan">33</div><div class="label">planted problems</div></div>
     </div>
     <div class="line"></div>
-    <div><span class="high">HIGH</span> <span class="rule">HETZ-IAC-001</span> Runtime network access diverges from declared infrastructure</div>
+    <div><span class="cyan">MEDIUM</span> <span class="rule">HETZ-IAC-001</span> Runtime network access diverges from declared infrastructure</div>
     <div class="muted">Terraform: SSH from 100.64.0.0/10 · Runtime: 0.0.0.0/0 → tcp/22 → server:admin</div>
     <br>
     <div><span class="high">HIGH</span> <span class="rule">HETZ-XLY-001</span> staging workload can reach prod postgres</div>
     <div class="muted">container:stage-worker → network:shared → tcp/5432 → postgres:prod</div>
     <br>
-    <div><span class="cyan">MEDIUM</span> <span class="rule">HETZ-VULN-001</span> Vulnerable component in non-public workload</div>
-    <div class="muted">Trivy CVE signal retained · no Internet path observed · priority reduced, not discarded</div>
+    <div><span class="muted">UNSCORED</span> <span class="rule">HETZ-VULN-001</span> Vulnerable component signal needs validation</div>
+    <div class="muted">Trivy signal retained · no Internet path · runtime applicability not yet evidenced</div>
     <div class="line"></div>
     <div><span class="ok">✓</span> JSON &nbsp; <span class="ok">✓</span> Markdown &nbsp; <span class="ok">✓</span> SARIF &nbsp; <span class="ok">✓</span> coverage ledger &nbsp; <span class="ok">✓</span> no provider writes</div>
   </div>

@@ -4,5 +4,6 @@ Use for Hetzner servers, types, images, locations, networks/routes, firewalls, I
 
 Required permission: an authorized project token, preferably read-only, supplied only as `HCLOUD_TOKEN`. Allowed provider actions are API `GET` operations. Never log the token. Provider changes, power actions, console access, deletes, or firewall edits are prohibited.
 
-Run `hetzner-sec inventory --format json --read-only --no-ssh`. Record successful and failed endpoints, then normalize IDs, public interfaces, labels, firewall attachments, network membership, protection, DNS, and backup state. Emit facts only. Missing evidence is `unknown`, not `false`. Before using absence as evidence, verify asset identity, pagination completeness, firewall attachment, endpoint coverage, and collection errors.
+If a token is missing, direct the operator to the target project in Hetzner Console: **Security → API tokens → Generate API token → Read**. Do not request the secret in chat or a command argument. The full value is shown only once and is bound to that project. Never test permission level with a write request.
 
+Run `hetzner-sec inventory --format json --read-only --no-ssh`. Record successful and failed endpoints, then normalize IDs, public interfaces, labels, firewall attachments, network membership, protection, DNS, and backup state. Emit facts only. Missing evidence is `unknown`, not `false`. Before using absence as evidence, verify asset identity, pagination completeness, firewall attachment, endpoint coverage, and collection errors.

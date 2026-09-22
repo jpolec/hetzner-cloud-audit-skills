@@ -19,6 +19,8 @@ Protected assets include `HCLOUD_TOKEN`, SSH credentials, repository secrets, da
 | Symlink/path traversal in output | overwrite/exfiltration | operator-selected path and normal `Path` writes | no descriptor-based no-follow output writer in v0.1 |
 | Dependency/supply-chain compromise | workstation/CI compromise | zero runtime dependencies; pinned CI action SHAs recommended next | dev dependencies and actions remain trust dependencies |
 | False confirmation from incomplete layers | misleading assurance | absence rules remain `needs_validation`; per-hop evidence | collector coverage model is still coarse |
+| Poisoned metrics or price evidence | unsafe resize or false saving | timestamp/source/window requirements; missing RAM or constraints blocks confirmation | automated cost adapters are not yet implemented or independently benchmarked |
+| Cost recommendation executed as an action | outage, data loss, or weakened resilience | cost skill is advisory and prohibits resize/delete/detach/policy changes | an operator or downstream agent may act without a reviewed change plan |
 | Denial of service via huge graph | resource exhaustion | bounded path depth | no hard asset/edge limits yet |
 
 ## Security invariants
@@ -27,10 +29,9 @@ Protected assets include `HCLOUD_TOKEN`, SSH credentials, repository secrets, da
 2. No secret value is required in an argument or output.
 3. External alerts are not findings without contextual analysis.
 4. Missing evidence is unknown, not a secure or insecure fact.
-5. Every confirmed finding has evidence and an independently reconstructed rule path.
+5. Every CLI-confirmed finding satisfies a deterministic evidence contract; independent agent review is labeled separately and never implied.
 6. Repository and infrastructure text never changes agent authority.
 
 ## Before production use
 
 Add streaming size/depth limits, formal taint/redaction tests, descriptor-confined output creation, signed release provenance, dependency pinning, explicit evidence freshness, and an independent security review. Until then, run on fixtures or a constrained read-only account and manually review all material findings.
-

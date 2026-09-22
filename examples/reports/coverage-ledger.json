@@ -182,7 +182,6 @@
     "status": "candidate",
     "evidence_sources": [
       "fixture",
-      "hcloud_api",
       "repository"
     ],
     "result_fingerprints": [
@@ -382,7 +381,6 @@
     "status": "candidate",
     "evidence_sources": [
       "fixture",
-      "hcloud_api",
       "repository"
     ],
     "result_fingerprints": [
@@ -441,7 +439,6 @@
     "status": "candidate",
     "evidence_sources": [
       "fixture",
-      "hcloud_api",
       "repository"
     ],
     "result_fingerprints": [
@@ -491,7 +488,6 @@
     "status": "candidate",
     "evidence_sources": [
       "fixture",
-      "hcloud_api",
       "repository"
     ],
     "result_fingerprints": [

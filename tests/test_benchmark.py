@@ -26,6 +26,26 @@ class BenchmarkTest(unittest.TestCase):
             {name: verdicts[name] for name in expected["expected_verifier"]},
             expected["expected_verifier"],
         )
+        evidence = [item for finding in findings for item in finding.evidence]
+        self.assertTrue(evidence)
+        self.assertTrue(all(item.collected_at == "2026-09-22T00:00:00+00:00" for item in evidence))
+
+        drift = next(
+            finding
+            for finding in findings
+            if finding.rule_id == "HETZ-IAC-001" and finding.assets == ["server:admin"]
+        )
+        self.assertEqual(drift.severity.value, "medium")
+        self.assertEqual(drift.evidence[1].source, "fixture")
+
+        contextual = next(
+            finding
+            for finding in findings
+            if finding.rule_id == "HETZ-VULN-001"
+            and finding.assets == ["container:internal-api"]
+        )
+        self.assertEqual(contextual.status.value, "needs_validation")
+        self.assertIsNone(contextual.severity)
 
     def test_no_real_infrastructure_names(self) -> None:
         raw = (ROOT / "benchmarks/scenarios/v0.1-insecure.json").read_text()

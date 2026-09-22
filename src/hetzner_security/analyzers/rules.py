@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Callable
+from dataclasses import replace
 
 from ..graph import AttackGraph
 from ..models import (
@@ -100,6 +101,12 @@ def _string_set(value: object) -> set[str]:
     return {item for item in value if isinstance(item, str)}
 
 
+def _int_set(value: object) -> set[int]:
+    if not isinstance(value, list):
+        return set()
+    return {_as_int(item) for item in value if _as_int(item) >= 0}
+
+
 def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     output: list[Finding] = []
     services = {
@@ -120,6 +127,25 @@ def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Find
             for port, (rule_id, title, severity) in services.items():
                 if not start <= port <= end:
                     continue
+                evidence = [_evidence(asset, "firewall_rule", rule, "properties.inbound")]
+                if port in _int_set(asset.properties.get("listening_ports")):
+                    evidence.append(
+                        _evidence(
+                            asset,
+                            "listening_socket",
+                            {"protocol": "tcp", "port": port},
+                            "properties.listening_ports",
+                        )
+                    )
+                if port in _int_set(asset.properties.get("host_firewall_allow_ports")):
+                    evidence.append(
+                        _evidence(
+                            asset,
+                            "host_firewall_allow",
+                            {"protocol": "tcp", "port": port},
+                            "properties.host_firewall_allow_ports",
+                        )
+                    )
                 output.append(
                     _candidate(
                         rule_id,
@@ -130,7 +156,7 @@ def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Find
                         f"An inbound rule admits a public source to TCP/{port}.",
                         "Management and data services are reachable only from declared trusted sources.",
                         f"TCP/{port} admits {sorted(_string_set(rule.get('sources')) & PUBLIC_SOURCES)}.",
-                        [_evidence(asset, "firewall_rule", rule, "properties.inbound")],
+                        evidence,
                         ["internet", f"tcp/{port}", asset.id],
                         ["The rule is attached to the target and no downstream firewall blocks it."],
                         "An unauthenticated network peer can reach a sensitive authentication boundary.",
@@ -187,24 +213,26 @@ def expectation_drift(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
         unexpected = observed - allowed
         if not unexpected:
             continue
+        target_asset = snapshot.asset_map().get(target)
+        observed_source = target_asset.source if target_asset is not None else "observed_state"
         evidence = [
             Evidence("repository", "declared_expectation", target, expectation.get("declared"), expectation.get("path")),
-            Evidence("hcloud_api", "observed_access", target, sorted(observed)),
+            Evidence(observed_source, "observed_access", target, sorted(observed)),
         ]
         output.append(
             _candidate(
                 "HETZ-IAC-001",
                 "Runtime network access diverges from declared infrastructure",
-                Severity.HIGH,
+                Severity.MEDIUM,
                 0.96,
                 [target],
                 "Declared and observed source ranges differ for a security-sensitive port.",
                 f"TCP/{port} sources equal the declared set {sorted(allowed)}.",
                 f"Unexpected observed sources: {sorted(unexpected)}.",
                 evidence,
-                [*sorted(unexpected), f"tcp/{port}", target],
+                [*sorted(unexpected), f"tcp/{port}", f"provider-policy:{target}"],
                 ["Repository declaration is current and refers to the observed asset."],
-                "A change outside the reviewed IaC path bypasses the intended access boundary.",
+                "The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.",
                 "Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.",
                 ["https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"],
                 f"{port}:{','.join(sorted(unexpected))}",
@@ -461,5 +489,11 @@ def hunt(snapshot: Snapshot) -> list[Finding]:
     if isinstance(collected_at, str):
         for candidate in candidates:
             candidate.discovered_at = collected_at
+            candidate.evidence = [
+                evidence
+                if evidence.collected_at is not None
+                else replace(evidence, collected_at=collected_at)
+                for evidence in candidate.evidence
+            ]
     deduplicated = {finding.id: finding for finding in candidates}
     return sorted(deduplicated.values(), key=lambda finding: finding.id)

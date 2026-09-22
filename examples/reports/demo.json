@@ -5,7 +5,7 @@
       "id": "HETZ-BCP-001-3a3e079847492065",
       "rule_id": "HETZ-BCP-001",
       "title": "Production stateful asset lacks observed backup coverage",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -21,7 +21,7 @@
           "asset_id": "postgres:prod",
           "observed": false,
           "path": "properties.backup_enabled",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -43,7 +43,7 @@
             "asset_id": "postgres:prod",
             "observed": false,
             "path": "properties.backup_enabled",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -59,7 +59,7 @@
       "id": "HETZ-BCP-001-63ce14eb9252c10a",
       "rule_id": "HETZ-BCP-001",
       "title": "Production stateful asset lacks observed backup coverage",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -75,7 +75,7 @@
           "asset_id": "postgres:analytics",
           "observed": false,
           "path": "properties.backup_enabled",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -97,7 +97,7 @@
             "asset_id": "postgres:analytics",
             "observed": false,
             "path": "properties.backup_enabled",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -113,7 +113,7 @@
       "id": "HETZ-BCP-001-657df523d6f5020b",
       "rule_id": "HETZ-BCP-001",
       "title": "Production stateful asset lacks observed backup coverage",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -129,7 +129,7 @@
           "asset_id": "redis:prod",
           "observed": false,
           "path": "properties.backup_enabled",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -151,7 +151,7 @@
             "asset_id": "redis:prod",
             "observed": false,
             "path": "properties.backup_enabled",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -167,7 +167,7 @@
       "id": "HETZ-BCP-001-6deecb58d09f333d",
       "rule_id": "HETZ-BCP-001",
       "title": "Production stateful asset lacks observed backup coverage",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -183,7 +183,7 @@
           "asset_id": "server:public-pg",
           "observed": false,
           "path": "properties.backup_enabled",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -205,7 +205,7 @@
             "asset_id": "server:public-pg",
             "observed": false,
             "path": "properties.backup_enabled",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -221,7 +221,7 @@
       "id": "HETZ-BCP-001-da23afb6e191edab",
       "rule_id": "HETZ-BCP-001",
       "title": "Production stateful asset lacks observed backup coverage",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -237,7 +237,7 @@
           "asset_id": "server:public-redis",
           "observed": false,
           "path": "properties.backup_enabled",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -259,7 +259,7 @@
             "asset_id": "server:public-redis",
             "observed": false,
             "path": "properties.backup_enabled",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -293,7 +293,7 @@
             "privileged": true
           },
           "path": "properties.privileged",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -306,7 +306,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -317,7 +317,7 @@
               "privileged": true
             },
             "path": "properties.privileged",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -351,7 +351,7 @@
             "privileged": true
           },
           "path": "properties.privileged",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -364,7 +364,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -375,7 +375,7 @@
               "privileged": true
             },
             "path": "properties.privileged",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -409,7 +409,7 @@
             "docker_socket": true
           },
           "path": "properties.docker_socket",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -422,7 +422,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -433,7 +433,7 @@
               "docker_socket": true
             },
             "path": "properties.docker_socket",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -467,7 +467,7 @@
             "docker_socket": true
           },
           "path": "properties.docker_socket",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -480,7 +480,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -491,7 +491,7 @@
               "docker_socket": true
             },
             "path": "properties.docker_socket",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -525,7 +525,7 @@
             "host_pid": true
           },
           "path": "properties.host_pid",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -538,7 +538,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -549,7 +549,7 @@
               "host_pid": true
             },
             "path": "properties.host_pid",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -583,7 +583,7 @@
             "host_pid": true
           },
           "path": "properties.host_pid",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -596,7 +596,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -607,7 +607,7 @@
               "host_pid": true
             },
             "path": "properties.host_pid",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -641,7 +641,7 @@
             "host_network": true
           },
           "path": "properties.host_network",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -654,7 +654,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -665,7 +665,7 @@
               "host_network": true
             },
             "path": "properties.host_network",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -699,7 +699,7 @@
             "host_network": true
           },
           "path": "properties.host_network",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -712,7 +712,7 @@
       ],
       "impact": "Container compromise can expand to host or sibling-workload control.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -723,7 +723,7 @@
               "host_network": true
             },
             "path": "properties.host_network",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -739,7 +739,7 @@
       "id": "HETZ-IAC-001-9c3eddeb6c5c135a",
       "rule_id": "HETZ-IAC-001",
       "title": "Runtime network access diverges from declared infrastructure",
-      "severity": "high",
+      "severity": "medium",
       "confidence": 0.98,
       "status": "confirmed",
       "assets": [
@@ -755,30 +755,30 @@
           "asset_id": "server:admin",
           "observed": "SSH only from Tailscale",
           "path": "examples/intentionally-insecure/main.tf:12",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
-          "source": "hcloud_api",
+          "source": "fixture",
           "kind": "observed_access",
           "asset_id": "server:admin",
           "observed": [
             "0.0.0.0/0"
           ],
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
         "0.0.0.0/0",
         "tcp/22",
-        "server:admin"
+        "provider-policy:server:admin"
       ],
       "prerequisites": [
         "Repository declaration is current and refers to the observed asset."
       ],
-      "impact": "A change outside the reviewed IaC path bypasses the intended access boundary.",
+      "impact": "The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -787,17 +787,17 @@
             "asset_id": "server:admin",
             "observed": "SSH only from Tailscale",
             "path": "examples/intentionally-insecure/main.tf:12",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
-            "source": "hcloud_api",
+            "source": "fixture",
             "kind": "observed_access",
             "asset_id": "server:admin",
             "observed": [
               "0.0.0.0/0"
             ],
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -813,7 +813,7 @@
       "id": "HETZ-IAC-001-a5aff608f1082162",
       "rule_id": "HETZ-IAC-001",
       "title": "Runtime network access diverges from declared infrastructure",
-      "severity": "high",
+      "severity": "medium",
       "confidence": 0.98,
       "status": "confirmed",
       "assets": [
@@ -829,30 +829,30 @@
           "asset_id": "server:public-pg",
           "observed": "PostgreSQL only on private network",
           "path": "examples/intentionally-insecure/main.tf:30",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
-          "source": "hcloud_api",
+          "source": "fixture",
           "kind": "observed_access",
           "asset_id": "server:public-pg",
           "observed": [
             "0.0.0.0/0"
           ],
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
         "0.0.0.0/0",
         "tcp/5432",
-        "server:public-pg"
+        "provider-policy:server:public-pg"
       ],
       "prerequisites": [
         "Repository declaration is current and refers to the observed asset."
       ],
-      "impact": "A change outside the reviewed IaC path bypasses the intended access boundary.",
+      "impact": "The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -861,17 +861,17 @@
             "asset_id": "server:public-pg",
             "observed": "PostgreSQL only on private network",
             "path": "examples/intentionally-insecure/main.tf:30",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
-            "source": "hcloud_api",
+            "source": "fixture",
             "kind": "observed_access",
             "asset_id": "server:public-pg",
             "observed": [
               "0.0.0.0/0"
             ],
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -887,9 +887,9 @@
       "id": "HETZ-NET-001-537a129e75138d63",
       "rule_id": "HETZ-NET-001",
       "title": "SSH reachable from the public internet",
-      "severity": "high",
-      "confidence": 0.88,
-      "status": "confirmed",
+      "severity": null,
+      "confidence": 0.69,
+      "status": "needs_validation",
       "assets": [
         "server:admin"
       ],
@@ -909,7 +909,7 @@
             ]
           },
           "path": "properties.inbound",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -922,8 +922,8 @@
       ],
       "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
-        "result": "confirmed",
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
         "evidence": [
           {
             "source": "fixture",
@@ -937,10 +937,10 @@
               ]
             },
             "path": "properties.inbound",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
-        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+        "notes": "The provider rule is attached, but listener and host-firewall evidence are incomplete; validate end-to-end reachability safely."
       },
       "remediation": "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
       "references": [
@@ -975,7 +975,29 @@
             ]
           },
           "path": "properties.inbound",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "listening_socket",
+          "asset_id": "server:docker-api",
+          "observed": {
+            "protocol": "tcp",
+            "port": 2375
+          },
+          "path": "properties.listening_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "host_firewall_allow",
+          "asset_id": "server:docker-api",
+          "observed": {
+            "protocol": "tcp",
+            "port": 2375
+          },
+          "path": "properties.host_firewall_allow_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -988,7 +1010,7 @@
       ],
       "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1003,7 +1025,29 @@
               ]
             },
             "path": "properties.inbound",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "listening_socket",
+            "asset_id": "server:docker-api",
+            "observed": {
+              "protocol": "tcp",
+              "port": 2375
+            },
+            "path": "properties.listening_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "host_firewall_allow",
+            "asset_id": "server:docker-api",
+            "observed": {
+              "protocol": "tcp",
+              "port": 2375
+            },
+            "path": "properties.host_firewall_allow_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1041,7 +1085,29 @@
             ]
           },
           "path": "properties.inbound",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "listening_socket",
+          "asset_id": "server:kube-api",
+          "observed": {
+            "protocol": "tcp",
+            "port": 6443
+          },
+          "path": "properties.listening_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "host_firewall_allow",
+          "asset_id": "server:kube-api",
+          "observed": {
+            "protocol": "tcp",
+            "port": 6443
+          },
+          "path": "properties.host_firewall_allow_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1054,7 +1120,7 @@
       ],
       "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1069,7 +1135,29 @@
               ]
             },
             "path": "properties.inbound",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "listening_socket",
+            "asset_id": "server:kube-api",
+            "observed": {
+              "protocol": "tcp",
+              "port": 6443
+            },
+            "path": "properties.listening_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "host_firewall_allow",
+            "asset_id": "server:kube-api",
+            "observed": {
+              "protocol": "tcp",
+              "port": 6443
+            },
+            "path": "properties.host_firewall_allow_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1107,7 +1195,29 @@
             ]
           },
           "path": "properties.inbound",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "listening_socket",
+          "asset_id": "server:public-pg",
+          "observed": {
+            "protocol": "tcp",
+            "port": 5432
+          },
+          "path": "properties.listening_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "host_firewall_allow",
+          "asset_id": "server:public-pg",
+          "observed": {
+            "protocol": "tcp",
+            "port": 5432
+          },
+          "path": "properties.host_firewall_allow_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1120,7 +1230,7 @@
       ],
       "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1135,7 +1245,29 @@
               ]
             },
             "path": "properties.inbound",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "listening_socket",
+            "asset_id": "server:public-pg",
+            "observed": {
+              "protocol": "tcp",
+              "port": 5432
+            },
+            "path": "properties.listening_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "host_firewall_allow",
+            "asset_id": "server:public-pg",
+            "observed": {
+              "protocol": "tcp",
+              "port": 5432
+            },
+            "path": "properties.host_firewall_allow_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1173,7 +1305,29 @@
             ]
           },
           "path": "properties.inbound",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "listening_socket",
+          "asset_id": "server:public-redis",
+          "observed": {
+            "protocol": "tcp",
+            "port": 6379
+          },
+          "path": "properties.listening_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "host_firewall_allow",
+          "asset_id": "server:public-redis",
+          "observed": {
+            "protocol": "tcp",
+            "port": 6379
+          },
+          "path": "properties.host_firewall_allow_ports",
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1186,7 +1340,7 @@
       ],
       "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1201,7 +1355,29 @@
               ]
             },
             "path": "properties.inbound",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "listening_socket",
+            "asset_id": "server:public-redis",
+            "observed": {
+              "protocol": "tcp",
+              "port": 6379
+            },
+            "path": "properties.listening_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "host_firewall_allow",
+            "asset_id": "server:public-redis",
+            "observed": {
+              "protocol": "tcp",
+              "port": 6379
+            },
+            "path": "properties.host_firewall_allow_ports",
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1217,7 +1393,7 @@
       "id": "HETZ-NET-005-22bff27b5830122b",
       "rule_id": "HETZ-NET-005",
       "title": "Internet-facing server has no observed firewall control",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -1233,7 +1409,7 @@
           "asset_id": "server:no-firewall-a",
           "observed": "192.0.2.20",
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1254,7 +1430,7 @@
             "asset_id": "server:no-firewall-a",
             "observed": "192.0.2.20",
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -1270,7 +1446,7 @@
       "id": "HETZ-NET-005-53061fc23c60befd",
       "rule_id": "HETZ-NET-005",
       "title": "Internet-facing server has no observed firewall control",
-      "severity": "medium",
+      "severity": null,
       "confidence": 0.69,
       "status": "needs_validation",
       "assets": [
@@ -1286,7 +1462,7 @@
           "asset_id": "server:no-firewall-b",
           "observed": "2001:db8::20",
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1307,7 +1483,7 @@
             "asset_id": "server:no-firewall-b",
             "observed": "2001:db8::20",
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Absence evidence depends on complete collector coverage; validate the missing control with the owner."
@@ -1345,7 +1521,7 @@
             "method": "trust"
           },
           "path": "properties.pg_hba[0]",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1358,7 +1534,7 @@
       ],
       "impact": "A reachable client can select an allowed database role without presenting a password.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1373,7 +1549,7 @@
               "method": "trust"
             },
             "path": "properties.pg_hba[0]",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1389,9 +1565,9 @@
       "id": "HETZ-PG-001-8c5c845e7a65d727",
       "rule_id": "HETZ-PG-001",
       "title": "Broad PostgreSQL trust authentication bypasses credentials",
-      "severity": "critical",
-      "confidence": 0.99,
-      "status": "confirmed",
+      "severity": null,
+      "confidence": 0.69,
+      "status": "needs_validation",
       "assets": [
         "postgres:analytics"
       ],
@@ -1411,7 +1587,7 @@
             "method": "trust"
           },
           "path": "properties.pg_hba[0]",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1424,8 +1600,8 @@
       ],
       "impact": "A reachable client can select an allowed database role without presenting a password.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
-        "result": "confirmed",
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
         "evidence": [
           {
             "source": "postgres_fixture",
@@ -1439,10 +1615,10 @@
               "method": "trust"
             },
             "path": "properties.pg_hba[0]",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
-        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+        "notes": "The HBA rule is unsafe if selected, but no source-to-PostgreSQL network path is evidenced."
       },
       "remediation": "Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.",
       "references": [
@@ -1474,7 +1650,7 @@
             "migration"
           ],
           "path": "properties.roles",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1488,7 +1664,7 @@
       ],
       "impact": "The roles can bypass database authorization and alter security-sensitive configuration.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1500,7 +1676,7 @@
               "migration"
             ],
             "path": "properties.roles",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1538,7 +1714,7 @@
             "acl_enabled": false
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1551,7 +1727,7 @@
       ],
       "impact": "A client can read, alter, or destroy cached or persistent data.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1566,7 +1742,7 @@
               "acl_enabled": false
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1605,10 +1781,12 @@
             "installed_version": "2.0",
             "fixed_version": "2.1",
             "severity": "HIGH",
+            "runtime_present": true,
+            "affected_code_path": true,
             "primary_url": "https://example.invalid/CVE-DEMO-0002"
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1620,7 +1798,7 @@
       ],
       "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1636,10 +1814,12 @@
               "installed_version": "2.0",
               "fixed_version": "2.1",
               "severity": "HIGH",
+              "runtime_present": true,
+              "affected_code_path": true,
               "primary_url": "https://example.invalid/CVE-DEMO-0002"
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1655,9 +1835,9 @@
       "id": "HETZ-VULN-001-71bfcf71ae61e50c",
       "rule_id": "HETZ-VULN-001",
       "title": "Vulnerable component in non-public workload",
-      "severity": "medium",
-      "confidence": 0.84,
-      "status": "confirmed",
+      "severity": null,
+      "confidence": 0.69,
+      "status": "needs_validation",
       "assets": [
         "container:internal-api"
       ],
@@ -1681,7 +1861,7 @@
             "primary_url": "https://example.invalid/CVE-DEMO-0001"
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1693,8 +1873,8 @@
       ],
       "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
-        "result": "confirmed",
+        "method": "independent completeness challenge",
+        "result": "needs_validation",
         "evidence": [
           {
             "source": "trivy",
@@ -1712,10 +1892,10 @@
               "primary_url": "https://example.invalid/CVE-DEMO-0001"
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
-        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+        "notes": "Scanner signal is not enough to confirm runtime applicability; safely verify: runtime_present, affected_code_path."
       },
       "remediation": "Upgrade to the fixed version and verify whether the affected component is loaded or reachable.",
       "references": [
@@ -1751,10 +1931,12 @@
             "installed_version": "3.0",
             "fixed_version": "3.1",
             "severity": "HIGH",
+            "runtime_present": true,
+            "affected_code_path": true,
             "primary_url": "https://example.invalid/CVE-DEMO-0003"
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1766,7 +1948,7 @@
       ],
       "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1782,10 +1964,12 @@
               "installed_version": "3.0",
               "fixed_version": "3.1",
               "severity": "HIGH",
+              "runtime_present": true,
+              "affected_code_path": true,
               "primary_url": "https://example.invalid/CVE-DEMO-0003"
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1818,7 +2002,7 @@
           "asset_id": "container:stage-worker",
           "observed": "network:shared",
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "hcloud_fixture",
@@ -1829,7 +2013,7 @@
             "port": 5432
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "docker_fixture",
@@ -1837,7 +2021,7 @@
           "asset_id": "container:stage-worker",
           "observed": "staging",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "postgres_fixture",
@@ -1845,7 +2029,7 @@
           "asset_id": "postgres:prod",
           "observed": "prod",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1859,7 +2043,7 @@
       ],
       "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1868,7 +2052,7 @@
             "asset_id": "container:stage-worker",
             "observed": "network:shared",
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "hcloud_fixture",
@@ -1879,7 +2063,7 @@
               "port": 5432
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "docker_fixture",
@@ -1887,7 +2071,7 @@
             "asset_id": "container:stage-worker",
             "observed": "staging",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "postgres_fixture",
@@ -1895,7 +2079,7 @@
             "asset_id": "postgres:prod",
             "observed": "prod",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -1928,7 +2112,7 @@
           "asset_id": "container:ops-agent",
           "observed": "network:shared",
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "hcloud_fixture",
@@ -1939,7 +2123,7 @@
             "port": 6379
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "docker_fixture",
@@ -1947,7 +2131,7 @@
           "asset_id": "container:ops-agent",
           "observed": "dev",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "redis_fixture",
@@ -1955,7 +2139,7 @@
           "asset_id": "redis:prod",
           "observed": "prod",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -1969,7 +2153,7 @@
       ],
       "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -1978,7 +2162,7 @@
             "asset_id": "container:ops-agent",
             "observed": "network:shared",
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "hcloud_fixture",
@@ -1989,7 +2173,7 @@
               "port": 6379
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "docker_fixture",
@@ -1997,7 +2181,7 @@
             "asset_id": "container:ops-agent",
             "observed": "dev",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "redis_fixture",
@@ -2005,7 +2189,7 @@
             "asset_id": "redis:prod",
             "observed": "prod",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -2038,7 +2222,7 @@
           "asset_id": "container:stage-worker",
           "observed": "network:shared",
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "hcloud_fixture",
@@ -2049,7 +2233,7 @@
             "port": 6379
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "docker_fixture",
@@ -2057,7 +2241,7 @@
           "asset_id": "container:stage-worker",
           "observed": "staging",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "redis_fixture",
@@ -2065,7 +2249,7 @@
           "asset_id": "redis:prod",
           "observed": "prod",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -2079,7 +2263,7 @@
       ],
       "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -2088,7 +2272,7 @@
             "asset_id": "container:stage-worker",
             "observed": "network:shared",
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "hcloud_fixture",
@@ -2099,7 +2283,7 @@
               "port": 6379
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "docker_fixture",
@@ -2107,7 +2291,7 @@
             "asset_id": "container:stage-worker",
             "observed": "staging",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "redis_fixture",
@@ -2115,7 +2299,7 @@
             "asset_id": "redis:prod",
             "observed": "prod",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
@@ -2148,7 +2332,7 @@
           "asset_id": "container:ops-agent",
           "observed": "network:shared",
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "hcloud_fixture",
@@ -2159,7 +2343,7 @@
             "port": 5432
           },
           "path": null,
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "docker_fixture",
@@ -2167,7 +2351,7 @@
           "asset_id": "container:ops-agent",
           "observed": "dev",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         },
         {
           "source": "postgres_fixture",
@@ -2175,7 +2359,7 @@
           "asset_id": "postgres:prod",
           "observed": "prod",
           "path": "labels.environment",
-          "collected_at": null
+          "collected_at": "2026-09-22T00:00:00+00:00"
         }
       ],
       "attack_path": [
@@ -2189,7 +2373,7 @@
       ],
       "impact": "Compromise of a lower-trust environment can become unauthorized database or cache access.",
       "verification": {
-        "method": "independent deterministic evidence and prerequisite review",
+        "method": "deterministic evidence-contract verification",
         "result": "confirmed",
         "evidence": [
           {
@@ -2198,7 +2382,7 @@
             "asset_id": "container:ops-agent",
             "observed": "network:shared",
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "hcloud_fixture",
@@ -2209,7 +2393,7 @@
               "port": 5432
             },
             "path": null,
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "docker_fixture",
@@ -2217,7 +2401,7 @@
             "asset_id": "container:ops-agent",
             "observed": "dev",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           },
           {
             "source": "postgres_fixture",
@@ -2225,7 +2409,7 @@
             "asset_id": "postgres:prod",
             "observed": "prod",
             "path": "labels.environment",
-            "collected_at": null
+            "collected_at": "2026-09-22T00:00:00+00:00"
           }
         ],
         "notes": "Evidence is internally consistent and no observed compensating control refutes the path."

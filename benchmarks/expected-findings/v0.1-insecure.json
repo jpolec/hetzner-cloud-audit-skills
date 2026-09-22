@@ -19,6 +19,6 @@
     "HETZ-BCP-001": 5,
     "HETZ-VULN-001": 3
   },
-  "expected_verifier": {"confirmed": 26, "needs_validation": 7, "rejected": 0},
+  "expected_verifier": {"confirmed": 23, "needs_validation": 10, "rejected": 0},
   "notes": "All names, addresses, and CVE identifiers are synthetic documentation ranges or placeholders."
 }

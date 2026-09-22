@@ -10,7 +10,7 @@ from pathlib import Path
 from ..analyzers import hunt
 from ..collectors.fixture import load_snapshot
 from ..collectors.hcloud import HCloudCollectionError, ReadOnlyHCloudCollector
-from ..coverage import plan_coverage, save_coverage, update_coverage
+from ..coverage import plan_coverage, render_coverage, save_coverage, update_coverage
 from ..findings import render_json, render_markdown, render_sarif
 from ..models import Severity, Snapshot
 from ..verification import verify_all
@@ -21,7 +21,7 @@ SEVERITY_ORDER = {severity.value: index for index, severity in enumerate(Severit
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="hetzner-sec", description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
-    for name in ("audit", "inventory", "network", "postgres", "docker"):
+    for name in ("audit", "inventory", "network", "postgres", "docker", "coverage"):
         cmd = subparsers.add_parser(name)
         cmd.add_argument("--input", type=Path, help="Normalized JSON snapshot; avoids live API access")
         cmd.add_argument("--format", choices=("json", "markdown", "sarif"), default="markdown")
@@ -47,7 +47,7 @@ def _snapshot(args: argparse.Namespace) -> Snapshot:
 
 
 def _filter_command(snapshot: Snapshot, command: str) -> Snapshot:
-    if command in {"audit", "inventory"}:
+    if command in {"audit", "inventory", "coverage"}:
         return snapshot
     wanted = {
         "network": {"server", "network", "firewall", "service", "postgres", "redis"},
@@ -68,11 +68,21 @@ def run(args: argparse.Namespace) -> int:
     snapshot = _filter_command(_snapshot(args), args.command)
     if args.command == "inventory":
         output = json.dumps({"metadata": snapshot.metadata, "assets": [a.to_dict() for a in snapshot.assets]}, indent=2)
+    elif args.command == "coverage":
+        candidates = hunt(snapshot)
+        findings = verify_all(candidates, snapshot) if args.verify else candidates
+        units = plan_coverage(snapshot)
+        update_coverage(units, findings)
+        output = render_coverage(units)
     else:
         candidates = hunt(snapshot)
         findings = verify_all(candidates, snapshot) if args.verify else candidates
         minimum = SEVERITY_ORDER[args.severity]
-        findings = [f for f in findings if SEVERITY_ORDER[f.severity.value] <= minimum]
+        findings = [
+            finding
+            for finding in findings
+            if finding.severity is None or SEVERITY_ORDER[finding.severity.value] <= minimum
+        ]
         if args.coverage_ledger:
             units = plan_coverage(snapshot)
             update_coverage(units, findings)

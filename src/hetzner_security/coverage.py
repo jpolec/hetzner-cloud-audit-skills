@@ -66,3 +66,7 @@ def save_coverage(path: Path, units: list[CoverageUnit], *, prior_path: Path | N
         payload.append(item)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
 
+
+def render_coverage(units: list[CoverageUnit]) -> str:
+    """Render a report-only ledger without requiring a filesystem write."""
+    return json.dumps([{**asdict(unit), "prior_status": None} for unit in units], indent=2)

@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "hetzner-security-skills",
-          "version": "0.1.0",
+          "version": "0.1.1",
           "rules": [
             {
               "id": "HETZ-BCP-001",
@@ -126,7 +126,7 @@
       "results": [
         {
           "ruleId": "HETZ-BCP-001",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
           },
@@ -140,7 +140,7 @@
         },
         {
           "ruleId": "HETZ-BCP-001",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
           },
@@ -154,7 +154,7 @@
         },
         {
           "ruleId": "HETZ-BCP-001",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
           },
@@ -168,7 +168,7 @@
         },
         {
           "ruleId": "HETZ-BCP-001",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
           },
@@ -182,7 +182,7 @@
         },
         {
           "ruleId": "HETZ-BCP-001",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: The asset is declared production and stateful, but no backup configuration is observed."
           },
@@ -308,7 +308,7 @@
         },
         {
           "ruleId": "HETZ-IAC-001",
-          "level": "error",
+          "level": "warning",
           "message": {
             "text": "confirmed: Declared and observed source ranges differ for a security-sensitive port."
           },
@@ -322,7 +322,7 @@
         },
         {
           "ruleId": "HETZ-IAC-001",
-          "level": "error",
+          "level": "warning",
           "message": {
             "text": "confirmed: Declared and observed source ranges differ for a security-sensitive port."
           },
@@ -336,13 +336,13 @@
         },
         {
           "ruleId": "HETZ-NET-001",
-          "level": "error",
+          "level": "none",
           "message": {
-            "text": "confirmed: An inbound rule admits a public source to TCP/22."
+            "text": "needs_validation: An inbound rule admits a public source to TCP/22."
           },
           "properties": {
-            "confidence": 0.88,
-            "status": "confirmed",
+            "confidence": 0.69,
+            "status": "needs_validation",
             "assets": [
               "server:admin"
             ]
@@ -406,7 +406,7 @@
         },
         {
           "ruleId": "HETZ-NET-005",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present."
           },
@@ -420,7 +420,7 @@
         },
         {
           "ruleId": "HETZ-NET-005",
-          "level": "warning",
+          "level": "none",
           "message": {
             "text": "needs_validation: A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present."
           },
@@ -448,13 +448,13 @@
         },
         {
           "ruleId": "HETZ-PG-001",
-          "level": "error",
+          "level": "none",
           "message": {
-            "text": "confirmed: pg_hba.conf trusts a broad network range."
+            "text": "needs_validation: pg_hba.conf trusts a broad network range."
           },
           "properties": {
-            "confidence": 0.99,
-            "status": "confirmed",
+            "confidence": 0.69,
+            "status": "needs_validation",
             "assets": [
               "postgres:analytics"
             ]
@@ -504,13 +504,13 @@
         },
         {
           "ruleId": "HETZ-VULN-001",
-          "level": "warning",
+          "level": "none",
           "message": {
-            "text": "confirmed: trivy reports CVE-DEMO-0001 in libdemo."
+            "text": "needs_validation: trivy reports CVE-DEMO-0001 in libdemo."
           },
           "properties": {
-            "confidence": 0.84,
-            "status": "confirmed",
+            "confidence": 0.69,
+            "status": "needs_validation",
             "assets": [
               "container:internal-api"
             ]
