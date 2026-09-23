@@ -378,7 +378,8 @@ More detail: [architecture](https://github.com/jpolec/hetzner-cloud-audit-skills
 | Private-network blast radius | Beta (host/runtime stays `needs_validation`) |
 | Storage Box exposure and snapshot plan; label governance | Beta, tested on a live project |
 | Load balancers (incl. attack-graph edges and bypass), certificates, DNS, OS lifecycle, placement | Beta, **fixture-tested only** (positive case and clean twin) |
-| SSH key strength and age; traffic quota and overage | Beta, tested on a live project |
+| SSH key strength and age | Beta: fields verified on a live project (no weak key there, so the positive case is fixture- and benchmark-tested) |
+| Traffic quota and overage | Beta, tested on a live project |
 | Semantic exposure diff (flow sets, not edge IDs) | Beta, property-tested against brute force |
 | Recommended actions with evidence levels; three diagrams | Beta |
 | Snapshots and diff; GitHub Action with `fail-on`; SARIF | Beta |

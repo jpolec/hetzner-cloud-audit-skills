@@ -57,7 +57,9 @@ def _grouped(findings: list[Finding]) -> list[dict[str, Any]]:
     return sorted(groups.values(), key=lambda item: (order.get(item["severity"], 5), item["rule_id"]))
 
 
-def build_summary(snapshot: Snapshot, findings: list[Finding]) -> dict[str, Any]:
+def build_summary(
+    snapshot: Snapshot, findings: list[Finding], suppressed: list[dict[str, Any]] | None = None
+) -> dict[str, Any]:
     counts = {kind: sum(1 for asset in snapshot.assets if asset.type == kind) for kind, _one, _many in SCOPE_TYPES}
     locations = {
         str(asset.properties.get("location", {}).get("name"))
@@ -95,7 +97,7 @@ def build_summary(snapshot: Snapshot, findings: list[Finding]) -> dict[str, Any]
         "needs_validation": _grouped([item for item in findings if item.status == FindingStatus.NEEDS_VALIDATION]),
         "rejected": sum(1 for item in findings if item.status == FindingStatus.REJECTED),
         "failed_endpoints": failed_endpoints,
-        "suppressed": snapshot.metadata.get("suppressed_findings", []),
+        "suppressed": suppressed or [],
         "missing_layers": missing_layers,
         "cost": cost,
     }

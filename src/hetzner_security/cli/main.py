@@ -159,12 +159,14 @@ def _render_map_svg(snapshot: Snapshot, topology: dict[str, Any], args: argparse
     return render_svg(topology, title, args.theme, actions)
 
 
-def _findings(snapshot: Snapshot, *, verify: bool = True) -> list[Finding]:
+def _findings_and_suppressed(snapshot: Snapshot, *, verify: bool = True) -> tuple[list[Finding], list[dict[str, Any]]]:
     candidates = hunt(snapshot)
     findings = verify_all(candidates, snapshot) if verify else candidates
-    kept, suppressed = apply_suppressions(findings, snapshot)
-    snapshot.metadata["suppressed_findings"] = suppressed  # surfaced in the report, never silent
-    return kept
+    return apply_suppressions(findings, snapshot)
+
+
+def _findings(snapshot: Snapshot, *, verify: bool = True) -> list[Finding]:
+    return _findings_and_suppressed(snapshot, verify=verify)[0]
 
 
 def run(args: argparse.Namespace) -> int:
@@ -213,7 +215,7 @@ def run(args: argparse.Namespace) -> int:
         answer = _answer(snapshot, args.question)
         output = json.dumps(answer, indent=2) if args.format == "json" else _answer_markdown(answer)
     else:
-        findings = _findings(snapshot, verify=args.verify)
+        findings, suppressed = _findings_and_suppressed(snapshot, verify=args.verify)
         minimum = SEVERITY_ORDER[args.severity]
         findings = [finding for finding in findings if finding.severity is None or SEVERITY_ORDER[finding.severity.value] <= minimum]
         if args.coverage_ledger:
@@ -225,7 +227,7 @@ def run(args: argparse.Namespace) -> int:
                 findings,
                 snapshot.metadata,
                 {asset.id: asset.name for asset in snapshot.assets if asset.name},
-                build_summary(snapshot, findings) if args.command == "audit" else None,
+                build_summary(snapshot, findings, suppressed) if args.command == "audit" else None,
             )
         else:
             renderer = {"json": render_json, "sarif": render_sarif}[args.format]

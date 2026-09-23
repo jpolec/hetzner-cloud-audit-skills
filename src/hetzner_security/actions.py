@@ -359,7 +359,15 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
                 sources = " ".join(f"--source-ips {_shell_name(str(source))}" for source in (fw_rule.get("sources") or []))
                 fw_name = _shell_name(_names(snapshot, fw_finding.assets[:1])[0])
                 protocol = _shell_name(str(fw_rule.get("protocol", "tcp")))
-                fw_commands.append(f"hcloud firewall delete-rule {fw_name} --direction in --protocol {protocol} {sources}".strip())
+                port_first, port_last = fw_rule.get("port_from"), fw_rule.get("port_to")
+                port = (
+                    "any" if port_first is None
+                    else str(port_first) if port_first == port_last or port_last is None
+                    else f"{port_first}-{port_last}"
+                )
+                fw_commands.append(
+                    f"hcloud firewall delete-rule {fw_name} --direction in --protocol {protocol} --port {_shell_name(port)} {sources}".strip()
+                )
         if len(group) == 1:
             add(priority, first.title, first.observation, first, None, risk, None, first.remediation, [rule_id], category, commands=fw_commands)
         else:  # one action per rule, not one per resource
