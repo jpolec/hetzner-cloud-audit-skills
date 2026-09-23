@@ -44,7 +44,6 @@ Homepage = "https://github.com/jpolec/hetzner-cloud-audit-skills"
 Issues = "https://github.com/jpolec/hetzner-cloud-audit-skills/issues"
 Changelog = "https://github.com/jpolec/hetzner-cloud-audit-skills/blob/main/CHANGELOG.md"
 Maintainer = "https://github.com/jpolec"
-QuantJourney = "https://quantjourney.cloud"
 
 [tool.hatch.build.targets.sdist]
 # Never ship local settings, real audit output, or release helpers.

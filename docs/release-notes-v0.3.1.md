@@ -1,6 +1,6 @@
 # v0.3.1 release notes
 
-v0.3.1 comes from the first audit of a real Hetzner project. It adds a network map and fixes the defects that run exposed.
+v0.3.1 adds a network map and fixes defects found while auditing a live Hetzner project.
 
 ## Highlights
 

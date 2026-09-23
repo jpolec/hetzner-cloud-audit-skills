@@ -75,8 +75,12 @@ Render the network map from the same snapshot and show it to the owner before di
 
 ```sh
 hetzner-audit map --input audit/snapshot.json --format markdown --output audit/network-map.md
-hetzner-audit map --input audit/snapshot.json --format svg --output audit/network-map.svg
+hetzner-audit map --input audit/snapshot.json --format svg --output audit/architecture.svg
+hetzner-audit map --input audit/snapshot.json --format svg --view connectivity --output audit/connectivity.svg
+hetzner-audit map --input audit/snapshot.json --format svg --view cost --output audit/cost.svg
 ```
+
+Pick the view that matches the question: `architecture` for "what does my project look like", `connectivity` for "what can reach what" (the blast radius on shared private networks), and `cost` for "where am I overpaying". Lead the conversation with the report's **Recommended actions**. For each action, state the evidence level and what evidence would upgrade it; never present a `needs_validation` item as fact.
 
 For repeated audits, compare timestamped facts before hunting again:
 
