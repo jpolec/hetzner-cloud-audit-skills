@@ -195,8 +195,10 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
             by_rule.setdefault(finding.rule_id, []).append(finding)
 
     def add(priority: int, title: str, why: str, finding: Finding | None, level: tuple[str, str] | None,
-            risk: str, saving: float | None, next_step: str, rules: list[str]) -> None:
-        category = "security" if priority < 40 else "cost" if priority in {40, 50, 80, 90} else "resilience" if priority < 90 else "hygiene"
+            risk: str, saving: float | None, next_step: str, rules: list[str], category: str | None = None) -> None:
+        category = category or (
+            "security" if priority < 40 else "cost" if priority in {40, 50, 80, 90} else "resilience" if priority < 90 else "hygiene"
+        )
         level = level or (evidence_level(finding) if finding else ("MEDIUM", "derived from provider state"))
         actions.append(
             {
@@ -297,9 +299,32 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
     for finding in by_rule.get("HETZ-GOV-004", []):
         add(92, f"Label {len(finding.assets)} servers with environment and role", finding.observation, finding, None, "low", None,
             "Add environment, role, and owner labels in IaC (sensitivity=high for databases and secrets) so policy and blast-radius checks cover every server.", ["HETZ-GOV-004"])
-    for finding in by_rule.get("HETZ-GOV-002", []):
+    for finding in [] if by_rule.get("HETZ-GOV-004") else by_rule.get("HETZ-GOV-002", []):  # GOV-004 action covers owner labels too
         add(95, f"Add owner/project labels to {len(finding.assets)} servers", finding.observation, finding, None, "low", None,
             "Add owner, project, environment, and role labels through IaC.", ["HETZ-GOV-002"])
+    # Rule families that map one finding to one action: (priority, category, risk of acting).
+    generic = {
+        "HETZ-FW-001": (11, "security", "low"),
+        "HETZ-CERT-001": (12, "security", "low"),
+        "HETZ-LB-002": (18, "security", "low"),
+        "HETZ-STO-001": (25, "security", "low"),
+        "HETZ-DNS-001": (28, "security", "low"),
+        "HETZ-STO-002": (35, "resilience", "low"),
+        "HETZ-IMG-001": (38, "security", "medium"),
+        "HETZ-LB-004": (45, "resilience", "low"),
+        "HETZ-LB-001": (55, "cost", "low"),
+        "HETZ-LB-003": (60, "security", "low"),
+        "HETZ-LB-005": (70, "resilience", "medium"),
+        "HETZ-PLC-001": (75, "resilience", "medium"),
+        "HETZ-FW-003": (85, "security", "low"),
+        "HETZ-FW-002": (88, "hygiene", "low"),
+        "HETZ-DNS-002": (90, "hygiene", "low"),
+        "HETZ-CERT-002": (96, "hygiene", "low"),
+        "HETZ-FW-004": (97, "hygiene", "low"),
+    }
+    for rule_id, (priority, category, risk) in generic.items():
+        for finding in by_rule.get(rule_id, []):
+            add(priority, finding.title, finding.observation, finding, None, risk, None, finding.remediation, [rule_id], category)
     actions.sort(key=lambda item: item["priority"])
     for index, item in enumerate(actions, 1):
         item["rank"] = index

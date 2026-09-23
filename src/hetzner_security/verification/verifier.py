@@ -40,6 +40,17 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
             confidence=0.0,
         )
 
+    if candidate.rule_id == "HETZ-DNS-001":
+        return _needs(
+            result,
+            "The address may live at another provider or in another project; confirm before calling it dangling.",
+        )
+    if candidate.rule_id == "HETZ-IMG-001":
+        return _needs(
+            result,
+            "The API reports the creation image; the running release may have been upgraded in place.",
+        )
+
     if candidate.rule_id == "HETZ-NET-006":
         return _needs(
             result,

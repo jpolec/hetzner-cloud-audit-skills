@@ -906,8 +906,10 @@ RULES: tuple[Rule, ...] = (
 
 
 def hunt(snapshot: Snapshot) -> list[Finding]:
+    from .resources import RESOURCE_RULES  # resources builds on helpers in this module
+
     graph = AttackGraph(snapshot)
-    candidates = [finding for rule in RULES for finding in rule(snapshot, graph)]
+    candidates = [finding for rule in (*RULES, *RESOURCE_RULES) for finding in rule(snapshot, graph)]
     collected_at = snapshot.metadata.get("collected_at")
     if isinstance(collected_at, str):
         for candidate in candidates:
