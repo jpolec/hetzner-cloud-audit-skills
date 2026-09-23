@@ -19,7 +19,7 @@ from ..models import Asset, Edge, Evidence, Fact, Snapshot
 
 API_BASE = "https://api.hetzner.cloud/v1"
 HETZNER_API_BASE = "https://api.hetzner.com/v1"
-COLLECTOR_VERSION = "0.3.1"
+COLLECTOR_VERSION = "0.4.0"
 RESOURCE_ENDPOINTS = {
     "server": "servers",
     "server_type": "server_types",

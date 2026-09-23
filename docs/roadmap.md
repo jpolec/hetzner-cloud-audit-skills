@@ -19,7 +19,7 @@ The release target is one defensible first run: one read-only project token, zer
 - New rules: deprecated server types (`HETZ-GOV-003`) and web origins that bypass Cloudflare (`HETZ-NET-006`).
 - Personal data redaction in snapshots; grouped Markdown findings; PyPI distribution `hetzner-audit`.
 
-## v0.4 — a report you can show to a founder
+## v0.4.0 — a report you can show to a founder (released 2026-09-23; remaining items move to v0.5)
 
 Goal: one read-only token, zero SSH, a complete and honest provider-level report. Hetzner depth comes before any other provider.
 

@@ -103,7 +103,7 @@ uvx hetzner-audit audit --read-only --no-ssh --format markdown --output audit.md
 `uvx` runs the [PyPI package](https://pypi.org/project/hetzner-audit/) without installing it. To pin the Git tag instead:
 
 ```sh
-uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.3.1' hetzner-audit --help
+uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.4.0' hetzner-audit --help
 ```
 
 When you are done:
@@ -293,7 +293,7 @@ The cost audit is deliberately conservative:
 ## GitHub Action and SARIF
 
 ```yaml
-- uses: jpolec/hetzner-cloud-audit-skills@v0.3.1
+- uses: jpolec/hetzner-cloud-audit-skills@v0.4.0
   env:
     HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
   with:
