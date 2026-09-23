@@ -53,9 +53,9 @@ A missing collector is reported as a gap. It is never reported as "secure". Conf
 
 ---
 
-## <img src="https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/icons/start.svg" width="28" height="28" alt=""> Two ways to start
+## Two ways to start
 
-| | <img src="https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/icons/agent.svg" width="32" height="32" alt=""><br>**AI agent skill**: fastest, recommended | <img src="https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/icons/cli.svg" width="32" height="32" alt=""><br>**Command-line tool** |
+| | **AI agent skill**: fastest, recommended | **Command-line tool** |
 |---|---|---|
 | **Install** | `npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills --skill hetzner-security-audit` | `uvx hetzner-audit …`, or `git clone` and `uv run` |
 | **Run** | Ask your agent: *"audit my Hetzner infrastructure"* | `hetzner-audit audit`, `hetzner-audit map` |
