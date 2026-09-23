@@ -216,11 +216,11 @@
 <text x="1606" y="1233" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
 <circle cx="56" cy="1264" r="11" fill="#1f1f1f"/>
 <text x="56" y="1268" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">3</text>
-<text x="76" y="1262" font-size="12.5" font-weight="700" fill="#1f1f1f">Confirm the management path to idp-1, secrets-1</text>
-<text x="76" y="1279" font-size="11" fill="#6b6b6b">Document the intended access path. If VPC workloads must reach them, attach them deliberately; otherwise record the isolation as a control.</text>
+<text x="76" y="1262" font-size="12.5" font-weight="700" fill="#1f1f1f">Storage Box is reachable from outside Hetzner</text>
+<text x="76" y="1279" font-size="11" fill="#6b6b6b">Disable external reachability if only Hetzner servers write backups; otherwise restrict protocols and use SSH keys, not passwords.</text>
 <text x="1606" y="1262" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
-<rect x="1503" y="1268" width="33" height="15" rx="7.5" fill="#6b6b6b"/>
-<text x="1519.5" y="1279" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">LOW</text>
+<rect x="1496" y="1268" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1516.0" y="1279" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
 <text x="1606" y="1279" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
 <rect x="28" y="1312" width="1594" height="92" rx="10" fill="#ffffff" stroke="#e3e3e3"/>
 <text x="44" y="1334" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">LEGEND</text>

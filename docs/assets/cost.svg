@@ -234,7 +234,7 @@
 <text x="44" y="812" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">RECOMMENDED COST ACTIONS</text>
 <text x="1416" y="812" text-anchor="end" font-size="11" fill="#6b6b6b">plans for a human · the tool changes nothing</text>
 <circle cx="56" cy="842" r="11" fill="#1f1f1f"/>
-<text x="56" y="846" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">4</text>
+<text x="56" y="846" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">6</text>
 <text x="76" y="840" font-size="12.5" font-weight="700" fill="#1f1f1f">Migrate jobs-1 off deprecated cx22</text>
 <text x="76" y="857" font-size="11" fill="#6b6b6b">Plan a resize or rebuild during a maintenance window, update IaC, and keep a snapshot for rollback.</text>
 <text x="1416" y="840" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk medium</text>
@@ -242,7 +242,7 @@
 <text x="1326.0" y="857" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
 <text x="1416" y="857" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
 <circle cx="56" cy="888" r="11" fill="#1f1f1f"/>
-<text x="56" y="892" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">5</text>
+<text x="56" y="892" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">7</text>
 <text x="76" y="886" font-size="12.5" font-weight="700" fill="#1f1f1f">Validate retirement of an unattached volume: orphan-data</text>
 <text x="76" y="903" font-size="11" fill="#6b6b6b">Confirm the owner and any restore dependency, snapshot if unsure, then delete through IaC.</text>
 <text x="1416" y="886" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">EUR 2.29/mo  ·  risk low</text>

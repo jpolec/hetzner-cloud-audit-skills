@@ -4,6 +4,42 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-23
+
+### Added
+
+- Firewall quality rules:
+  - `HETZ-FW-001`: all ports open to the world, reported once instead of once per service;
+  - `HETZ-FW-002`: unattached firewall, or a label selector that matches nothing;
+  - `HETZ-FW-003`: IPv4/IPv6 drift;
+  - `HETZ-FW-004`: duplicate rules.
+- `HETZ-NET-002` now covers about 30 TCP/UDP services and ranges, including MySQL, RDP, SMB, Kafka, AMQP, Vault, Consul, etcd, kubelet, NodePort, SNMP, and memcached UDP.
+- Rules for other resource types:
+  - Storage Boxes (`HETZ-STO-001/002`);
+  - OS end of support (`HETZ-IMG-001`);
+  - load balancers (`HETZ-LB-001..005`);
+  - certificates (`HETZ-CERT-001/002`);
+  - DNS (`HETZ-DNS-001/002`);
+  - placement spread (`HETZ-PLC-001`).
+- `HETZ-GOV-004` flags servers that policy cannot evaluate because labels are missing. A new `sensitivity` label overrides name-based detection.
+- `--fail-on none|confirmed|confirmed-high` for audit commands and the GitHub Action. `needs_validation` never fails a job.
+- `scripts/check_cloudflare_ranges.py` and `CLOUDFLARE_RANGES_AS_OF`, which is cited in `HETZ-NET-006` evidence.
+
+### Fixed
+
+- `audit --format json|sarif` crashed when `HETZ-NET-006` was present, because its evidence contained a set.
+- `HETZ-DNS-002` no longer treats documentation ranges as private.
+
+### Security
+
+- Provider-sourced text is escaped in Markdown and entity-encoded in Mermaid, so crafted names cannot inject links, HTML, or headings into reports read by people or agents.
+- Collector requests retry 429 and 5xx responses with jitter and honor `Retry-After`. Pagination is capped at 1,000 pages and attack-path search at 50 paths.
+- CI audits the toolchain with OSV before installing the package, so PyPI outages no longer fail builds.
+
+### Changed
+
+- README section 10 separates live-tested from fixture-tested rules and adds a "What it is not (yet)" list.
+
 ## [0.4.0] - 2026-09-23
 
 ### Added
@@ -141,7 +177,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.2.0...v0.3.0

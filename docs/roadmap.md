@@ -55,6 +55,25 @@ Goal: one read-only token, zero SSH, a complete and honest provider-level report
 
 Also done in v0.4: architecture, per-VM connectivity, and per-VM cost diagrams. Private networks are now modeled as unfiltered by cloud firewalls.
 
+## v0.5.0 — close the gap between collection and analysis (released 2026-09-23)
+
+Driven by an external review that noted the collector was wide and the analyzer narrow:
+
+- Firewall quality (`HETZ-FW-001..004`) and about 30 sensitive TCP/UDP services and ranges.
+- Load balancers, certificates, DNS takeover and private records, Storage Boxes, OS end of support, and placement spread. Load balancers, certificates, and DNS are fixture-tested only.
+- `HETZ-GOV-004`: servers that policy cannot evaluate because labels are missing; a `sensitivity=high` label.
+- CI honesty: `--fail-on none|confirmed|confirmed-high`; hypotheses never fail a job.
+- Retry/backoff with `Retry-After`, capped pagination and path search, and Markdown/Mermaid escaping of provider text.
+- Cloudflare range provenance and a freshness check.
+
+## v0.6 — next
+
+1. **Host evidence bundle** (`host-bundle`): an opt-in, versioned read-only allowlist covering UFW/nftables, listeners, sshd, Docker published ports (UFW bypass), `pg_hba`, and Redis. It turns `cloud_path_present` into `reachable` or `rejected`.
+2. **Terraform ↔ runtime drift** from `terraform show -json` and saved plans.
+3. **Anonymized real-response fixtures** for load balancers, certificates, and DNS, to replace the synthetic-only coverage.
+4. **Hetzner `/actions` history** as drift signals (`disable_protection`, `remove_from_resource`, `change_dns_ptr`).
+5. **Cost evidence**: RAM and disk p95 from node exporter or Prometheus, and traffic.
+
 ## Later
 
 - Cross-domain architecture recommendations that combine cost, exposure, and recovery into one reviewed change.
