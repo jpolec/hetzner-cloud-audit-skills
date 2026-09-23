@@ -1,10 +1,46 @@
 # Hetzner Security Audit
 
-## Summary
+## At a glance
 
-- Confirmed: 23
-- Needs validation: 10
-- Rejected: 0
+| | |
+|---|---|
+| Scope | 7 servers · 1 network |
+| Confirmed (evidence complete) | 23 findings |
+| Needs host/runtime validation | 10 hypotheses |
+| Rejected by the verifier | 0 |
+| Collection gaps | none |
+
+### Confirmed
+
+- **CRITICAL** · HETZ-DKR-002 · Container can control the Docker daemon (2 assets)
+- **CRITICAL** · HETZ-NET-002 · Docker daemon reachable from the public internet
+- **CRITICAL** · HETZ-NET-002 · Kubernetes API reachable from the public internet
+- **CRITICAL** · HETZ-NET-004 · Redis reachable from the public internet
+- **CRITICAL** · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
+- **CRITICAL** · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control
+- **HIGH** · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets)
+- **HIGH** · HETZ-DKR-003 · Container shares the host PID namespace (2 assets)
+- **HIGH** · HETZ-NET-003 · PostgreSQL reachable from the public internet
+- **HIGH** · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability
+- **HIGH** · HETZ-XLY-001 · staging workload can reach prod postgres
+- **HIGH** · HETZ-XLY-001 · dev workload can reach prod redis
+- **HIGH** · HETZ-XLY-001 · staging workload can reach prod redis
+- **HIGH** · HETZ-XLY-001 · dev workload can reach prod postgres
+- **MEDIUM** · HETZ-DKR-004 · Container shares the host network namespace (2 assets)
+- **MEDIUM** · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets)
+- **MEDIUM** · HETZ-VULN-001 · Vulnerable component in non-public workload (2 assets)
+
+### Needs host or runtime validation
+
+- HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets)
+- HETZ-NET-001 · SSH reachable from the public internet
+- HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets)
+- HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
+- HETZ-VULN-001 · Vulnerable component in non-public workload
+
+### Collection gaps
+
+- Every Hetzner endpoint was collected.
 
 ## Evidence scope
 

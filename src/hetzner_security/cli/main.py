@@ -16,6 +16,7 @@ from ..coverage import plan_coverage, render_coverage, save_coverage, update_cov
 from ..diagram import render_svg
 from ..doctor import render_doctor_markdown, run_doctor
 from ..findings import render_json, render_markdown, render_sarif
+from ..findings.summary import build_summary
 from ..graph import AttackGraph, render_path_markdown
 from ..models import Finding, Severity, Snapshot
 from ..policy import apply_policy, load_policy
@@ -182,7 +183,10 @@ def run(args: argparse.Namespace) -> int:
             save_coverage(args.coverage_ledger, units, prior_path=args.coverage_ledger)
         if args.format == "markdown":
             output = render_markdown(
-                findings, snapshot.metadata, {asset.id: asset.name for asset in snapshot.assets if asset.name}
+                findings,
+                snapshot.metadata,
+                {asset.id: asset.name for asset in snapshot.assets if asset.name},
+                build_summary(snapshot, findings) if args.command == "audit" else None,
             )
         else:
             renderer = {"json": render_json, "sarif": render_sarif}[args.format]

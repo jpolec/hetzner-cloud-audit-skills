@@ -122,6 +122,8 @@ The [synthetic benchmark report](https://github.com/jpolec/hetzner-cloud-audit-s
 
 ## What the report contains
 
+The report opens with an **At a glance** page. It shows the scope, the confirmed findings, the hypotheses that still need host or runtime evidence, collection gaps, and the catalog cost with potential and confirmed savings. The detail follows:
+
 - **Facts** confirmed by the Hetzner API.
 - **Findings** with a complete evidence chain, impact, and remediation.
 - **Hypotheses** that need host or runtime evidence before they can be confirmed.

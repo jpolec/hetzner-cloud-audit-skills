@@ -15,6 +15,18 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
   It exits non-zero on a missing or rejected token or unreadable core endpoints.
 - The v0.4 roadmap in `docs/roadmap.md`.
+- The audit report opens with an "At a glance" first page:
+  - scope counts and locations;
+  - confirmed findings and hypotheses that need host or runtime validation, grouped by rule;
+  - findings rejected by the verifier;
+  - failed endpoints and evidence layers the API cannot see;
+  - catalog cost, with potential and confirmed savings.
+- `map --format svg` now draws a cloud-architecture diagram in the style of AWS and OCI:
+  - a network-zone boundary and the private network (VPC) with its subnets;
+  - location columns crossed by role tiers, with service icons;
+  - routed Internet and Cloudflare ingress, and Tailscale admin access;
+  - a band for resources outside the private network, including Storage Boxes;
+  - summary tiles and a legend.
 
 ### Changed
 

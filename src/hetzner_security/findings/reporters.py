@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from ..models import Finding, FindingStatus
+from .summary import render_summary_markdown
 
 
 def render_json(findings: list[Finding]) -> str:
@@ -16,8 +17,9 @@ def render_markdown(
     findings: list[Finding],
     metadata: dict[str, Any] | None = None,
     names: dict[str, str] | None = None,
+    summary: dict[str, Any] | None = None,
 ) -> str:
-    """Render findings; ``names`` maps asset IDs to human-readable names for display."""
+    """Render findings; ``names`` maps asset IDs to display names; ``summary`` adds a first page."""
     lookup = names or {}
 
     def label(value: str) -> str:
@@ -27,16 +29,19 @@ def render_markdown(
     confirmed = [finding for finding in findings if finding.status == FindingStatus.CONFIRMED]
     pending = [finding for finding in findings if finding.status == FindingStatus.NEEDS_VALIDATION]
     rejected = [finding for finding in findings if finding.status == FindingStatus.REJECTED]
-    lines.extend(
-        [
-            "## Summary",
-            "",
-            f"- Confirmed: {len(confirmed)}",
-            f"- Needs validation: {len(pending)}",
-            f"- Rejected: {len(rejected)}",
-            "",
-        ]
-    )
+    if summary is not None:
+        lines.extend(render_summary_markdown(summary))
+    else:
+        lines.extend(
+            [
+                "## Summary",
+                "",
+                f"- Confirmed: {len(confirmed)}",
+                f"- Needs validation: {len(pending)}",
+                f"- Rejected: {len(rejected)}",
+                "",
+            ]
+        )
     if metadata:
         lines.extend(
             [

@@ -270,6 +270,21 @@ class V03Test(unittest.TestCase):
         self.assertIn("(3 assets)", report)
         self.assertIn("db-0, db-1, db-2", report)
 
+    def test_audit_markdown_starts_with_at_a_glance(self) -> None:
+        from hetzner_security.findings import render_markdown
+        from hetzner_security.findings.summary import build_summary
+
+        server = Asset("hcloud:server:1", "server", "db-0", {"stateful": True, "backup_enabled": False, "location": {"name": "fsn1"}}, {"environment": "production"}, "hcloud_api")
+        network = Asset("hcloud:network:1", "network", "net", {"ip_range": "10.0.0.0/16"}, source="hcloud_api")
+        snapshot = Snapshot(assets=[server, network], metadata={"coverage": {"server": {"status": "collected"}, "volume": {"status": "failed"}}})
+        findings = verify_all(hunt(snapshot), snapshot)
+        report = render_markdown(findings, snapshot.metadata, summary=build_summary(snapshot, findings))
+        self.assertTrue(report.split("\n")[2].startswith("## At a glance"))
+        self.assertIn("1 server · 1 network · 1 location (fsn1)", report)
+        self.assertIn("Endpoint volume (failed)", report)
+        self.assertIn("Host firewall: not collected", report)
+        self.assertNotIn("## Summary", report)
+
     def test_deprecated_server_type_is_reported(self) -> None:
         server = Asset(
             "hcloud:server:1",
