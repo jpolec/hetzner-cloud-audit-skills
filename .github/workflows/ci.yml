@@ -46,10 +46,12 @@ jobs:
           python-version: "3.13"
           cache: pip
       - run: python -m pip install build pip-audit
+      # Audit the toolchain before installing our own wheel: the package has no runtime
+      # dependencies, and querying PyPI for an unpublished version fails during outages.
+      - run: pip-audit --vulnerability-service osv
       - run: python -m build
       - run: python -m pip install dist/*.whl
       - run: hetzner-audit audit --input benchmarks/scenarios/v0.1-insecure.json --format json --output /tmp/audit.json
-      - run: pip-audit
 
   secrets:
     runs-on: ubuntu-latest
