@@ -65,14 +65,32 @@ def render_markdown(
                     "",
                 ]
             )
+    # Single-asset findings that differ only by asset render as one section to keep reports short.
+    groups: dict[tuple[str, ...], list[Finding]] = {}
     for finding in [*confirmed, *pending]:
+        key = (
+            (finding.rule_id, finding.status.value, finding.observation, finding.actual_state, finding.verification.notes)
+            if len(finding.assets) == 1
+            else (finding.id,)
+        )
+        groups.setdefault(key, []).append(finding)
+    for members in groups.values():
+        finding = members[0]
+        assets = [asset for member in members for asset in member.assets]
+        if len(members) > 1:
+            assets.sort(key=label)
+        if len(members) > 1:
+            path = " → ".join("each listed asset" if step == finding.assets[0] else label(step) for step in finding.attack_path)
+        else:
+            path = " → ".join(label(step) for step in finding.attack_path)
         lines.extend(
             [
-                f"## {(finding.severity.value.upper() if finding.severity else 'UNSCORED')} · {finding.rule_id} · {finding.title}",
+                f"## {(finding.severity.value.upper() if finding.severity else 'UNSCORED')} · {finding.rule_id} · {finding.title}"
+                + (f" ({len(members)} assets)" if len(members) > 1 else ""),
                 "",
                 f"- **Status:** {finding.status.value}",
-                f"- **Confidence:** {finding.confidence:.2f}",
-                f"- **Assets:** {', '.join(label(asset) for asset in finding.assets)}",
+                f"- **Confidence:** {min(member.confidence for member in members):.2f}",
+                f"- **Assets:** {', '.join(label(asset) for asset in assets)}",
                 "",
                 "**Observation:** " + finding.observation,
                 "",
@@ -80,7 +98,7 @@ def render_markdown(
                 "",
                 "**Actual:** " + finding.actual_state,
                 "",
-                "**Attack path:** " + " → ".join(label(step) for step in finding.attack_path),
+                "**Attack path:** " + path,
                 "",
                 "**Verification:** " + finding.verification.notes,
                 "",

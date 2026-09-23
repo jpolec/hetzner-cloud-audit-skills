@@ -40,6 +40,12 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
             confidence=0.0,
         )
 
+    if candidate.rule_id == "HETZ-NET-006":
+        return _needs(
+            result,
+            "Cloudflare-only peers suggest the origin should not be public; confirm with the owner whether direct access is intended.",
+        )
+
     if candidate.rule_id.startswith("HETZ-NET-") and candidate.rule_id != "HETZ-NET-005":
         firewall_evidence = [e for e in candidate.evidence if e.kind == "firewall_rule"]
         if not firewall_evidence:

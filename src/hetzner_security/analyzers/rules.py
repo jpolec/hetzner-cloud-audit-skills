@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import ipaddress
 import json
 from collections.abc import Callable
 from dataclasses import replace
@@ -18,8 +19,10 @@ from ..models import (
     Snapshot,
     Verification,
 )
+from ..topology import classify_source
 
 Rule = Callable[[Snapshot, AttackGraph], list[Finding]]
+CGNAT_RANGE = ipaddress.IPv4Network("100.64.0.0/10")
 PUBLIC_SOURCES = {"0.0.0.0/0", "::/0", "any", "internet"}
 MANAGEMENT_PORTS = {
     2375: "Docker daemon",
@@ -584,6 +587,66 @@ def ownership_metadata_gap(snapshot: Snapshot, graph: AttackGraph) -> list[Findi
     ]
 
 
+def _is_private_source(source: str) -> bool:
+    try:
+        network = ipaddress.ip_network(source, strict=False)
+    except ValueError:
+        return False
+    if network.prefixlen == 0:
+        return False
+    if isinstance(network, ipaddress.IPv4Network) and network.subnet_of(CGNAT_RANGE):
+        return True  # Tailscale and other carrier-grade NAT overlays
+    return network.is_private
+
+
+def cloudflare_origin_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    """Flag web origins open to any address when peers restrict web ports to Cloudflare."""
+    web_ports = {80, 443}
+
+    def web_sources(asset: Asset) -> set[str]:
+        classes: set[str] = set()
+        for rule in asset.properties.get("inbound", []) or []:
+            start, end = _port_bounds(rule)
+            if rule.get("protocol", "tcp") != "tcp" or not any(start <= port <= end for port in web_ports):
+                continue
+            classes |= {classify_source(str(source), ()) for source in rule.get("sources", []) if not _is_private_source(str(source))}
+        return classes
+
+    servers = [asset for asset in snapshot.assets if asset.type == "server" and asset.properties.get("public_ip")]
+    fronted = [asset for asset in servers if web_sources(asset) == {"cloudflare"}]
+    if not fronted:
+        return []
+    output = []
+    for asset in servers:
+        if "world" not in web_sources(asset):
+            continue
+        rules = [
+            rule
+            for rule in asset.properties.get("inbound", []) or []
+            if set(rule.get("sources", [])) & PUBLIC_SOURCES and rule.get("protocol", "tcp") == "tcp"
+        ]
+        output.append(
+            _candidate(
+                "HETZ-NET-006",
+                "Web origin is reachable directly, bypassing Cloudflare",
+                Severity.MEDIUM,
+                0.8,
+                [asset.id],
+                f"{asset.name} accepts HTTP/HTTPS from any address, while {len(fronted)} other server(s) accept web traffic only from Cloudflare.",
+                "Origins behind Cloudflare accept web traffic only from Cloudflare ranges.",
+                "tcp/80 or tcp/443 is open to 0.0.0.0/0 or ::/0.",
+                [_evidence(asset, "firewall_rule", rule, "properties.inbound") for rule in rules]
+                + [_evidence(peer, "cloudflare_only_peer", web_sources(peer), "properties.inbound") for peer in fronted[:3]],
+                ["internet", asset.id],
+                ["The origin is meant to be served through Cloudflare."],
+                "Direct origin access bypasses Cloudflare WAF, rate limiting, and DDoS protection, and can expose the origin IP.",
+                "Restrict tcp/80 and tcp/443 to Cloudflare ranges, or use Cloudflare Tunnel, if direct access is not intended.",
+                ["https://www.cloudflare.com/ips/", "https://developers.cloudflare.com/fundamentals/concepts/cloudflare-ip-addresses/"],
+            )
+        )
+    return output
+
+
 def deprecated_server_type(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     affected = [
         asset
@@ -657,6 +720,7 @@ def contextualize_vulnerabilities(snapshot: Snapshot, graph: AttackGraph) -> lis
 RULES: tuple[Rule, ...] = (
     public_service_exposure,
     internet_host_without_firewall,
+    cloudflare_origin_bypass,
     expectation_drift,
     cross_environment_data_path,
     broad_private_data_path,

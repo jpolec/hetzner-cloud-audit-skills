@@ -12,16 +12,24 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - A README screenshot and example map from a real 18-server Hetzner project, with identifiers replaced.
 - `HETZ-GOV-003` reports servers running a deprecated Hetzner server type.
 - Markdown audit and `path` output show asset names instead of numeric provider IDs.
+- `HETZ-NET-006` flags web origins open to any address while peer servers accept web traffic only from Cloudflare.
+- The package is published on PyPI as `hetzner-audit`, so `uvx hetzner-audit` works without a Git URL.
 
 ### Fixed
 
 - A public IP address no longer counts as permitted traffic when a path is traced. `ask` previously reported private-network paths as Internet exposure; it now separates direct exposure from indirect pivots through a publicly reachable host.
+
+### Security
+
+- Snapshots now redact email addresses, reverse-DNS names, Storage Box usernames, and SSH public-key material and comments. Labels and graph-edge evidence are redacted too; previously they bypassed sanitization.
 
 ### Changed
 
 - `hetzner-audit map --format svg` defaults to a light theme (grey canvas, white cards, exposure stripe); `--theme dark` keeps the previous look.
 - README images use the same light style, and the token guide shows a console-style illustration with fictional data.
 - README is restructured around a quick start, a no-token demo, and a safety model.
+- Markdown reports merge single-asset findings that differ only by asset into one section. JSON and SARIF keep one finding per asset.
+- The Python distribution is renamed from `hetzner-cloud-audit-skills` to `hetzner-audit`, matching the command name.
 
 ## [0.3.0] - 2026-09-22
 

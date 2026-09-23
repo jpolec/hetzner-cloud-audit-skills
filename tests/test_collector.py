@@ -11,6 +11,24 @@ class CollectorSafetyTest(unittest.TestCase):
         self.assertEqual(value["token"], "[REDACTED]")
         self.assertEqual(value["nested"]["user_data"], "[REDACTED]")
 
+    def test_personal_data_is_redacted(self) -> None:
+        value = _sanitize_resource(
+            {
+                "public_key": "ssh-ed25519 AAAAC3Nza owner@example.com",
+                "fingerprint": "a4:95:53",
+                "username": "u123456",
+                "public_net": {"ipv4": {"ip": "192.0.2.10", "dns_ptr": "static.example.net"}, "ipv6": {"dns_ptr": []}},
+                "labels": {"owner": "ops@example.com"},
+            }
+        )
+        self.assertEqual(value["public_key"], "ssh-ed25519 [key material and comment omitted]")
+        self.assertEqual(value["fingerprint"], "a4:95:53")
+        self.assertEqual(value["username"], "[REDACTED:personal]")
+        self.assertEqual(value["public_net"]["ipv4"]["dns_ptr"], "[REDACTED:personal]")
+        self.assertEqual(value["public_net"]["ipv4"]["ip"], "192.0.2.10")
+        self.assertEqual(value["public_net"]["ipv6"]["dns_ptr"], [])
+        self.assertEqual(value["labels"]["owner"], "[REDACTED:email]")
+
     def test_collector_has_no_mutation_api(self) -> None:
         methods = set(dir(ReadOnlyHCloudCollector))
         self.assertTrue({"collect", "_get_page", "_list"} <= methods)

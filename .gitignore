@@ -20,3 +20,7 @@ _gtm/
 
 # Local audit output from real projects; never publish
 _output/
+
+# Local release helper; kept out of the repository
+publish_pypi.sh
+.claude/settings.local.json

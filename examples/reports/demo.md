@@ -17,11 +17,11 @@
 
 - None reported by the collector.
 
-## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary
+## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets)
 
 - **Status:** confirmed
 - **Confidence:** 0.97
-- **Assets:** container:stage-worker
+- **Assets:** demo-ops-agent, demo-stage-worker
 
 **Observation:** Runtime inspection reports privileged=true.
 
@@ -29,7 +29,7 @@
 
 **Actual:** privileged=true
 
-**Attack path:** container:stage-worker → container_runtime → host
+**Attack path:** each listed asset → container_runtime → host
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -37,31 +37,11 @@
 
 **Remediation:** Disable privileged and grant a narrower capability or mediated service.
 
-## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary
+## CRITICAL · HETZ-DKR-002 · Container can control the Docker daemon (2 assets)
 
 - **Status:** confirmed
 - **Confidence:** 0.97
-- **Assets:** container:ops-agent
-
-**Observation:** Runtime inspection reports privileged=true.
-
-**Expected:** The workload has only capabilities required by its declared function.
-
-**Actual:** privileged=true
-
-**Attack path:** container:ops-agent → container_runtime → host
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** Container compromise can expand to host or sibling-workload control.
-
-**Remediation:** Disable privileged and grant a narrower capability or mediated service.
-
-## CRITICAL · HETZ-DKR-002 · Container can control the Docker daemon
-
-- **Status:** confirmed
-- **Confidence:** 0.97
-- **Assets:** container:ops-agent
+- **Assets:** demo-ops-agent, demo-stage-worker
 
 **Observation:** Runtime inspection reports docker_socket=true.
 
@@ -69,7 +49,7 @@
 
 **Actual:** docker_socket=true
 
-**Attack path:** container:ops-agent → container_runtime → host
+**Attack path:** each listed asset → container_runtime → host
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -77,31 +57,11 @@
 
 **Remediation:** Disable docker_socket and grant a narrower capability or mediated service.
 
-## CRITICAL · HETZ-DKR-002 · Container can control the Docker daemon
+## HIGH · HETZ-DKR-003 · Container shares the host PID namespace (2 assets)
 
 - **Status:** confirmed
 - **Confidence:** 0.97
-- **Assets:** container:stage-worker
-
-**Observation:** Runtime inspection reports docker_socket=true.
-
-**Expected:** The workload has only capabilities required by its declared function.
-
-**Actual:** docker_socket=true
-
-**Attack path:** container:stage-worker → container_runtime → host
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** Container compromise can expand to host or sibling-workload control.
-
-**Remediation:** Disable docker_socket and grant a narrower capability or mediated service.
-
-## HIGH · HETZ-DKR-003 · Container shares the host PID namespace
-
-- **Status:** confirmed
-- **Confidence:** 0.97
-- **Assets:** container:stage-worker
+- **Assets:** demo-ops-agent, demo-stage-worker
 
 **Observation:** Runtime inspection reports host_pid=true.
 
@@ -109,7 +69,7 @@
 
 **Actual:** host_pid=true
 
-**Attack path:** container:stage-worker → container_runtime → host
+**Attack path:** each listed asset → container_runtime → host
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -117,31 +77,11 @@
 
 **Remediation:** Disable host_pid and grant a narrower capability or mediated service.
 
-## HIGH · HETZ-DKR-003 · Container shares the host PID namespace
+## MEDIUM · HETZ-DKR-004 · Container shares the host network namespace (2 assets)
 
 - **Status:** confirmed
 - **Confidence:** 0.97
-- **Assets:** container:ops-agent
-
-**Observation:** Runtime inspection reports host_pid=true.
-
-**Expected:** The workload has only capabilities required by its declared function.
-
-**Actual:** host_pid=true
-
-**Attack path:** container:ops-agent → container_runtime → host
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** Container compromise can expand to host or sibling-workload control.
-
-**Remediation:** Disable host_pid and grant a narrower capability or mediated service.
-
-## MEDIUM · HETZ-DKR-004 · Container shares the host network namespace
-
-- **Status:** confirmed
-- **Confidence:** 0.97
-- **Assets:** container:ops-agent
+- **Assets:** demo-ops-agent, demo-stage-worker
 
 **Observation:** Runtime inspection reports host_network=true.
 
@@ -149,7 +89,7 @@
 
 **Actual:** host_network=true
 
-**Attack path:** container:ops-agent → container_runtime → host
+**Attack path:** each listed asset → container_runtime → host
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -157,31 +97,11 @@
 
 **Remediation:** Disable host_network and grant a narrower capability or mediated service.
 
-## MEDIUM · HETZ-DKR-004 · Container shares the host network namespace
-
-- **Status:** confirmed
-- **Confidence:** 0.97
-- **Assets:** container:stage-worker
-
-**Observation:** Runtime inspection reports host_network=true.
-
-**Expected:** The workload has only capabilities required by its declared function.
-
-**Actual:** host_network=true
-
-**Attack path:** container:stage-worker → container_runtime → host
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** Container compromise can expand to host or sibling-workload control.
-
-**Remediation:** Disable host_network and grant a narrower capability or mediated service.
-
-## MEDIUM · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure
+## MEDIUM · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets)
 
 - **Status:** confirmed
 - **Confidence:** 0.98
-- **Assets:** server:admin
+- **Assets:** demo-admin, demo-public-pg
 
 **Observation:** Declared and observed source ranges differ for a security-sensitive port.
 
@@ -197,31 +117,11 @@
 
 **Remediation:** Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.
 
-## MEDIUM · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure
-
-- **Status:** confirmed
-- **Confidence:** 0.98
-- **Assets:** server:public-pg
-
-**Observation:** Declared and observed source ranges differ for a security-sensitive port.
-
-**Expected:** TCP/5432 sources equal the declared set ['10.0.0.0/8'].
-
-**Actual:** Unexpected observed sources: ['0.0.0.0/0'].
-
-**Attack path:** 0.0.0.0/0 → tcp/5432 → provider-policy:server:public-pg
-
-**Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
-
-**Impact:** The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.
-
-**Remediation:** Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.
-
 ## CRITICAL · HETZ-NET-002 · Docker daemon reachable from the public internet
 
 - **Status:** confirmed
 - **Confidence:** 0.88
-- **Assets:** server:docker-api
+- **Assets:** demo-docker-api
 
 **Observation:** An inbound rule admits a public source to TCP/2375.
 
@@ -229,7 +129,7 @@
 
 **Actual:** TCP/2375 admits ['0.0.0.0/0'].
 
-**Attack path:** internet → tcp/2375 → server:docker-api
+**Attack path:** internet → tcp/2375 → demo-docker-api
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -241,7 +141,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.88
-- **Assets:** server:kube-api
+- **Assets:** demo-kube-api
 
 **Observation:** An inbound rule admits a public source to TCP/6443.
 
@@ -249,7 +149,7 @@
 
 **Actual:** TCP/6443 admits ['::/0'].
 
-**Attack path:** internet → tcp/6443 → server:kube-api
+**Attack path:** internet → tcp/6443 → demo-kube-api
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -261,7 +161,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.88
-- **Assets:** server:public-pg
+- **Assets:** demo-public-pg
 
 **Observation:** An inbound rule admits a public source to TCP/5432.
 
@@ -269,7 +169,7 @@
 
 **Actual:** TCP/5432 admits ['0.0.0.0/0'].
 
-**Attack path:** internet → tcp/5432 → server:public-pg
+**Attack path:** internet → tcp/5432 → demo-public-pg
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -281,7 +181,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.88
-- **Assets:** server:public-redis
+- **Assets:** demo-public-redis
 
 **Observation:** An inbound rule admits a public source to TCP/6379.
 
@@ -289,7 +189,7 @@
 
 **Actual:** TCP/6379 admits ['0.0.0.0/0'].
 
-**Attack path:** internet → tcp/6379 → server:public-redis
+**Attack path:** internet → tcp/6379 → demo-public-redis
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -301,7 +201,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.99
-- **Assets:** postgres:prod
+- **Assets:** demo-prod-postgres
 
 **Observation:** pg_hba.conf trusts a broad network range.
 
@@ -309,7 +209,7 @@
 
 **Actual:** HBA rule 0 uses trust for 0.0.0.0/0.
 
-**Attack path:** 0.0.0.0/0 → postgres:prod → postgres authentication
+**Attack path:** 0.0.0.0/0 → demo-prod-postgres → postgres authentication
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -321,7 +221,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.93
-- **Assets:** postgres:prod
+- **Assets:** demo-prod-postgres
 
 **Observation:** Role inventory marks superuser roles outside the declared allowlist.
 
@@ -329,7 +229,7 @@
 
 **Actual:** Unexpected superusers: ['app', 'migration'].
 
-**Attack path:** database credentials → app → migration → postgres:prod
+**Attack path:** database credentials → app → migration → demo-prod-postgres
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -341,7 +241,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.99
-- **Assets:** redis:prod
+- **Assets:** demo-prod-redis
 
 **Observation:** Broad bind, disabled protected mode, and absent ACL/password evidence coincide.
 
@@ -349,7 +249,7 @@
 
 **Actual:** bind is broad; protected-mode=no; no authentication configured.
 
-**Attack path:** reachable network peer → redis:prod → redis command surface
+**Attack path:** reachable network peer → demo-prod-redis → redis command surface
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -361,7 +261,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.84
-- **Assets:** container:stage-worker
+- **Assets:** demo-stage-worker
 
 **Observation:** grype reports CVE-DEMO-0002 in openssl-demo.
 
@@ -369,7 +269,7 @@
 
 **Actual:** Installed 2.0; fixed 2.1; internet_reachable=False.
 
-**Attack path:** container:stage-worker → local vulnerable component
+**Attack path:** demo-stage-worker → local vulnerable component
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -381,7 +281,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.84
-- **Assets:** container:ops-agent
+- **Assets:** demo-ops-agent
 
 **Observation:** trivy reports CVE-DEMO-0003 in curl-demo.
 
@@ -389,7 +289,7 @@
 
 **Actual:** Installed 3.0; fixed 3.1; internet_reachable=False.
 
-**Attack path:** container:ops-agent → local vulnerable component
+**Attack path:** demo-ops-agent → local vulnerable component
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -401,7 +301,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.96
-- **Assets:** container:stage-worker, postgres:prod
+- **Assets:** demo-stage-worker, demo-prod-postgres
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -409,7 +309,7 @@
 
 **Actual:** A TCP/5432 path exists: container:stage-worker -> network:shared -> postgres:prod
 
-**Attack path:** container:stage-worker → network:shared → postgres:prod
+**Attack path:** demo-stage-worker → demo-shared → demo-prod-postgres
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -421,7 +321,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.96
-- **Assets:** container:ops-agent, redis:prod
+- **Assets:** demo-ops-agent, demo-prod-redis
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -429,7 +329,7 @@
 
 **Actual:** A TCP/6379 path exists: container:ops-agent -> network:shared -> redis:prod
 
-**Attack path:** container:ops-agent → network:shared → redis:prod
+**Attack path:** demo-ops-agent → demo-shared → demo-prod-redis
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -441,7 +341,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.96
-- **Assets:** container:stage-worker, redis:prod
+- **Assets:** demo-stage-worker, demo-prod-redis
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -449,7 +349,7 @@
 
 **Actual:** A TCP/6379 path exists: container:stage-worker -> network:shared -> redis:prod
 
-**Attack path:** container:stage-worker → network:shared → redis:prod
+**Attack path:** demo-stage-worker → demo-shared → demo-prod-redis
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -461,7 +361,7 @@
 
 - **Status:** confirmed
 - **Confidence:** 0.96
-- **Assets:** container:ops-agent, postgres:prod
+- **Assets:** demo-ops-agent, demo-prod-postgres
 
 **Observation:** A cross-environment attack-graph path contradicts an explicit isolation declaration.
 
@@ -469,7 +369,7 @@
 
 **Actual:** A TCP/5432 path exists: container:ops-agent -> network:shared -> postgres:prod
 
-**Attack path:** container:ops-agent → network:shared → postgres:prod
+**Attack path:** demo-ops-agent → demo-shared → demo-prod-postgres
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
@@ -477,11 +377,11 @@
 
 **Remediation:** Separate environment networks and enforce target-side allowlists for the exact clients.
 
-## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
+## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets)
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
-- **Assets:** postgres:prod
+- **Assets:** demo-analytics-postgres, demo-prod-postgres, demo-prod-redis, demo-public-pg, demo-public-redis
 
 **Observation:** The asset is declared production and stateful, but no backup configuration is observed.
 
@@ -489,87 +389,7 @@
 
 **Actual:** backup_enabled=false or absent.
 
-**Attack path:** postgres:prod → data loss → unrecoverable state
-
-**Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
-
-**Impact:** Deletion, corruption, or compromise may cause unrecoverable service data loss.
-
-**Remediation:** Enable provider or application-consistent backups and record a restore test.
-
-## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
-
-- **Status:** needs_validation
-- **Confidence:** 0.69
-- **Assets:** postgres:analytics
-
-**Observation:** The asset is declared production and stateful, but no backup configuration is observed.
-
-**Expected:** Production state has a tested, declared recovery mechanism.
-
-**Actual:** backup_enabled=false or absent.
-
-**Attack path:** postgres:analytics → data loss → unrecoverable state
-
-**Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
-
-**Impact:** Deletion, corruption, or compromise may cause unrecoverable service data loss.
-
-**Remediation:** Enable provider or application-consistent backups and record a restore test.
-
-## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
-
-- **Status:** needs_validation
-- **Confidence:** 0.69
-- **Assets:** redis:prod
-
-**Observation:** The asset is declared production and stateful, but no backup configuration is observed.
-
-**Expected:** Production state has a tested, declared recovery mechanism.
-
-**Actual:** backup_enabled=false or absent.
-
-**Attack path:** redis:prod → data loss → unrecoverable state
-
-**Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
-
-**Impact:** Deletion, corruption, or compromise may cause unrecoverable service data loss.
-
-**Remediation:** Enable provider or application-consistent backups and record a restore test.
-
-## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
-
-- **Status:** needs_validation
-- **Confidence:** 0.69
-- **Assets:** server:public-pg
-
-**Observation:** The asset is declared production and stateful, but no backup configuration is observed.
-
-**Expected:** Production state has a tested, declared recovery mechanism.
-
-**Actual:** backup_enabled=false or absent.
-
-**Attack path:** server:public-pg → data loss → unrecoverable state
-
-**Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
-
-**Impact:** Deletion, corruption, or compromise may cause unrecoverable service data loss.
-
-**Remediation:** Enable provider or application-consistent backups and record a restore test.
-
-## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage
-
-- **Status:** needs_validation
-- **Confidence:** 0.69
-- **Assets:** server:public-redis
-
-**Observation:** The asset is declared production and stateful, but no backup configuration is observed.
-
-**Expected:** Production state has a tested, declared recovery mechanism.
-
-**Actual:** backup_enabled=false or absent.
-
-**Attack path:** server:public-redis → data loss → unrecoverable state
+**Attack path:** each listed asset → data loss → unrecoverable state
 
 **Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
 
@@ -581,7 +401,7 @@
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
-- **Assets:** server:admin
+- **Assets:** demo-admin
 
 **Observation:** An inbound rule admits a public source to TCP/22.
 
@@ -589,7 +409,7 @@
 
 **Actual:** TCP/22 admits ['0.0.0.0/0'].
 
-**Attack path:** internet → tcp/22 → server:admin
+**Attack path:** internet → tcp/22 → demo-admin
 
 **Verification:** The provider rule is attached, but listener and host-firewall evidence are incomplete; validate end-to-end reachability safely.
 
@@ -597,11 +417,11 @@
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 
-## UNSCORED · HETZ-NET-005 · Internet-facing server has no observed firewall control
+## UNSCORED · HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets)
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
-- **Assets:** server:no-firewall-a
+- **Assets:** demo-no-firewall-a, demo-no-firewall-b
 
 **Observation:** A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.
 
@@ -609,27 +429,7 @@
 
 **Actual:** Public IP present; firewall attachment and host firewall evidence absent.
 
-**Attack path:** internet → server:no-firewall-a
-
-**Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
-
-**Impact:** Services that bind broadly may be reachable without a network policy boundary.
-
-**Remediation:** Attach a least-privilege Hetzner firewall or provide verified host-firewall evidence.
-
-## UNSCORED · HETZ-NET-005 · Internet-facing server has no observed firewall control
-
-- **Status:** needs_validation
-- **Confidence:** 0.69
-- **Assets:** server:no-firewall-b
-
-**Observation:** A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.
-
-**Expected:** Every public server has an independently evidenced ingress control.
-
-**Actual:** Public IP present; firewall attachment and host firewall evidence absent.
-
-**Attack path:** internet → server:no-firewall-b
+**Attack path:** internet → each listed asset
 
 **Verification:** Absence evidence depends on complete collector coverage; validate the missing control with the owner.
 
@@ -641,7 +441,7 @@
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
-- **Assets:** postgres:analytics
+- **Assets:** demo-analytics-postgres
 
 **Observation:** pg_hba.conf trusts a broad network range.
 
@@ -649,7 +449,7 @@
 
 **Actual:** HBA rule 0 uses trust for ::/0.
 
-**Attack path:** ::/0 → postgres:analytics → postgres authentication
+**Attack path:** ::/0 → demo-analytics-postgres → postgres authentication
 
 **Verification:** The HBA rule is unsafe if selected, but no source-to-PostgreSQL network path is evidenced.
 
@@ -661,7 +461,7 @@
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
-- **Assets:** container:internal-api
+- **Assets:** demo-internal-api
 
 **Observation:** trivy reports CVE-DEMO-0001 in libdemo.
 
@@ -669,7 +469,7 @@
 
 **Actual:** Installed 1.0; fixed 1.1; internet_reachable=False.
 
-**Attack path:** container:internal-api → local vulnerable component
+**Attack path:** demo-internal-api → local vulnerable component
 
 **Verification:** Scanner signal is not enough to confirm runtime applicability; safely verify: runtime_present, affected_code_path.
 

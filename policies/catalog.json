@@ -12,6 +12,7 @@
     {"id":"HETZ-GOV-001","category":"hetzner","layers":["provider_protection","recovery"],"title":"Deletion protection disabled on production or foundational assets"},
     {"id":"HETZ-GOV-002","category":"hetzner","layers":["resource_metadata","ownership"],"title":"Missing ownership metadata"},
     {"id":"HETZ-GOV-003","category":"hetzner","layers":["provider_catalog","recovery"],"title":"Server runs a deprecated server type"},
+    {"id":"HETZ-NET-006","category":"hetzner","layers":["cloud_firewall","edge_proxy"],"title":"Web origin reachable directly, bypassing Cloudflare","absence_requires_validation":true},
     {"id":"HETZ-DKR-001","category":"docker","layers":["container","host"],"title":"Privileged container"},
     {"id":"HETZ-DKR-002","category":"docker","layers":["container","docker_daemon","host"],"title":"Docker socket control"},
     {"id":"HETZ-DKR-003","category":"docker","layers":["container","host_pid_namespace"],"title":"Host PID namespace"},

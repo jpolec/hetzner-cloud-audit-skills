@@ -9,6 +9,7 @@ import hashlib
 import ipaddress
 import json
 import os
+import re
 import urllib.parse
 import urllib.request
 from datetime import UTC, datetime, timedelta
@@ -149,7 +150,8 @@ class ReadOnlyHCloudCollector:
         if self.include_metrics:
             self._collect_server_metrics(raw_by_kind.get("server", []), coverage, collected_at)
 
-        normalized = _normalize_resources(raw_by_kind)
+        # Sanitize once so assets, labels, facts, and edge evidence all see redacted data.
+        normalized: dict[str, list[dict[str, Any]]] = _sanitize_resource(_normalize_resources(raw_by_kind))
         for kind, rows in normalized.items():
             for row in rows:
                 rid = str(row.get("id", row.get("name", "unknown")))
@@ -245,15 +247,28 @@ class ReadOnlyHCloudCollector:
         }
 
 
+EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+SECRET_KEYS = {"token", "password", "private_key", "secret", "user_data"}
+# Personal or account-identifying fields that no audit rule needs.
+PERSONAL_KEYS = {"dns_ptr", "username"}
+
+
 def _sanitize_resource(value: Any, key: str = "") -> Any:
-    """Redact key-like fields defensively before evidence can reach a report."""
-    secret_names = {"token", "password", "private_key", "secret", "user_data"}
-    if key.lower() in secret_names:
+    """Redact secrets and personal data before evidence can reach a snapshot or report."""
+    lowered = key.lower()
+    if lowered in SECRET_KEYS:
         return "[REDACTED]"
+    if lowered in PERSONAL_KEYS:
+        return "[REDACTED:personal]" if value not in (None, [], "") else value
+    if lowered == "public_key" and isinstance(value, str):
+        # Keep the key type for evidence; drop key material and the comment (often an email).
+        return (value.split()[0] + " [key material and comment omitted]") if value.strip() else value
     if isinstance(value, dict):
         return {str(k): _sanitize_resource(v, str(k)) for k, v in value.items()}
     if isinstance(value, list):
         return [_sanitize_resource(item, key) for item in value]
+    if isinstance(value, str):
+        return EMAIL_PATTERN.sub("[REDACTED:email]", value)
     return value
 
 

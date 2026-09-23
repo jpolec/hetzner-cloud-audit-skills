@@ -240,6 +240,36 @@ class V03Test(unittest.TestCase):
         self.assertEqual(len(answer["indirect_paths"]), 1)
         self.assertIn("indirect", answer["answer"])
 
+    def test_cloudflare_origin_bypass_needs_validation(self) -> None:
+        def web(name: str, sources: list[str]) -> Asset:
+            inbound = [
+                {"protocol": "tcp", "port_from": 443, "port_to": 443, "sources": sources},
+                {"protocol": "tcp", "port_from": None, "port_to": None, "sources": ["10.0.0.0/16", "100.64.0.0/10"]},
+            ]
+            return Asset(f"hcloud:server:{name}", "server", name, {"public_ip": True, "firewall_attached": True, "inbound": inbound}, source="hcloud_api")
+
+        snapshot = Snapshot(assets=[web("fronted", ["173.245.48.0/20"]), web("direct", ["0.0.0.0/0"])])
+        findings = [item for item in verify_all(hunt(snapshot), snapshot) if item.rule_id == "HETZ-NET-006"]
+        self.assertEqual([item.assets for item in findings], [["hcloud:server:direct"]])
+        self.assertEqual(findings[0].status.value, "needs_validation")
+        alone = Snapshot(assets=[web("direct", ["0.0.0.0/0"])])
+        self.assertFalse([item for item in hunt(alone) if item.rule_id == "HETZ-NET-006"])
+
+    def test_markdown_groups_single_asset_findings(self) -> None:
+        from hetzner_security.findings import render_markdown
+
+        servers = [
+            Asset(f"hcloud:server:{index}", "server", f"db-{index}", {"stateful": True, "backup_enabled": False}, {"environment": "production"}, "hcloud_api")
+            for index in range(3)
+        ]
+        snapshot = Snapshot(assets=servers)
+        findings = [item for item in verify_all(hunt(snapshot), snapshot) if item.rule_id == "HETZ-BCP-001"]
+        self.assertEqual(len(findings), 3)
+        report = render_markdown(findings, names={item.id: item.name for item in servers})
+        self.assertEqual(report.count("HETZ-BCP-001"), 1)
+        self.assertIn("(3 assets)", report)
+        self.assertIn("db-0, db-1, db-2", report)
+
     def test_deprecated_server_type_is_reported(self) -> None:
         server = Asset(
             "hcloud:server:1",
