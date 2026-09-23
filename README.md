@@ -161,6 +161,8 @@ Every audit opens with three things:
 3. **Recommended actions**, ranked. Each one has a saving, an **evidence level** (HIGH, MEDIUM, or LOW, with the reason), the risk of acting, and the concrete next step. For example:
    - *"Migrate jobs-1 off deprecated cx22. The same-family successor is unavailable in this location right now. Available replacement: cpx22, +15.00/mo. ARM alternative: cax11, +1.50/mo, which needs multi-arch images and a benchmark."*
 
+Where the fix is a plain `hcloud` command (deletion protection, labels, removing an all-ports rule), the action includes a **suggested command** for a human to review. Such commands need a Read & Write token, so `hetzner-audit` never runs them, and provider names are sanitized so a crafted name cannot inject shell syntax.
+
 The detailed findings follow, each with its evidence chain, impact, and remediation. Indirect paths are kept separate from direct exposure: a database reachable only by pivoting through another host is not reported as Internet-exposed.
 
 ---
@@ -178,7 +180,7 @@ Out of the box, the API-only layer checks:
   - public servers with no firewall.
 - **Edge:** web origins open to any address while peer servers accept only Cloudflare (the bundled Cloudflare list is dated and checkable).
 - **Lateral movement:** paths from unrelated workloads to database, identity, and secrets hosts on shared private networks.
-- **Load balancers:**
+- **Load balancers:** Internet → load balancer → target edges in the attack graph, and backends that are also reachable directly. Plus:
   - plain HTTP;
   - HTTP without a redirect to HTTPS;
   - unhealthy targets;
@@ -187,6 +189,7 @@ Out of the box, the API-only layer checks:
 - **Certificates:** expired, expiring soon, failing to renew, or unused.
 - **DNS:** records pointing at IPs the project does not own (takeover risk) or at private addresses.
 - **Storage Boxes:** reachable from outside Hetzner, or without a snapshot plan.
+- **SSH keys:** weak algorithms (DSA, RSA below 3072 bits) and keys older than two years. Key strength is read before the key material is redacted.
 - **Lifecycle and resilience:**
   - operating systems past end of support;
   - deprecated server types;
@@ -199,6 +202,8 @@ Out of the box, the API-only layer checks:
   - environment-policy violations.
 
 Mark databases and secrets hosts with the label `sensitivity=high` so detection does not depend on server names.
+
+**You stay in control of the noise.** Add `audit.ignore=true`, or `audit.ignore.HETZ-BCP-001=true` for a single rule, to a resource that is deliberately different, such as a throwaway build box. The finding moves to a **Suppressed by owner labels** section of the report instead of disappearing silently.
 
 > <img src="https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/icons/warning.svg" width="22" height="22" alt=""> **Hetzner Cloud Firewalls do not filter private network traffic** ([Hetzner FAQ](https://docs.hetzner.com/cloud/firewalls/faq/)). Every server on a private network reaches every port on every other member, and firewall rules with private source ranges have no effect on that traffic. `hetzner-audit` models it that way, so only host-firewall evidence can mark a private path as blocked.
 
@@ -229,6 +234,7 @@ hetzner-audit map --format svg --view cost --output cost.svg
 
 - **Identifiable waste:** unattached volumes, unassigned IPs, stopped-but-billed servers, and stale snapshots. These need no telemetry.
 - **Optimization candidates:** rightsizing and x86 → ARM moves based on 30-day CPU p95. Only one candidate per server counts toward the total, so savings are never double-counted.
+- **Traffic:** outgoing traffic against each server's included quota, overage already incurred this period, and an action when a server passes 80%.
 - **Structure signals:** spend concentration, storage-heavy servers (volumes above half the compute cost), and deprecated types with a replacement and cost delta.
 - **Confirmed savings stay at zero** until RAM, disk, owner intent, and rollback are evidenced. The tool reports missing proof instead of inflating the number.
 
@@ -280,7 +286,7 @@ hetzner-audit snapshot --output after.json --read-only --no-ssh
 hetzner-audit diff before.json after.json --fail-on-regression
 ```
 
-The diff reports new public edges, asset and fact changes, and collector coverage regressions. A resource that failed to collect is not reported as deleted. Each fact records its source, observation time, collector version, and run ID.
+The diff compares **sets of allowed flows**, not graph edges: for every server and load balancer, per address family, protocol, and source class (world, wide CIDR, allow-list). Widening `80-443` to `80-8443`, or opening a port only on IPv6, is a regression. A new public IP behind a deny-all firewall is not. It also reports asset and fact changes and collector coverage regressions. A resource that failed to collect is not reported as deleted. Each fact records its source, observation time, collector version, and run ID.
 
 ```yaml
 - uses: jpolec/hetzner-cloud-audit-skills@v0.5.0
@@ -371,7 +377,9 @@ More detail: [architecture](https://github.com/jpolec/hetzner-cloud-audit-skills
 | Public exposure (~30 services), firewall quality, Cloudflare bypass | Beta, tested on a live project |
 | Private-network blast radius | Beta (host/runtime stays `needs_validation`) |
 | Storage Box exposure and snapshot plan; label governance | Beta, tested on a live project |
-| Load balancers, certificates, DNS, OS lifecycle, placement | Beta, **fixture-tested only** (positive case and clean twin) |
+| Load balancers (incl. attack-graph edges and bypass), certificates, DNS, OS lifecycle, placement | Beta, **fixture-tested only** (positive case and clean twin) |
+| SSH key strength and age; traffic quota and overage | Beta, tested on a live project |
+| Semantic exposure diff (flow sets, not edge IDs) | Beta, property-tested against brute force |
 | Recommended actions with evidence levels; three diagrams | Beta |
 | Snapshots and diff; GitHub Action with `fail-on`; SARIF | Beta |
 | Cost: waste, concentration, rightsizing and ARM candidates | Experimental |
@@ -379,14 +387,21 @@ More detail: [architecture](https://github.com/jpolec/hetzner-cloud-audit-skills
 ### What it is not (yet)
 
 - **Not a host audit.** Without host evidence it cannot see UFW or nftables, sshd settings, Docker-published ports (which bypass UFW), listeners, `pg_hba`, or Redis ACLs. "No path found" is not proof of isolation when host coverage is empty. A host evidence bundle is next on the roadmap.
-- **One token means one project.** Hetzner Robot (dedicated servers), vSwitch, Object Storage, console members and 2FA, and cross-project trust are out of scope.
-- **Not Terraform drift or a Kubernetes audit yet.** Both are on the roadmap, and not claimed until they ship with clean-twin fixtures.
+- **One token means one project, for now.** Multiple projects, Hetzner Robot (dedicated servers and vSwitch), Object Storage, Kubernetes correlation, and a console members/2FA checklist are planned for v0.7. Each is a separate API with its own credentials.
+- **Not Terraform drift yet.** It is planned for v0.6, together with the host evidence bundle, and not claimed until it ships with clean-twin fixtures.
 - **Not a compliance mapping.** There is no CIS, NIST, or C5 matrix.
-- **Not a billing tool.** Costs use catalog prices without VAT or traffic, and are never reconciled with invoices.
+- **Not a billing tool.** Costs use net catalog prices without VAT. Traffic covers only overage already incurred this period, and nothing is reconciled with invoices.
 
 Use it for topology, public exposure, private-network blast radius, firewall drift, and a ranked fix list. Do not treat it as the only security or FinOps audit.
 
-See the [roadmap](https://github.com/jpolec/hetzner-cloud-audit-skills/blob/main/docs/roadmap.md). The synthetic benchmark plants 33 security problems: 23 meet the deterministic evidence contract and 10 intentionally remain `needs_validation`. This measures fixture behavior, not real-world detection accuracy ([methodology](https://github.com/jpolec/hetzner-cloud-audit-skills/blob/main/benchmarks/README.md)).
+See the [roadmap](https://github.com/jpolec/hetzner-cloud-audit-skills/blob/main/docs/roadmap.md).
+
+Two benchmarks are included:
+
+- **Fixture benchmark:** plants 33 security problems. 23 meet the deterministic evidence contract and 10 intentionally remain `needs_validation`.
+- **Generated benchmark:** 150 random projects, each mixing planted issues with clean twins. It scores ten rules on true positives, false positives, and false negatives.
+
+Both measure the rules against their specification, not real-world detection accuracy ([methodology](https://github.com/jpolec/hetzner-cloud-audit-skills/blob/main/benchmarks/README.md)).
 
 ---
 

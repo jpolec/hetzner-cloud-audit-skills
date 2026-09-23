@@ -65,20 +65,31 @@ Driven by an external review that noted the collector was wide and the analyzer 
 - CI honesty: `--fail-on none|confirmed|confirmed-high`; hypotheses never fail a job.
 - Retry/backoff with `Retry-After`, capped pagination and path search, and Markdown/Mermaid escaping of provider text.
 - Cloudflare range provenance and a freshness check.
+- Core correctness from an architecture review: semantic flow-set diff, listener ∩ host-firewall confirmation, load balancers in the attack graph, stateful detection, and an honest metrics window.
+- SSH key strength and age, `audit.ignore` owner labels, suggested `hcloud` commands, traffic quota and overage, and a generated TP/FP/FN benchmark.
 
-## v0.6 — next
+## v0.6 — host evidence and drift
 
-1. **Host evidence bundle** (`host-bundle`): an opt-in, versioned read-only allowlist covering UFW/nftables, listeners, sshd, Docker published ports (UFW bypass), `pg_hba`, and Redis. It turns `cloud_path_present` into `reachable` or `rejected`.
+1. **Host evidence bundle** (`host-bundle`): an opt-in, versioned read-only allowlist covering UFW/nftables, `ss` listeners, sshd effective config, Docker published ports (UFW bypass), capabilities and mounts, PostgreSQL `pg_hba` (first-match order), and Redis bind and ACL. It turns `cloud_path_present` into `reachable` or `rejected` through flow intersection: cloud firewall ∩ host firewall ∩ listener ∩ application policy.
 2. **Terraform ↔ runtime drift** from `terraform show -json` and saved plans.
-3. **Anonymized real-response fixtures** for load balancers, certificates, and DNS, to replace the synthetic-only coverage.
-4. **Hetzner `/actions` history** as drift signals (`disable_protection`, `remove_from_resource`, `change_dns_ptr`).
-5. **Cost evidence**: RAM and disk p95 from node exporter or Prometheus, and traffic.
+3. **Hetzner `/actions` history** as drift signals (`disable_protection`, `remove_from_resource`, `change_dns_ptr`, `rebuild`).
+4. **Anonymized real-response fixtures** for load balancers, certificates, and DNS.
+5. **Cost evidence**: RAM and disk p95 from node exporter or Prometheus, sample coverage and seasonality, and separate theoretical, expected, and verified savings.
+
+## v0.7 — beyond one Cloud project
+
+Each item is a separate API with its own credentials, so each ships as its own read-only collector feeding the same fact → flow → finding engine:
+
+1. **Multi-project**: several read-only tokens combined into one report, with trust boundaries between projects.
+2. **Hetzner Robot** (dedicated servers, vSwitch, Robot firewall) through the Robot webservice with a read-only user.
+3. **Object Storage** (S3 API): public buckets, bucket policies, and access keys.
+4. **Kubernetes on Hetzner**, correlation only: kube-hetzner, CCM, and CSI; public API server, kubelet, etcd, NodePort, privileged pods, and hostPath.
+5. **Console members and 2FA** have no API, so they get a guided checklist the agent walks through with the owner.
 
 ## Later
 
 - Cross-domain architecture recommendations that combine cost, exposure, and recovery into one reviewed change.
 - An independent agent verifier that sees only the finding, schema, and evidence, never the hunter's reasoning.
-- Kubernetes on Hetzner: correlation only (kube-hetzner, CCM, CSI, public API server, NodePort, node firewalls), not a full Kubernetes audit.
 
 ## Not planned for now
 

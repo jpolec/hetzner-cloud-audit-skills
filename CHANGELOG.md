@@ -25,16 +25,32 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - `--fail-on none|confirmed|confirmed-high` for audit commands and the GitHub Action. `needs_validation` never fails a job.
 - `scripts/check_cloudflare_ranges.py` and `CLOUDFLARE_RANGES_AS_OF`, which is cited in `HETZ-NET-006` evidence.
 
+- Load balancers in the attack graph (Internet → LB listen port → target destination port, including label-selector targets). `ask` treats LB forwarding as direct exposure. `HETZ-LB-006` flags backends reachable directly.
+- `flows.py`: an interval `PortSet` algebra and effective exposure per asset, keyed by (address family, protocol, source class).
+- SSH key strength and age (`HETZ-KEY-001/002`). The collector records the algorithm and bits before redacting key material.
+- `audit.ignore=true` and `audit.ignore.<RULE-ID>=true` owner labels. Suppressed findings are listed in the report.
+- Suggested `hcloud` commands in recommended actions (deletion protection, labels, all-ports rules). They are for a human to review and are never run, and provider names are sanitized for the shell.
+- Traffic usage against each server's included quota, overage already incurred, and an action above 80%.
+- A generated-project benchmark (`scripts/benchmark_generated.py`): 150 random projects with ground truth, scored on TP/FP/FN per rule, plus a regression test.
+
 ### Fixed
 
 - `audit --format json|sarif` crashed when `HETZ-NET-006` was present, because its evidence contained a set.
 - `HETZ-DNS-002` no longer treats documentation ranges as private.
+
+- `diff` compares sets of allowed flows instead of edge identities. Widened port ranges and IPv6-only openings are now regressions. A new public IP behind a deny-all firewall no longer is.
+- `HETZ-XLY-002` was confirmed when host-firewall and listener evidence merely existed. It now needs a listening port that the host firewall admits, and is rejected otherwise.
+- Servers count as stateful through database-like roles, names, or a `stateful` label, not only through attached volumes.
+- Firewall assets from the API are no longer evaluated as loose rule sets. Their rules count only as the effective policy of the servers they are applied to.
+- Cost recommendations record the real observation window and sample count. Rightsizing is skipped, with a data gap noted, when CPU data covers less than 80% of the requested window.
 
 ### Security
 
 - Provider-sourced text is escaped in Markdown and entity-encoded in Mermaid, so crafted names cannot inject links, HTML, or headings into reports read by people or agents.
 - Collector requests retry 429 and 5xx responses with jitter and honor `Retry-After`. Pagination is capped at 1,000 pages and attack-path search at 50 paths.
 - CI audits the toolchain with OSV before installing the package, so PyPI outages no longer fail builds.
+- GitHub Actions in `action.yml` and CI are pinned to commit SHAs.
+- Input snapshots are capped at 256 MiB, 200k assets, and 1M edges.
 
 ### Changed
 

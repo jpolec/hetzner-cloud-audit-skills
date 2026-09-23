@@ -16,9 +16,25 @@ v0.5.0 closes the gap between what the collector gathers and what the analyzer r
 - **Label governance:** servers without `environment` or `role` labels are reported, because policy silently skipped them. Add `sensitivity=high` to mark sensitive hosts explicitly.
 - **CI honesty:** `--fail-on confirmed|confirmed-high` fails only on confirmed findings. Hypotheses never fail a job and stay at SARIF level `none`.
 
+## Core correctness (from an external architecture review)
+
+- **Semantic exposure diff:** `diff` now subtracts allowed-flow sets (`AFTER_ALLOWED` minus `BEFORE_ALLOWED`) per address family, protocol, and source class. Range widening and IPv6-only openings are caught. A new public IP behind a deny-all firewall is not a regression. The logic is property-tested against brute force.
+- **Lateral-path confirmation** needs a listening port that the host firewall admits. Two non-empty but disjoint lists no longer confirm a path.
+- **Load balancers in the attack graph**, plus detection of backends reachable directly around the LB.
+- **Stateful detection** beyond attached volumes, and the **real metrics window** in cost recommendations, with a telemetry-coverage gate.
+
+## Also new
+
+- SSH key strength and age rules.
+- `audit.ignore` owner labels, with suppressions always listed.
+- Suggested `hcloud` commands in actions, for a human to review.
+- Traffic quota and overage.
+- A generated benchmark: 150 projects scored on TP/FP/FN.
+
 ## Hardening
 
-- Retry with backoff on 429 and 5xx responses, honoring `Retry-After`; capped pagination and path search.
+- Retry with backoff on 429 and 5xx responses, honoring `Retry-After`; capped pagination and path search; snapshot size limits.
+- GitHub Actions pinned to commit SHAs.
 - Markdown and Mermaid escaping of provider text, which protects reports and agents from crafted names.
 - JSON and SARIF output no longer crash on Cloudflare-bypass findings.
 - The Cloudflare range list is dated and checkable (`scripts/check_cloudflare_ranges.py`).
