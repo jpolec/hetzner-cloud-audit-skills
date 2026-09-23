@@ -11,6 +11,7 @@ from typing import Any
 
 from .cost import _available, _location, _type_price
 from .models import Asset, Finding, FindingStatus, Snapshot
+from .text import md
 
 # Cost rules that need no utilization telemetry: the resource is billed and unused as observed.
 WASTE_RULES = {"HETZ-COST-001", "HETZ-COST-004", "HETZ-COST-005", "HETZ-COST-006", "HETZ-COST-007"}
@@ -309,13 +310,13 @@ def render_actions_markdown(actions: list[dict[str, Any]], currency: str = "EUR"
     for item in actions:
         saving = f"{currency} {item['saving_monthly']:.2f}/mo" if item["saving_monthly"] else "TBD"
         lines += [
-            f"### {item['rank']}. {item['title']}",
+            f"### {item['rank']}. {md(item['title'])}",
             "",
-            f"**Saving:** {saving} · **Evidence:** {item['evidence_level']} ({item['evidence_reason']}) · **Risk of acting:** {item['risk']}",
+            f"**Saving:** {saving} · **Evidence:** {item['evidence_level']} ({md(item['evidence_reason'])}) · **Risk of acting:** {md(item['risk'])}",
             "",
-            item["why"],
+            md(item["why"]),
             "",
-            f"**Next step:** {item['next_step']}",
+            f"**Next step:** {md(item['next_step'])}",
             "",
         ]
     return lines
@@ -323,6 +324,6 @@ def render_actions_markdown(actions: list[dict[str, Any]], currency: str = "EUR"
 
 def render_coverage_markdown(rows: list[tuple[str, int, str]], notes: list[str]) -> list[str]:
     lines = ["### What this audit knows", "", "| Coverage | | Basis |", "|---|---|---|"]
-    lines += [f"| {name} | {percent}% | {basis} |" for name, percent, basis in rows]
-    lines += ["", *[f"- {note}" for note in notes], ""]
+    lines += [f"| {name} | {percent}% | {md(basis)} |" for name, percent, basis in rows]
+    lines += ["", *[f"- {md(note)}" for note in notes], ""]
     return lines

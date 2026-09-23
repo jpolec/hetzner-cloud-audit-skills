@@ -11,6 +11,7 @@ from html import escape
 from typing import Any
 
 from .models import Asset, Snapshot
+from .text import md
 
 # Published at https://www.cloudflare.com/ips/ ; used only to label firewall sources.
 # Re-check with scripts/check_cloudflare_ranges.py and bump the date when it changes.
@@ -247,6 +248,12 @@ def _group_title(key: str) -> str:
     return next((title for group, title, _words in GROUPS if group == key), "Other")
 
 
+def _mermaid_text(value: object) -> str:
+    """Entity-encode label text so names cannot close a Mermaid label or inject markup or links."""
+    text = escape(" ".join(str(value).split()), quote=True)
+    return text.replace("[", "&#91;").replace("]", "&#93;").replace("|", "&#124;").replace("(", "&#40;").replace(")", "&#41;")
+
+
 def _node_id(name: str) -> str:
     return "n_" + "".join(char if char.isalnum() else "_" for char in name)
 
@@ -267,7 +274,7 @@ def render_mermaid(topology: dict[str, Any]) -> str:
     for section_id, section_title, members in sections:
         if not members:
             continue
-        lines.append(f'  subgraph {section_id}["{escape(section_title)}"]')
+        lines.append(f'  subgraph {section_id}["{_mermaid_text(section_title)}"]')
         groups: dict[str, list[dict[str, Any]]] = {}
         for server in members:
             groups.setdefault(server["group"], []).append(server)
@@ -278,7 +285,7 @@ def render_mermaid(topology: dict[str, Any]) -> str:
             lines.append("      direction TB")
             for server in groups[key]:
                 detail = " · ".join(item for item in (server["role"], server["type"], server["location"]) if item)
-                lines.append(f'      {_node_id(server["name"])}["{server["name"]}<br/><small>{escape(detail)}</small>"]')
+                lines.append(f'      {_node_id(server["name"])}["{_mermaid_text(server["name"])}<br/><small>{_mermaid_text(detail)}</small>"]')
             lines.append("    end")
         lines.append("  end")
     for server in topology["servers"]:
@@ -348,9 +355,9 @@ def render_topology_markdown(topology: dict[str, Any]) -> str:
         private = private or "none"
         server_type = server["type"] + (" (deprecated)" if server["deprecated_type"] else "")
         lines.append(
-            f"| {server['name']} | {_group_title(server['group'])} | {server_type} | {server['exposure']} | {public} | {private} |"
+            f"| {md(server['name'])} | {_group_title(server['group'])} | {md(server_type)} | {server['exposure']} | {md(public)} | {md(private)} |"
         )
     if topology["unattached_volumes"]:
-        lines.extend(["", "Unattached volumes: " + ", ".join(topology["unattached_volumes"])])
+        lines.extend(["", "Unattached volumes: " + ", ".join(md(name) for name in topology["unattached_volumes"])])
     lines.extend(["", "Public IP addresses are intentionally omitted. The map shows provider firewall intent, not host or application controls."])
     return "\n".join(lines)

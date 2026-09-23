@@ -222,9 +222,9 @@ Provider backups are off.
 
 **Observation:** Declared and observed source ranges differ for a security-sensitive port.
 
-**Expected:** TCP/22 sources equal the declared set ['100.64.0.0/10'].
+**Expected:** TCP/22 sources equal the declared set \['100.64.0.0/10'\].
 
-**Actual:** Unexpected observed sources: ['0.0.0.0/0'].
+**Actual:** Unexpected observed sources: \['0.0.0.0/0'\].
 
 **Attack path:** 0.0.0.0/0 → tcp/22 → provider-policy:server:admin
 
@@ -244,13 +244,13 @@ Provider backups are off.
 
 **Expected:** Management and data services are reachable only from declared trusted sources.
 
-**Actual:** TCP/2375 admits ['0.0.0.0/0'].
+**Actual:** TCP/2375 admits \['0.0.0.0/0'\].
 
 **Attack path:** internet → tcp/2375 → demo-docker-api
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
-**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
+**Impact:** An unauthenticated network peer can reach a sensitive service boundary.
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 
@@ -264,13 +264,13 @@ Provider backups are off.
 
 **Expected:** Management and data services are reachable only from declared trusted sources.
 
-**Actual:** TCP/6443 admits ['::/0'].
+**Actual:** TCP/6443 admits \['::/0'\].
 
 **Attack path:** internet → tcp/6443 → demo-kube-api
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
-**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
+**Impact:** An unauthenticated network peer can reach a sensitive service boundary.
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 
@@ -284,13 +284,13 @@ Provider backups are off.
 
 **Expected:** Management and data services are reachable only from declared trusted sources.
 
-**Actual:** TCP/5432 admits ['0.0.0.0/0'].
+**Actual:** TCP/5432 admits \['0.0.0.0/0'\].
 
 **Attack path:** internet → tcp/5432 → demo-public-pg
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
-**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
+**Impact:** An unauthenticated network peer can reach a sensitive service boundary.
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 
@@ -304,13 +304,13 @@ Provider backups are off.
 
 **Expected:** Management and data services are reachable only from declared trusted sources.
 
-**Actual:** TCP/6379 admits ['0.0.0.0/0'].
+**Actual:** TCP/6379 admits \['0.0.0.0/0'\].
 
 **Attack path:** internet → tcp/6379 → demo-public-redis
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 
-**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
+**Impact:** An unauthenticated network peer can reach a sensitive service boundary.
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 
@@ -344,7 +344,7 @@ Provider backups are off.
 
 **Expected:** Only explicitly designated break-glass or administrative roles are superusers.
 
-**Actual:** Unexpected superusers: ['app', 'migration'].
+**Actual:** Unexpected superusers: \['app', 'migration'\].
 
 **Attack path:** database credentials → app → migration → demo-prod-postgres
 
@@ -424,7 +424,7 @@ Provider backups are off.
 
 **Expected:** staging and prod data planes are isolated.
 
-**Actual:** A TCP/5432 path exists: container:stage-worker -> network:shared -> postgres:prod
+**Actual:** A TCP/5432 path exists: container:stage-worker -\> network:shared -\> postgres:prod
 
 **Attack path:** demo-stage-worker → demo-shared → demo-prod-postgres
 
@@ -444,7 +444,7 @@ Provider backups are off.
 
 **Expected:** dev and prod data planes are isolated.
 
-**Actual:** A TCP/6379 path exists: container:ops-agent -> network:shared -> redis:prod
+**Actual:** A TCP/6379 path exists: container:ops-agent -\> network:shared -\> redis:prod
 
 **Attack path:** demo-ops-agent → demo-shared → demo-prod-redis
 
@@ -464,7 +464,7 @@ Provider backups are off.
 
 **Expected:** staging and prod data planes are isolated.
 
-**Actual:** A TCP/6379 path exists: container:stage-worker -> network:shared -> redis:prod
+**Actual:** A TCP/6379 path exists: container:stage-worker -\> network:shared -\> redis:prod
 
 **Attack path:** demo-stage-worker → demo-shared → demo-prod-redis
 
@@ -484,7 +484,7 @@ Provider backups are off.
 
 **Expected:** dev and prod data planes are isolated.
 
-**Actual:** A TCP/5432 path exists: container:ops-agent -> network:shared -> postgres:prod
+**Actual:** A TCP/5432 path exists: container:ops-agent -\> network:shared -\> postgres:prod
 
 **Attack path:** demo-ops-agent → demo-shared → demo-prod-postgres
 
@@ -524,13 +524,13 @@ Provider backups are off.
 
 **Expected:** Management and data services are reachable only from declared trusted sources.
 
-**Actual:** TCP/22 admits ['0.0.0.0/0'].
+**Actual:** TCP/22 admits \['0.0.0.0/0'\].
 
 **Attack path:** internet → tcp/22 → demo-admin
 
 **Verification:** The provider rule is attached, but listener and host-firewall evidence are incomplete; validate end-to-end reachability safely.
 
-**Impact:** An unauthenticated network peer can reach a sensitive authentication boundary.
+**Impact:** An unauthenticated network peer can reach a sensitive service boundary.
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 

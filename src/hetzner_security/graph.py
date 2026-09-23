@@ -6,6 +6,7 @@ from collections import defaultdict, deque
 from typing import Any
 
 from .models import Asset, Edge, Snapshot
+from .text import md
 
 
 class AttackGraph:
@@ -197,7 +198,7 @@ def render_path_markdown(result: dict[str, Any], names: dict[str, str] | None = 
     lookup = names or {}
 
     def label(value: str) -> str:
-        return lookup.get(value, value)
+        return md(lookup.get(value, value))
 
     lines = [
         "# Hetzner Attack Path",
@@ -214,7 +215,7 @@ def render_path_markdown(result: dict[str, Any], names: dict[str, str] | None = 
     if result.get("evidence"):
         lines.extend(["", "## Evidence", ""])
         for item in result["evidence"]:
-            lines.append(f"- `{item['kind']}` · `{label(item['asset_id'])}` · `{item.get('path') or 'normalized graph'}`")
+            lines.append(f"- `{md(item['kind'])}` · `{label(item['asset_id'])}` · `{item.get('path') or 'normalized graph'}`")
     return "\n".join(lines)
 
 

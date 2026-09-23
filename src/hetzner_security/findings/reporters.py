@@ -6,6 +6,7 @@ import json
 from typing import Any
 
 from ..models import Finding, FindingStatus
+from ..text import md
 from .summary import render_summary_markdown
 
 
@@ -23,7 +24,7 @@ def render_markdown(
     lookup = names or {}
 
     def label(value: str) -> str:
-        return lookup.get(value, value)
+        return md(lookup.get(value, value))
 
     lines = ["# Hetzner Security Audit", ""]
     confirmed = [finding for finding in findings if finding.status == FindingStatus.CONFIRMED]
@@ -90,26 +91,26 @@ def render_markdown(
             path = " → ".join(label(step) for step in finding.attack_path)
         lines.extend(
             [
-                f"## {(finding.severity.value.upper() if finding.severity else 'UNSCORED')} · {finding.rule_id} · {finding.title}"
+                f"## {(finding.severity.value.upper() if finding.severity else 'UNSCORED')} · {finding.rule_id} · {md(finding.title)}"
                 + (f" ({len(members)} assets)" if len(members) > 1 else ""),
                 "",
                 f"- **Status:** {finding.status.value}",
                 f"- **Confidence:** {min(member.confidence for member in members):.2f}",
                 f"- **Assets:** {', '.join(label(asset) for asset in assets)}",
                 "",
-                "**Observation:** " + finding.observation,
+                "**Observation:** " + md(finding.observation),
                 "",
-                "**Expected:** " + finding.expected_state,
+                "**Expected:** " + md(finding.expected_state),
                 "",
-                "**Actual:** " + finding.actual_state,
+                "**Actual:** " + md(finding.actual_state),
                 "",
                 "**Attack path:** " + path,
                 "",
-                "**Verification:** " + finding.verification.notes,
+                "**Verification:** " + md(finding.verification.notes),
                 "",
-                "**Impact:** " + finding.impact,
+                "**Impact:** " + md(finding.impact),
                 "",
-                "**Remediation:** " + finding.remediation,
+                "**Remediation:** " + md(finding.remediation),
                 "",
             ]
         )

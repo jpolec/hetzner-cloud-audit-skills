@@ -920,7 +920,7 @@
       "prerequisites": [
         "The rule is attached to the target and no downstream firewall blocks it."
       ],
-      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "impact": "An unauthenticated network peer can reach a sensitive service boundary.",
       "verification": {
         "method": "independent completeness challenge",
         "result": "needs_validation",
@@ -1008,7 +1008,7 @@
       "prerequisites": [
         "The rule is attached to the target and no downstream firewall blocks it."
       ],
-      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "impact": "An unauthenticated network peer can reach a sensitive service boundary.",
       "verification": {
         "method": "deterministic evidence-contract verification",
         "result": "confirmed",
@@ -1118,7 +1118,7 @@
       "prerequisites": [
         "The rule is attached to the target and no downstream firewall blocks it."
       ],
-      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "impact": "An unauthenticated network peer can reach a sensitive service boundary.",
       "verification": {
         "method": "deterministic evidence-contract verification",
         "result": "confirmed",
@@ -1228,7 +1228,7 @@
       "prerequisites": [
         "The rule is attached to the target and no downstream firewall blocks it."
       ],
-      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "impact": "An unauthenticated network peer can reach a sensitive service boundary.",
       "verification": {
         "method": "deterministic evidence-contract verification",
         "result": "confirmed",
@@ -1338,7 +1338,7 @@
       "prerequisites": [
         "The rule is attached to the target and no downstream firewall blocks it."
       ],
-      "impact": "An unauthenticated network peer can reach a sensitive authentication boundary.",
+      "impact": "An unauthenticated network peer can reach a sensitive service boundary.",
       "verification": {
         "method": "deterministic evidence-contract verification",
         "result": "confirmed",

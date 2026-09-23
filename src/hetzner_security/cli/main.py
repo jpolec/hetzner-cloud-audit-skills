@@ -22,6 +22,7 @@ from ..graph import AttackGraph, render_path_markdown
 from ..models import Finding, FindingStatus, Severity, Snapshot
 from ..policy import apply_policy, load_policy
 from ..temporal import diff_snapshots, render_diff_markdown
+from ..text import md
 from ..topology import build_topology, render_mermaid, render_topology_markdown
 from ..verification import verify_all
 
@@ -245,10 +246,10 @@ def _write(output: str, path: Path | None) -> None:
 
 
 def _explain_markdown(finding: Finding) -> str:
-    lines = [f"# {finding.id}", "", f"**{finding.status.value.upper()} · {finding.rule_id} · {finding.title}**", "", f"Why: {finding.observation}", "", "## Evidence chain", ""]
+    lines = [f"# {finding.id}", "", f"**{finding.status.value.upper()} · {finding.rule_id} · {md(finding.title)}**", "", f"Why: {md(finding.observation)}", "", "## Evidence chain", ""]
     for evidence in finding.evidence:
-        lines.append(f"- ✓ `{evidence.kind}` · `{evidence.asset_id}` · `{evidence.path or 'normalized evidence'}`")
-    lines.extend(["", "## Attack path", "", " → ".join(f"`{item}`" for item in finding.attack_path), "", "## Verification challenge", "", finding.verification.notes, "", "## Remediation", "", finding.remediation])
+        lines.append(f"- ✓ `{md(evidence.kind)}` · `{md(evidence.asset_id)}` · `{md(evidence.path or 'normalized evidence')}`")
+    lines.extend(["", "## Attack path", "", " → ".join(f"`{md(item)}`" for item in finding.attack_path), "", "## Verification challenge", "", md(finding.verification.notes), "", "## Remediation", "", md(finding.remediation)])
     return "\n".join(lines)
 
 

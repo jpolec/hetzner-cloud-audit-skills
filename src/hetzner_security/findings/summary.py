@@ -16,6 +16,7 @@ from ..actions import (
 from ..actions import coverage as coverage_rows
 from ..cost import analyze_cost
 from ..models import Asset, Finding, FindingStatus, Snapshot
+from ..text import md
 
 SCOPE_TYPES = (
     ("server", "server", "servers"),
@@ -150,23 +151,23 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
             ),
             ("Confirmed savings", f"{currency} {cost['confirmed_monthly']:,.2f}/month (confirmation needs RAM, disk, owner intent, rollback)"),
         ]
-    lines = ["## At a glance", "", "| | |", "|---|---|", *(f"| {name} | {value} |" for name, value in rows), ""]
+    lines = ["## At a glance", "", "| | |", "|---|---|", *(f"| {name} | {md(value).replace(chr(92) + '`', '`')} |" for name, value in rows), ""]
     lines += render_coverage_markdown(summary.get("coverage", []), summary.get("provenance", []))
     lines += render_actions_markdown(summary.get("actions", []), cost["currency"] if cost else "EUR")
     lines += ["## Findings by status", "", "### Confirmed", ""]
     lines += [
-        f"- **{(item['severity'] or 'unscored').upper()}** · {item['rule_id']} · {item['title']}"
+        f"- **{(item['severity'] or 'unscored').upper()}** · {item['rule_id']} · {md(item['title'])}"
         + _affected(item)
         + f" · evidence {item['evidence'][0]}"
         for item in confirmed
     ] or ["- None."]
     lines += ["", "### Needs host or runtime validation", ""]
     lines += [
-        f"- {item['rule_id']} · {item['title']}" + _affected(item) + f" · evidence {item['evidence'][0]} ({item['evidence'][1]})"
+        f"- {item['rule_id']} · {md(item['title'])}" + _affected(item) + f" · evidence {item['evidence'][0]} ({item['evidence'][1]})"
         for item in pending
     ] or ["- None."]
     lines += ["", "### Collection gaps", ""]
-    lines += [f"- Endpoint {name}" for name in summary["failed_endpoints"]] or ["- Every Hetzner endpoint was collected."]
+    lines += [f"- Endpoint {md(name)}" for name in summary["failed_endpoints"]] or ["- Every Hetzner endpoint was collected."]
     lines += [
         f"- {name}: not collected. The Hetzner API cannot see it; related findings stay `needs_validation`."
         for name in summary["missing_layers"]
