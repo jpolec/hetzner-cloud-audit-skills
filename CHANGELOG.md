@@ -4,6 +4,19 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- `HETZ-GOV-003` reports servers running a deprecated Hetzner server type.
+- Markdown audit and `path` output show asset names instead of numeric provider IDs.
+
+### Fixed
+
+- A public IP address no longer counts as permitted traffic when a path is traced. `ask` previously reported private-network paths as Internet exposure; it now separates direct exposure from indirect pivots through a publicly reachable host.
+
+### Changed
+
+- README is restructured around a quick start, a no-token demo, and a safety model.
+
 ## [0.3.0] - 2026-09-22
 
 ### Added

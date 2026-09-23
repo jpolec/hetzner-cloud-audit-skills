@@ -584,6 +584,45 @@ def ownership_metadata_gap(snapshot: Snapshot, graph: AttackGraph) -> list[Findi
     ]
 
 
+def deprecated_server_type(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    affected = [
+        asset
+        for asset in snapshot.assets
+        if asset.type == "server"
+        and isinstance(asset.properties.get("server_type"), dict)
+        and asset.properties["server_type"].get("deprecated") is True
+    ]
+    if not affected:
+        return []
+    types = sorted({str(asset.properties["server_type"].get("name")) for asset in affected})
+    return [
+        _candidate(
+            "HETZ-GOV-003",
+            "Servers run a deprecated server type",
+            Severity.LOW,
+            0.99,
+            [asset.id for asset in affected],
+            f"{len(affected)} server(s) use deprecated type(s): {', '.join(types)}.",
+            "Long-lived servers run a server type that Hetzner still offers.",
+            "Provider catalog marks the server type as deprecated.",
+            [
+                _evidence(
+                    asset,
+                    "server_type_deprecation",
+                    asset.properties["server_type"].get("deprecation"),
+                    "properties.server_type.deprecation",
+                )
+                for asset in affected
+            ],
+            ["deprecated server type", "no like-for-like rebuild or scale-out", "delayed recovery"],
+            [],
+            "A rebuild, recreate, or disaster recovery cannot reuse the same type and may be delayed by an unplanned migration.",
+            "Plan a reviewed migration to a current type, preferably through IaC, and record the rollback.",
+            ["https://docs.hetzner.com/cloud/servers/overview/"],
+        )
+    ]
+
+
 def contextualize_vulnerabilities(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     output: list[Finding] = []
     for signal in snapshot.signals:
@@ -627,6 +666,7 @@ RULES: tuple[Rule, ...] = (
     backup_and_protection,
     deletion_protection_gap,
     ownership_metadata_gap,
+    deprecated_server_type,
     contextualize_vulnerabilities,
 )
 

@@ -36,6 +36,9 @@ class AttackGraph:
             for edge in self.outgoing.get(node, []):
                 if edge.target in visited:
                     continue
+                # A public IP alone admits no traffic; only firewall "allows" edges carry it.
+                if edge.relation == "public_interface":
+                    continue
                 next_path = [*path, edge]
                 if edge.target == target:
                     if port is not None and edge.relation not in {"allows", "publishes", "listens"}:
@@ -184,11 +187,16 @@ class AttackGraph:
         }
 
 
-def render_path_markdown(result: dict[str, Any]) -> str:
+def render_path_markdown(result: dict[str, Any], names: dict[str, str] | None = None) -> str:
+    lookup = names or {}
+
+    def label(value: str) -> str:
+        return lookup.get(value, value)
+
     lines = [
         "# Hetzner Attack Path",
         "",
-        " → ".join(f"`{item}`" for item in result["path"]) if result["path"] else "No allowed path observed.",
+        " → ".join(f"`{label(item)}`" for item in result["path"]) if result["path"] else "No allowed path observed.",
         "",
         f"**Result:** `{result['result'].upper()}`",
         "",
@@ -200,7 +208,7 @@ def render_path_markdown(result: dict[str, Any]) -> str:
     if result.get("evidence"):
         lines.extend(["", "## Evidence", ""])
         for item in result["evidence"]:
-            lines.append(f"- `{item['kind']}` · `{item['asset_id']}` · `{item.get('path') or 'normalized graph'}`")
+            lines.append(f"- `{item['kind']}` · `{label(item['asset_id'])}` · `{item.get('path') or 'normalized graph'}`")
     return "\n".join(lines)
 
 

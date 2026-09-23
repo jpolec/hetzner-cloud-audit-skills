@@ -12,7 +12,17 @@ def render_json(findings: list[Finding]) -> str:
     return json.dumps({"schema_version": "1.0.0", "findings": [f.to_dict() for f in findings]}, indent=2)
 
 
-def render_markdown(findings: list[Finding], metadata: dict[str, Any] | None = None) -> str:
+def render_markdown(
+    findings: list[Finding],
+    metadata: dict[str, Any] | None = None,
+    names: dict[str, str] | None = None,
+) -> str:
+    """Render findings; ``names`` maps asset IDs to human-readable names for display."""
+    lookup = names or {}
+
+    def label(value: str) -> str:
+        return lookup.get(value, value)
+
     lines = ["# Hetzner Security Audit", ""]
     confirmed = [finding for finding in findings if finding.status == FindingStatus.CONFIRMED]
     pending = [finding for finding in findings if finding.status == FindingStatus.NEEDS_VALIDATION]
@@ -62,7 +72,7 @@ def render_markdown(findings: list[Finding], metadata: dict[str, Any] | None = N
                 "",
                 f"- **Status:** {finding.status.value}",
                 f"- **Confidence:** {finding.confidence:.2f}",
-                f"- **Assets:** {', '.join(finding.assets)}",
+                f"- **Assets:** {', '.join(label(asset) for asset in finding.assets)}",
                 "",
                 "**Observation:** " + finding.observation,
                 "",
@@ -70,7 +80,7 @@ def render_markdown(findings: list[Finding], metadata: dict[str, Any] | None = N
                 "",
                 "**Actual:** " + finding.actual_state,
                 "",
-                "**Attack path:** " + " → ".join(finding.attack_path),
+                "**Attack path:** " + " → ".join(label(step) for step in finding.attack_path),
                 "",
                 "**Verification:** " + finding.verification.notes,
                 "",

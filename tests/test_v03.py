@@ -224,6 +224,36 @@ class V03Test(unittest.TestCase):
         self.assertTrue(answer["paths"])
         self.assertEqual(answer["paths"][0]["port"], 5432)
 
+    def test_ask_separates_direct_internet_exposure_from_pivots(self) -> None:
+        web = Asset("server:web", "server", "web")
+        db = Asset("server:db", "server", "synthetic-db", labels={"role": "db"})
+        snapshot = Snapshot(
+            assets=[web, db, Asset("net", "network", "net")],
+            edges=[
+                Edge("internet", "server:web", "allows", "tcp", 443),
+                Edge("server:web", "net", "attached_to"),
+                Edge("net", "server:db", "allows", "tcp", None),
+            ],
+        )
+        answer = _answer(snapshot, "Can the Internet reach any database?")
+        self.assertEqual(answer["result"], "no_confirmed_path")
+        self.assertEqual(len(answer["indirect_paths"]), 1)
+        self.assertIn("indirect", answer["answer"])
+
+    def test_deprecated_server_type_is_reported(self) -> None:
+        server = Asset(
+            "hcloud:server:1",
+            "server",
+            "legacy",
+            {"server_type": {"name": "cx22", "deprecated": True, "deprecation": {"unavailable_after": "2025-12-31T23:59:59Z"}}},
+            source="hcloud_api",
+        )
+        snapshot = Snapshot(assets=[server])
+        findings = verify_all(hunt(snapshot), snapshot)
+        finding = next(item for item in findings if item.rule_id == "HETZ-GOV-003")
+        self.assertEqual(finding.status.value, "confirmed")
+        self.assertIn("cx22", finding.observation)
+
 
 if __name__ == "__main__":
     unittest.main()

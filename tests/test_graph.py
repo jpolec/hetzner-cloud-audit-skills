@@ -28,6 +28,19 @@ class AttackGraphTest(unittest.TestCase):
         graph = AttackGraph(snapshot)
         self.assertFalse(graph.reachable("internet", "server:db", protocol="tcp", port=5432))
 
+    def test_public_interface_is_not_a_pivot_into_private_network(self) -> None:
+        snapshot = Snapshot(
+            assets=[Asset("server:app", "server", "app"), Asset("net", "network", "net"), Asset("server:db", "server", "db")],
+            edges=[
+                Edge("internet", "server:app", "public_interface"),
+                Edge("server:app", "net", "attached_to"),
+                Edge("net", "server:db", "allows", "tcp", None),
+            ],
+        )
+        graph = AttackGraph(snapshot)
+        self.assertFalse(graph.reachable("internet", "server:db", protocol="tcp", port=5432))
+        self.assertTrue(graph.reachable("server:app", "server:db", protocol="tcp", port=5432))
+
     def test_firewall_range_is_checked_for_requested_port(self) -> None:
         evidence = Evidence(
             "fixture",

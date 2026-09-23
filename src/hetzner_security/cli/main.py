@@ -136,7 +136,9 @@ def run(args: argparse.Namespace) -> int:
         output = json.dumps(report, indent=2) if args.format == "json" else render_cost_markdown(report)
     elif args.command == "path":
         result = AttackGraph(snapshot).explain_path(args.path_source, args.path_target, protocol=args.protocol, port=args.port, max_depth=args.max_depth)
-        output = json.dumps(result, indent=2) if args.format == "json" else render_path_markdown(result)
+        output = json.dumps(result, indent=2) if args.format == "json" else render_path_markdown(
+            result, {asset.id: asset.name for asset in snapshot.assets if asset.name}
+        )
     elif args.command == "explain":
         finding = next((item for item in _findings(snapshot) if item.id == args.finding_id), None)
         if finding is None:
@@ -154,7 +156,9 @@ def run(args: argparse.Namespace) -> int:
             update_coverage(units, findings)
             save_coverage(args.coverage_ledger, units, prior_path=args.coverage_ledger)
         if args.format == "markdown":
-            output = render_markdown(findings, snapshot.metadata)
+            output = render_markdown(
+                findings, snapshot.metadata, {asset.id: asset.name for asset in snapshot.assets if asset.name}
+            )
         else:
             renderer = {"json": render_json, "sarif": render_sarif}[args.format]
             output = renderer(findings)
@@ -231,14 +235,21 @@ def _answer(snapshot: Snapshot, question: str) -> dict[str, Any]:
                     paths.append(result)
     else:
         return {"question": question, "result": "unsupported_question", "answer": "Use a question about Internet-to-database or staging-to-production reachability.", "coverage": _coverage_summary(snapshot), "paths": []}
+    # Internet questions are about direct exposure; multi-hop pivots are reported separately.
+    indirect = [path for path in paths if path["source"] == "internet" and len(path["path"]) > 1]
+    paths = [path for path in paths if path not in indirect]
     confirmed = [path for path in paths if path["result"] == "reachable"]
     possible = [path for path in paths if path["result"] == "cloud_path_present"]
+    answer = f"{len(confirmed)} complete and {len(possible)} cloud-only path(s) observed." if paths else "No matching path was observed; collection gaps can prevent a negative proof."
+    if indirect:
+        answer += f" {len(indirect)} indirect path(s) require compromising a publicly reachable host first."
     return {
         "question": question,
         "result": "reachable" if confirmed else "needs_validation" if possible else "no_confirmed_path",
-        "answer": f"{len(confirmed)} complete and {len(possible)} cloud-only path(s) observed." if paths else "No matching path was observed; collection gaps can prevent a negative proof.",
+        "answer": answer,
         "coverage": _coverage_summary(snapshot),
         "paths": paths,
+        "indirect_paths": indirect,
     }
 
 

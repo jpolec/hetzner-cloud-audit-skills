@@ -105,7 +105,7 @@ Treat `audit.md` as sensitive. It contains names, IP addresses, and topology. Do
 - **Findings** with a complete evidence chain, impact, and remediation.
 - **Hypotheses** that need host or runtime evidence before they can be confirmed.
 - **Collection gaps** and stale evidence.
-- **Controls** that refute an apparent exposure, such as a Cloudflare-only or Tailscale-only source.
+- **Indirect paths** kept separate from direct exposure: a database reachable only by pivoting through another host is not reported as Internet-exposed.
 
 Out of the box, the API-only layer checks:
 
@@ -116,7 +116,8 @@ Out of the box, the API-only layer checks:
 - disabled deletion protection on production or foundational resources;
 - production state with no observed native backup;
 - missing ownership labels;
-- stopped-but-billed servers, unattached resources, deprecated types, and rightsizing candidates.
+- servers on deprecated server types;
+- stopped-but-billed servers, unattached volumes, and rightsizing or ARM candidates.
 
 The Hetzner API cannot see host listeners, Docker port publishing, PostgreSQL HBA, Redis ACLs, or guest memory. Those findings stay `needs_validation` and show what evidence is missing.
 
