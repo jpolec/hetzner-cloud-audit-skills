@@ -64,6 +64,13 @@ hetzner-audit audit --format json --output audit/findings.json \
   --coverage-ledger audit/coverage-ledger.json --read-only --no-ssh
 ```
 
+Render the network map from the same snapshot and show it to the owner before discussing findings. It omits public IP addresses; keep it private anyway because it reveals topology:
+
+```sh
+hetzner-audit map --input audit/snapshot.json --format markdown --output audit/network-map.md
+hetzner-audit map --input audit/snapshot.json --format svg --output audit/network-map.svg
+```
+
 For repeated audits, compare timestamped facts before hunting again:
 
 ```sh

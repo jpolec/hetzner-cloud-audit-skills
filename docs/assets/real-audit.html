@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>hetzner-cloud-audit-skills real audit</title>
+<style>
+  *{box-sizing:border-box} body{margin:0;background:#071018;color:#dbe8f5;font-family:Inter,ui-sans-serif,system-ui;padding:52px}
+  .shell{max-width:1320px;margin:auto;border:1px solid #29445b;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0009;background:#0b1722}
+  .bar{height:54px;background:#112333;border-bottom:1px solid #29445b;display:flex;align-items:center;padding:0 20px;gap:10px}
+  .dot{width:13px;height:13px;border-radius:50%}.r{background:#ff6b6b}.y{background:#ffd166}.g{background:#4dd599}.title{margin:auto;color:#8da9bf;font:600 14px ui-monospace,SFMono-Regular,monospace}
+  .term{padding:30px 34px 38px;font:17px/1.62 ui-monospace,SFMono-Regular,Menlo,monospace}.prompt{color:#4dd599}.cmd{color:#e8f2fb}.muted{color:#7894aa}.cyan{color:#50d8ff}.high{color:#ffb454}.ok{color:#54d69d}.rule{color:#b49cff}.line{border-top:1px solid #20394d;margin:22px 0}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:20px}.card{background:#102434;border:1px solid #29485f;padding:16px;border-radius:10px}.n{font-size:30px;font-weight:800}.label{color:#91abc0;font:13px ui-sans-serif,system-ui;text-transform:uppercase;letter-spacing:.08em}
+</style>
+<div class="shell">
+  <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">real Hetzner project · 18 servers · identifiers replaced · read-only token</span></div>
+  <div class="term">
+    <div><span class="prompt">$</span> <span class="cmd">hetzner-audit audit --read-only --no-ssh</span></div>
+    <div class="muted">19 endpoints collected · 0 collector gaps · 185 assets · 2,804 temporal facts</div>
+    <div class="grid">
+      <div class="card"><div class="n ok">0</div><div class="label">databases open to Internet</div></div>
+      <div class="card"><div class="n cyan">3</div><div class="label">confirmed</div></div>
+      <div class="card"><div class="n high">12</div><div class="label">needs validation</div></div>
+      <div class="card"><div class="n cyan">1</div><div class="label">indirect pivot path</div></div>
+    </div>
+    <div class="line"></div>
+    <div><span class="prompt">$</span> <span class="cmd">hetzner-audit ask "Can the Internet reach any database?"</span></div>
+    <div><span class="ok">no_confirmed_path</span> <span class="muted">· 1 indirect path requires compromising a public host first</span></div>
+    <br>
+    <div><span class="prompt">$</span> <span class="cmd">hetzner-audit path --from acme-worker-1 --to acme-api-db-1 --port 5432</span></div>
+    <div><span class="high">CLOUD_PATH_PRESENT</span> <span class="muted">acme-worker-1 → acme-net 10.0.0.0/16 → acme-api-db-1</span></div>
+    <div class="muted">missing: host firewall decision · listener publication · application auth policy</div>
+    <div class="line"></div>
+    <div><span class="cyan">MEDIUM</span> <span class="rule">HETZ-GOV-001</span> 32 production assets lack deletion protection</div>
+    <div><span class="muted">LOW</span> <span class="rule">HETZ-GOV-003</span> acme-worker-1 runs deprecated type cx22</div>
+    <div><span class="muted">UNSCORED</span> <span class="rule">HETZ-XLY-002</span> 11 unrelated servers have a cloud path to acme-api-db-1</div>
+  </div>
+</div>
+</html>

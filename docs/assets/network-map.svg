@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1510" height="1070" viewBox="0 0 1510 1070" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" rx="16" fill="#0b1220"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker></defs>
+<text x="32" y="48" font-size="22" font-weight="700" fill="#e5edf7">Real Hetzner project · identifiers replaced</text>
+<text x="32" y="74" font-size="13" fill="#8aa0bd">18 servers · 0 critical · 1 public · 3 proxied · 14 private · read-only API evidence · public IPs omitted</text>
+<rect x="1062" y="38" width="12" height="12" rx="3" fill="none" stroke="#f87171" stroke-width="2"/>
+<text x="1080" y="48" font-size="12" fill="#8aa0bd">critical</text>
+<rect x="1166" y="38" width="12" height="12" rx="3" fill="none" stroke="#fde047" stroke-width="2"/>
+<text x="1184" y="48" font-size="12" fill="#8aa0bd">public</text>
+<rect x="1270" y="38" width="12" height="12" rx="3" fill="none" stroke="#34d399" stroke-width="2"/>
+<text x="1288" y="48" font-size="12" fill="#8aa0bd">proxied</text>
+<rect x="1374" y="38" width="12" height="12" rx="3" fill="none" stroke="#60a5fa" stroke-width="2"/>
+<text x="1392" y="48" font-size="12" fill="#8aa0bd">private</text>
+<rect x="298" y="116" width="1180" height="724" rx="14" fill="#0f1a2e" stroke="#23324d"/>
+<text x="318" y="142" font-size="13" font-weight="600" letter-spacing="0.5" fill="#8aa0bd">PRIVATE NETWORK  acme-net · 10.0.0.0/16</text>
+<rect x="298" y="864" width="1180" height="158" rx="14" fill="#0f1a2e" stroke="#23324d"/>
+<text x="318" y="890" font-size="13" font-weight="600" letter-spacing="0.5" fill="#8aa0bd">NO PRIVATE NETWORK</text>
+<text x="318" y="172" font-size="11.5" font-weight="700" letter-spacing="1" fill="#8aa0bd">EDGE &amp; WEB</text>
+<text x="318" y="332" font-size="11.5" font-weight="700" letter-spacing="1" fill="#8aa0bd">IDENTITY &amp; SECRETS</text>
+<text x="318" y="450" font-size="11.5" font-weight="700" letter-spacing="1" fill="#8aa0bd">DATA</text>
+<text x="318" y="594" font-size="11.5" font-weight="700" letter-spacing="1" fill="#8aa0bd">APPLICATIONS</text>
+<text x="318" y="712" font-size="11.5" font-weight="700" letter-spacing="1" fill="#8aa0bd">OTHER</text>
+<text x="318" y="920" font-size="11.5" font-weight="700" letter-spacing="1" fill="#8aa0bd">IDENTITY &amp; SECRETS</text>
+<rect x="32" y="116" width="230" height="52" rx="26" fill="#0f1a2e" stroke="#fde047" stroke-width="2"/>
+<text x="147.0" y="147" text-anchor="middle" font-size="14" font-weight="600" fill="#fde047">Internet (any address)</text>
+<rect x="32" y="196" width="230" height="52" rx="26" fill="#0f1a2e" stroke="#fb923c" stroke-width="2"/>
+<text x="147.0" y="227" text-anchor="middle" font-size="14" font-weight="600" fill="#fb923c">Cloudflare only</text>
+<rect x="32" y="276" width="230" height="52" rx="26" fill="#0f1a2e" stroke="#a78bfa" stroke-width="2"/>
+<text x="147.0" y="307" text-anchor="middle" font-size="14" font-weight="600" fill="#a78bfa">Tailscale tailnet</text>
+<text x="147.0" y="346" text-anchor="middle" font-size="11.5" fill="#a78bfa">admin + WireGuard → 18 servers</text>
+<path d="M 262 222 L 282 222 L 282 214 L 502 214 L 502 226" stroke="#fb923c" stroke-width="1.8" fill="none" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="494" y="210" text-anchor="end" font-size="11" font-weight="600" fill="#fb923c">tcp/80, tcp/443</text>
+<path d="M 262 222 L 282 222 L 282 476 L 734 476 L 734 488" stroke="#fb923c" stroke-width="1.8" fill="none" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="726" y="472" text-anchor="end" font-size="11" font-weight="600" fill="#fb923c">tcp/80, tcp/443</text>
+<path d="M 262 222 L 282 222 L 282 198 L 734 198 L 734 226" stroke="#fb923c" stroke-width="1.8" fill="none" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="726" y="194" text-anchor="end" font-size="11" font-weight="600" fill="#fb923c">tcp/80, tcp/443</text>
+<path d="M 262 142 L 274 142 L 274 738 L 1198 738 L 1198 750" stroke="#fde047" stroke-width="2.4" fill="none" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<text x="1190" y="734" text-anchor="end" font-size="11" font-weight="600" fill="#fde047">tcp/80, tcp/443</text>
+<rect x="318" y="606" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="330" y="628" font-size="14" font-weight="700" fill="#e5edf7">acme-agents-1</text>
+<text x="330" y="646" font-size="11.5" fill="#8aa0bd">agent-gateway · cax11 · fsn1</text>
+<rect x="550" y="606" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="562" y="628" font-size="14" font-weight="700" fill="#e5edf7">acme-api-app-1</text>
+<text x="562" y="646" font-size="11.5" fill="#8aa0bd">app · cpx22 · fsn1</text>
+<rect x="318" y="488" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="330" y="510" font-size="14" font-weight="700" fill="#e5edf7">acme-api-db-1</text>
+<text x="330" y="528" font-size="11.5" fill="#8aa0bd">db · cx23 · fsn1</text>
+<text x="330" y="544" font-size="10.5" font-weight="600" fill="#f87171">sensitive</text>
+<text x="395" y="544" font-size="10.5" font-weight="600" fill="#8aa0bd">120 GB vol</text>
+<rect x="318" y="932" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="330" y="954" font-size="14" font-weight="700" fill="#e5edf7">acme-auth-1</text>
+<text x="330" y="972" font-size="11.5" fill="#8aa0bd">auth · cx23 · fsn1</text>
+<text x="330" y="988" font-size="10.5" font-weight="600" fill="#f87171">sensitive</text>
+<text x="395" y="988" font-size="10.5" font-weight="600" fill="#8aa0bd">60 GB vol</text>
+<rect x="318" y="226" width="214" height="64" rx="10" fill="#111f36" stroke="#34d399" stroke-width="1.6"/>
+<text x="330" y="248" font-size="14" font-weight="700" fill="#e5edf7">acme-batch-1</text>
+<text x="330" y="266" font-size="11.5" fill="#8aa0bd">batch-web · cx33 · nbg1</text>
+<text x="330" y="282" font-size="10.5" font-weight="600" fill="#8aa0bd">20 GB vol</text>
+<text x="395" y="282" font-size="10.5" font-weight="600" fill="#34d399">protected</text>
+<rect x="782" y="606" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="794" y="628" font-size="14" font-weight="700" fill="#e5edf7">acme-bus</text>
+<text x="794" y="646" font-size="11.5" fill="#8aa0bd">acme-bus · cpx22 · fsn1</text>
+<text x="794" y="662" font-size="10.5" font-weight="600" fill="#8aa0bd">50 GB vol</text>
+<rect x="318" y="750" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="330" y="772" font-size="14" font-weight="700" fill="#e5edf7">acme-catalog</text>
+<text x="330" y="790" font-size="11.5" fill="#8aa0bd">catalog · cax11 · fsn1</text>
+<text x="330" y="806" font-size="10.5" font-weight="600" fill="#8aa0bd">20 GB vol</text>
+<rect x="550" y="488" width="214" height="64" rx="10" fill="#111f36" stroke="#34d399" stroke-width="1.6"/>
+<text x="562" y="510" font-size="14" font-weight="700" fill="#e5edf7">acme-data</text>
+<text x="562" y="528" font-size="11.5" fill="#8aa0bd">data-platform · cx23 · fsn1</text>
+<rect x="550" y="226" width="214" height="64" rx="10" fill="#111f36" stroke="#34d399" stroke-width="1.6"/>
+<text x="562" y="248" font-size="14" font-weight="700" fill="#e5edf7">acme-edge-1</text>
+<text x="562" y="266" font-size="11.5" fill="#8aa0bd">edge · cx23 · fsn1</text>
+<rect x="550" y="750" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="562" y="772" font-size="14" font-weight="700" fill="#e5edf7">acme-ingest-1</text>
+<text x="562" y="790" font-size="11.5" fill="#8aa0bd">cpx32 · fsn1</text>
+<text x="562" y="806" font-size="10.5" font-weight="600" fill="#8aa0bd">500 GB vol</text>
+<rect x="782" y="750" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="794" y="772" font-size="14" font-weight="700" fill="#e5edf7">acme-ingest-2</text>
+<text x="794" y="790" font-size="11.5" fill="#8aa0bd">vendor-feed · cx33 · fsn1</text>
+<text x="794" y="806" font-size="10.5" font-weight="600" fill="#8aa0bd">200 GB vol</text>
+<rect x="318" y="344" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="330" y="366" font-size="14" font-weight="700" fill="#e5edf7">acme-orchestrator-1</text>
+<text x="330" y="384" font-size="11.5" fill="#8aa0bd">identity · cx23 · fsn1</text>
+<text x="330" y="400" font-size="10.5" font-weight="600" fill="#f87171">sensitive</text>
+<text x="395" y="400" font-size="10.5" font-weight="600" fill="#8aa0bd">50 GB vol</text>
+<rect x="782" y="488" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="794" y="510" font-size="14" font-weight="700" fill="#e5edf7">acme-replica</text>
+<text x="794" y="528" font-size="11.5" fill="#8aa0bd">replica · cax31 · fsn1</text>
+<text x="794" y="544" font-size="10.5" font-weight="600" fill="#8aa0bd">100 GB vol</text>
+<rect x="1014" y="750" width="214" height="64" rx="10" fill="#111f36" stroke="#fde047" stroke-width="1.6"/>
+<text x="1026" y="772" font-size="14" font-weight="700" fill="#e5edf7">acme-sim</text>
+<text x="1026" y="790" font-size="11.5" fill="#8aa0bd">scenario · cpx32 · fsn1</text>
+<text x="1026" y="806" font-size="10.5" font-weight="600" fill="#8aa0bd">60 GB vol</text>
+<rect x="550" y="932" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="562" y="954" font-size="14" font-weight="700" fill="#e5edf7">acme-vault-1</text>
+<text x="562" y="972" font-size="11.5" fill="#8aa0bd">vault · cx23 · fsn1</text>
+<text x="562" y="988" font-size="10.5" font-weight="600" fill="#f87171">sensitive</text>
+<text x="627" y="988" font-size="10.5" font-weight="600" fill="#8aa0bd">50 GB vol</text>
+<rect x="1014" y="488" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="1026" y="510" font-size="14" font-weight="700" fill="#e5edf7">acme-warehouse</text>
+<text x="1026" y="528" font-size="11.5" fill="#8aa0bd">warehouse · cpx32 · hel1</text>
+<text x="1026" y="544" font-size="10.5" font-weight="600" fill="#8aa0bd">800 GB vol</text>
+<rect x="782" y="226" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="794" y="248" font-size="14" font-weight="700" fill="#e5edf7">acme-web-1</text>
+<text x="794" y="266" font-size="11.5" fill="#8aa0bd">fe · cx23 · fsn1</text>
+<rect x="1014" y="606" width="214" height="64" rx="10" fill="#111f36" stroke="#60a5fa" stroke-width="1.6"/>
+<text x="1026" y="628" font-size="14" font-weight="700" fill="#e5edf7">acme-worker-1</text>
+<text x="1026" y="646" font-size="11.5" fill="#8aa0bd">cx22 · hel1</text>
+<text x="1026" y="662" font-size="10.5" font-weight="600" fill="#8aa0bd">50 GB vol</text>
+<text x="1091" y="662" font-size="10.5" font-weight="600" fill="#fde047">deprecated type</text>
+</svg>

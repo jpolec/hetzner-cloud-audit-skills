@@ -18,6 +18,7 @@ from ..graph import AttackGraph, render_path_markdown
 from ..models import Finding, Severity, Snapshot
 from ..policy import apply_policy, load_policy
 from ..temporal import diff_snapshots, render_diff_markdown
+from ..topology import build_topology, render_mermaid, render_svg, render_topology_markdown
 from ..verification import verify_all
 
 SEVERITY_ORDER = {severity.value: index for index, severity in enumerate(Severity)}
@@ -70,6 +71,10 @@ def build_parser() -> argparse.ArgumentParser:
     ask = subparsers.add_parser("ask")
     ask.add_argument("question")
     _common(ask, formats=("json", "markdown"))
+
+    topology = subparsers.add_parser("map", help="Network map as Markdown/Mermaid, SVG, or JSON")
+    _common(topology, formats=("markdown", "mermaid", "svg", "json"))
+    topology.add_argument("--title", default="Hetzner network map")
     return parser
 
 
@@ -91,7 +96,7 @@ def _snapshot(args: argparse.Namespace) -> Snapshot:
 
 
 def _filter_command(snapshot: Snapshot, command: str) -> Snapshot:
-    if command in {"audit", "inventory", "coverage", "snapshot", "cost", "path", "explain", "ask"}:
+    if command in {"audit", "inventory", "coverage", "snapshot", "cost", "path", "explain", "ask", "map"}:
         return snapshot
     wanted = {
         "network": {"server", "network", "firewall", "service", "postgres", "redis"},
@@ -144,6 +149,14 @@ def run(args: argparse.Namespace) -> int:
         if finding is None:
             raise ValueError(f"finding not found: {args.finding_id}")
         output = json.dumps(finding.to_dict(), indent=2) if args.format == "json" else _explain_markdown(finding)
+    elif args.command == "map":
+        topology = build_topology(snapshot)
+        output = {
+            "json": lambda: json.dumps(topology, indent=2),
+            "mermaid": lambda: render_mermaid(topology),
+            "svg": lambda: render_svg(topology, args.title),
+            "markdown": lambda: render_topology_markdown(topology),
+        }[args.format]()
     elif args.command == "ask":
         answer = _answer(snapshot, args.question)
         output = json.dumps(answer, indent=2) if args.format == "json" else _answer_markdown(answer)
@@ -240,7 +253,12 @@ def _answer(snapshot: Snapshot, question: str) -> dict[str, Any]:
     paths = [path for path in paths if path not in indirect]
     confirmed = [path for path in paths if path["result"] == "reachable"]
     possible = [path for path in paths if path["result"] == "cloud_path_present"]
-    answer = f"{len(confirmed)} complete and {len(possible)} cloud-only path(s) observed." if paths else "No matching path was observed; collection gaps can prevent a negative proof."
+    if paths:
+        answer = f"{len(confirmed)} complete and {len(possible)} cloud-only path(s) observed."
+    elif indirect:
+        answer = "No direct path was observed; host and runtime controls are not evidenced."
+    else:
+        answer = "No matching path was observed; collection gaps can prevent a negative proof."
     if indirect:
         answer += f" {len(indirect)} indirect path(s) require compromising a publicly reachable host first."
     return {
