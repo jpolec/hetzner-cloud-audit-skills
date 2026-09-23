@@ -285,6 +285,20 @@ class V03Test(unittest.TestCase):
         self.assertIn("Host firewall: not collected", report)
         self.assertNotIn("## Summary", report)
 
+    def test_label_governance_and_explicit_sensitivity(self) -> None:
+        net = [{"network": 1, "ip": "10.0.0.2"}]
+        odd = Asset("hcloud:server:1", "server", "odin", {"private_net": net}, {"environment": "production", "role": "app", "sensitivity": "high", "project": "a"}, "hcloud_api")
+        other = Asset("hcloud:server:2", "server", "tools", {"private_net": net}, {"project": "b"}, "hcloud_api")
+        network = Asset("hcloud:network:1", "network", "net", {"id": 1, "ip_range": "10.0.0.0/16"}, source="hcloud_api")
+        from hetzner_security.models import Edge
+        edges = [Edge("hcloud:server:2", "hcloud:network:1", "attached_to"), Edge("hcloud:network:1", "hcloud:server:1", "allows")]
+        snapshot = Snapshot(assets=[odd, other, network], edges=edges)
+        findings = verify_all(hunt(snapshot), snapshot)
+        governance = next(item for item in findings if item.rule_id == "HETZ-GOV-004")
+        self.assertEqual(governance.assets, ["hcloud:server:2"])
+        lateral = [item for item in findings if item.rule_id == "HETZ-XLY-002"]
+        self.assertEqual([item.assets[1] for item in lateral], ["hcloud:server:1"])  # 'odin' is sensitive only by label
+
     def test_deprecated_server_type_is_reported(self) -> None:
         server = Asset(
             "hcloud:server:1",

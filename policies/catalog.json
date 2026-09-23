@@ -12,6 +12,7 @@
     {"id":"HETZ-GOV-001","category":"hetzner","layers":["provider_protection","recovery"],"title":"Deletion protection disabled on production or foundational assets"},
     {"id":"HETZ-GOV-002","category":"hetzner","layers":["resource_metadata","ownership"],"title":"Missing ownership metadata"},
     {"id":"HETZ-GOV-003","category":"hetzner","layers":["provider_catalog","recovery"],"title":"Server runs a deprecated server type"},
+    {"id":"HETZ-GOV-004","category":"hetzner","layers":["resource_metadata","policy"],"title":"Policy cannot be evaluated for unlabeled servers"},
     {"id":"HETZ-NET-006","category":"hetzner","layers":["cloud_firewall","edge_proxy"],"title":"Web origin reachable directly, bypassing Cloudflare","absence_requires_validation":true},
     {"id":"HETZ-FW-001","category":"hetzner","layers":["cloud_firewall"],"title":"Firewall rule opens every port to the whole Internet"},
     {"id":"HETZ-FW-002","category":"hetzner","layers":["cloud_firewall","governance"],"title":"Firewall is not applied to any resource"},

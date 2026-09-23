@@ -102,6 +102,9 @@ def _group(server: Asset) -> str:
 
 
 def _sensitive(server: Asset) -> bool:
+    explicit = server.labels.get("sensitivity", "").lower()
+    if explicit in {"high", "low", "none"}:
+        return explicit == "high"
     return _group(server) in {"security", "data"} and any(
         word in (server.labels.get("role", "") + " " + server.name).lower()
         for word in ("db", "database", "postgres", "redis", "vault", "auth", "identity", "secret")

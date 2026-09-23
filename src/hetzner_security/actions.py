@@ -294,6 +294,9 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
             f"CPU-based candidates add up to {insights['opportunities_monthly']:.2f}/mo, but none can be confirmed without RAM, disk, owner intent, and rollback.",
             None, ("LOW", "optimization hypothesis from CPU only"), "medium", None,
             "Export 30 days of RAM and disk p95 (node exporter or Prometheus) and rerun `hetzner-audit cost`.", ["HETZ-COST-002", "HETZ-COST-003"])
+    for finding in by_rule.get("HETZ-GOV-004", []):
+        add(92, f"Label {len(finding.assets)} servers with environment and role", finding.observation, finding, None, "low", None,
+            "Add environment, role, and owner labels in IaC (sensitivity=high for databases and secrets) so policy and blast-radius checks cover every server.", ["HETZ-GOV-004"])
     for finding in by_rule.get("HETZ-GOV-002", []):
         add(95, f"Add owner/project labels to {len(finding.assets)} servers", finding.observation, finding, None, "low", None,
             "Add owner, project, environment, and role labels through IaC.", ["HETZ-GOV-002"])

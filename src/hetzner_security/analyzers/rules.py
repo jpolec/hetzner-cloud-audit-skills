@@ -601,7 +601,10 @@ def broad_private_data_path(snapshot: Snapshot, graph: AttackGraph) -> list[Find
     for target in servers:
         role = target.labels.get("role", "").lower()
         name = target.name.lower()
-        if not (role in sensitive_tokens or any(token in name for token in sensitive_tokens)):
+        explicit = target.labels.get("sensitivity", "").lower()
+        if explicit in {"low", "none"}:
+            continue
+        if not (explicit == "high" or role in sensitive_tokens or any(token in name for token in sensitive_tokens)):
             continue
         target_project = target.labels.get("project") or target.labels.get("owner")
         candidate_paths: list[tuple[Asset, list[Edge]]] = []
@@ -684,6 +687,38 @@ def deletion_protection_gap(snapshot: Snapshot, graph: AttackGraph) -> list[Find
             "A mistaken or compromised provider action can remove production infrastructure more easily.",
             "Enable deletion protection through reviewed IaC for assets whose recovery requirements justify it.",
             ["https://docs.hetzner.com/cloud/servers/faq/#how-can-i-protect-my-server-from-deletion"],
+        )
+    ]
+
+
+def label_governance(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    """Environment and role labels drive policy; unlabeled servers are silently outside it."""
+    servers = [asset for asset in snapshot.assets if asset.type == "server" and asset.source == "hcloud_api"]
+    missing = {
+        asset.id: [key for key in ("environment", "role") if not asset.labels.get(key)]
+        for asset in servers
+    }
+    affected = [asset for asset in servers if missing[asset.id]]
+    if not affected:
+        return []
+    return [
+        _candidate(
+            "HETZ-GOV-004",
+            "Policy cannot be evaluated for unlabeled servers",
+            Severity.MEDIUM,
+            0.98,
+            [asset.id for asset in affected],
+            f"{len(affected)} of {len(servers)} server(s) lack an environment or role label, so environment policy, "
+            "cross-environment rules, and sensitive-host detection cannot be applied to them.",
+            "Every server carries environment and role labels (plus owner, and optionally sensitivity=high).",
+            "; ".join(f"{asset.name}: missing {', '.join(missing[asset.id])}" for asset in affected[:6])
+            + (" …" if len(affected) > 6 else ""),
+            [_evidence(asset, "resource_labels", asset.labels, "labels") for asset in affected],
+            ["unlabeled server", "policy not evaluated", "undetected trust-boundary violation"],
+            [],
+            "Findings that depend on intent (staging reaching production, sensitive hosts on shared networks) are silently skipped for these servers.",
+            "Add environment, role, and owner labels through IaC; mark databases and secrets hosts with sensitivity=high.",
+            ["https://docs.hetzner.cloud/reference/cloud#labels"],
         )
     ]
 
@@ -864,6 +899,7 @@ RULES: tuple[Rule, ...] = (
     backup_and_protection,
     deletion_protection_gap,
     ownership_metadata_gap,
+    label_governance,
     deprecated_server_type,
     contextualize_vulnerabilities,
 )
