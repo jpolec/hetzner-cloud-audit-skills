@@ -85,6 +85,9 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
     pricing_asset = next((asset for asset in assets if asset.type == "pricing"), None)
     pricing = pricing_asset.properties if pricing_asset else {}
     observed_at = str(snapshot.metadata.get("collected_at") or datetime.now(UTC).isoformat())
+    metrics_coverage = (snapshot.metadata.get("coverage") or {}).get("server_metrics") or {}
+    requested_days = metrics_coverage.get("window_days") if isinstance(metrics_coverage, dict) else None
+    telemetry_gaps: list[str] = []
 
     volume_rate = _nested_float(pricing, "volume", "price_per_gb_month", "net")
     backup_pct = _nested_float(pricing, "server_backup", "percentage") / 100.0
@@ -157,6 +160,13 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
             continue
 
         if cpu_p95_capacity is None or cpu_p95_capacity >= 30 or base <= 0:
+            continue
+        window = _observation_window(server_rows[-1], observed_at) if server_rows else {}
+        if isinstance(requested_days, (int, float)) and requested_days > 0 and (window.get("days") or 0) < 0.8 * requested_days:
+            # Too little telemetry: a low p95 over a few hours says nothing about a monthly peak.
+            telemetry_gaps.append(
+                f"{server.name}: CPU data covers {window.get('days') or 0} of {requested_days} requested days; no rightsizing candidate"
+            )
             continue
         same_arch = _best_resize_candidate(
             server, server_types, cpu_p95_raw, cpu_max_raw, location, base
@@ -343,6 +353,7 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
             "Hetzner does not expose guest RAM utilization.",
             "Filesystem occupancy, workload SLOs, and application architecture constraints are not provider metrics.",
             "Catalog prices can differ from invoices, credits, taxes, and legacy contracts.",
+            *telemetry_gaps,
         ],
     }
 
@@ -468,6 +479,18 @@ def _best_arm_candidate(
     return item, price
 
 
+def _observation_window(current: dict[str, Any], observed_at: str) -> dict[str, Any]:
+    """The window actually covered by samples, not the requested one."""
+    start, end = current.get("metrics_start") or observed_at, current.get("metrics_end") or observed_at
+    days: float | None = None
+    try:
+        span = datetime.fromisoformat(str(end).replace("Z", "+00:00")) - datetime.fromisoformat(str(start).replace("Z", "+00:00"))
+        days = round(span.total_seconds() / 86400, 1) or None  # unknown rather than a fake zero
+    except ValueError:
+        pass
+    return {"start": start, "end": end, "days": days, "samples": current.get("cpu_samples", 0)}
+
+
 def _candidate_state(candidate: Asset, price: float) -> dict[str, Any]:
     props = candidate.properties
     return {
@@ -500,11 +523,7 @@ def _recommendation(
         "provider": "hetzner",
         "status": "needs_validation",
         "assets": [server.id],
-        "observation_window": {
-            "start": current.get("metrics_start") or observed_at,
-            "end": current.get("metrics_end") or observed_at,
-            "days": 30,
-        },
+        "observation_window": _observation_window(current, observed_at),
         "current_state": current,
         "metrics": [
             {

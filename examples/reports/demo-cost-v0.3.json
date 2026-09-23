@@ -100,7 +100,8 @@
       "observation_window": {
         "start": "2026-08-23T00:00:00+00:00",
         "end": "2026-09-22T00:00:00+00:00",
-        "days": 30
+        "days": 30.0,
+        "samples": 3
       },
       "current_state": {
         "asset_id": "hcloud:server:1",
@@ -205,7 +206,8 @@
       "observation_window": {
         "start": "2026-08-23T00:00:00+00:00",
         "end": "2026-09-22T00:00:00+00:00",
-        "days": 30
+        "days": 30.0,
+        "samples": 3
       },
       "current_state": {
         "asset_id": "hcloud:server:1",
@@ -310,7 +312,8 @@
       "observation_window": {
         "start": "2026-09-22T00:00:00+00:00",
         "end": "2026-09-22T00:00:00+00:00",
-        "days": 30
+        "days": null,
+        "samples": 0
       },
       "current_state": {
         "asset_id": "hcloud:server:2",

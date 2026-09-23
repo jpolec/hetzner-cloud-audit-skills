@@ -85,6 +85,15 @@ class CollectorSafetyTest(unittest.TestCase):
         snapshot = Snapshot(assets=[Asset("hcloud:server:1", "server", "a"), Asset("hcloud:server:2", "server", "b")], edges=_derive_edges(raw))
         self.assertTrue(AttackGraph(snapshot).reachable("hcloud:server:1", "hcloud:server:2", protocol="tcp", port=6379))
 
+    def test_stateful_detection_uses_volumes_roles_and_labels(self) -> None:
+        from hetzner_security.collectors.hcloud import _is_stateful
+
+        self.assertTrue(_is_stateful({"name": "pg-main", "labels": {}}))  # database on the root disk
+        self.assertTrue(_is_stateful({"name": "x", "labels": {"role": "db"}}))
+        self.assertTrue(_is_stateful({"name": "web-1", "labels": {}, "volumes": [1]}))
+        self.assertFalse(_is_stateful({"name": "web-1", "labels": {}}))
+        self.assertFalse(_is_stateful({"name": "db-cache", "labels": {"stateful": "false"}, "volumes": [1]}))
+
     def test_personal_data_is_redacted(self) -> None:
         value = _sanitize_resource(
             {

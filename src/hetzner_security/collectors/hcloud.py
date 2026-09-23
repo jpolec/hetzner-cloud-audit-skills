@@ -340,6 +340,24 @@ def _normal_rule(rule: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+STATEFUL_ROLES = {
+    "db", "database", "pg", "sql", "postgres", "postgresql", "mysql", "mariadb", "redis", "mongo", "mongodb",
+    "replica", "warehouse", "storage", "data", "vault", "queue", "kafka", "rabbitmq", "elastic",
+    "elasticsearch", "clickhouse", "minio", "backup",
+}
+
+
+def _is_stateful(server: dict[str, Any]) -> bool:
+    """Attached volumes, a stateful role, or an explicit stateful=true label; stateful=false wins."""
+    labels = {str(k).lower(): str(v).lower() for k, v in (server.get("labels") or {}).items()}
+    if labels.get("stateful") in {"true", "false"}:
+        return labels["stateful"] == "true"
+    words = set()
+    for value in (labels.get("role", ""), labels.get("service", ""), str(server.get("name", "")).lower()):
+        words |= set(value.replace("_", "-").split("-"))
+    return bool(server.get("volumes")) or bool(words & STATEFUL_ROLES)
+
+
 def _normalize_resources(
     raw: dict[str, list[dict[str, Any]]],
 ) -> dict[str, list[dict[str, Any]]]:
@@ -365,7 +383,7 @@ def _normalize_resources(
         server["firewall_ids"] = firewall_ids
         server["inbound"] = inbound
         server["backup_enabled"] = bool(server.get("backup_window"))
-        server["stateful"] = bool(server.get("volumes"))
+        server["stateful"] = _is_stateful(server)
         server["delete_protection"] = bool(server.get("protection", {}).get("delete"))
     return normalized
 

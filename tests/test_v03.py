@@ -162,6 +162,18 @@ class V03Test(unittest.TestCase):
             loaded = load_snapshot(output_path)
             self.assertEqual(loaded.facts[0].run_id, "run-a")
 
+    def test_rightsizing_needs_enough_telemetry(self) -> None:
+        current_type = {"name": "big", "architecture": "x86", "cpu_type": "shared", "cores": 4, "memory": 8,
+                        "prices": [{"location": "fsn1", "price_monthly": {"net": "100"}}]}
+        small = Asset("hcloud:server_type:2", "server_type", "small", {"name": "small", "architecture": "x86", "cpu_type": "shared", "cores": 2, "memory": 4,
+                      "deprecated": False, "locations": [{"name": "fsn1", "available": True}], "prices": [{"location": "fsn1", "price_monthly": {"net": "50"}}]}, source="hcloud_api")
+        metrics = {"start": "2026-09-22T00:00:00+00:00", "end": "2026-09-22T18:00:00+00:00", "time_series": {"cpu": {"values": [[1, "10"], [2, "12"]]}}}
+        server = Asset("hcloud:server:1", "server", "short-history", {"id": 1, "status": "running", "location": {"name": "fsn1"}, "server_type": current_type, "metrics": metrics}, {}, "hcloud_api")
+        snapshot = Snapshot(assets=[server, small], metadata={"collected_at": "2026-09-23T00:00:00+00:00", "coverage": {"server_metrics": {"window_days": 30}}})
+        report = analyze_cost(snapshot)
+        self.assertFalse([rec for rec in report["recommendations"] if rec["rule_id"] in {"HETZ-COST-002", "HETZ-COST-003"}])
+        self.assertTrue(any("0.8 of 30 requested days" in gap for gap in report["data_gaps"]))
+
     def test_cost_report_includes_unattached_volume_waste(self) -> None:
         volume = Asset(
             "hcloud:volume:9",

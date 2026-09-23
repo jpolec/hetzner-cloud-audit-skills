@@ -173,6 +173,8 @@ def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Find
     for asset in snapshot.assets:
         if asset.type not in {"server", "firewall", "service"}:
             continue
+        if asset.type == "firewall" and "applied_to" in asset.properties:
+            continue  # evaluated as effective policy on the servers it is applied to, not as a loose rule set
         for proto in ("tcp", "udp"):
             for rule in _public_ports(asset, proto):
                 if _all_ports(rule):
