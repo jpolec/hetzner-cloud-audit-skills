@@ -128,18 +128,28 @@ def host_rows(snapshot: Snapshot) -> list[dict[str, Any]]:
         own_rules = port_set(firewall.get("world_tcp_ranges"))
         bypass = sorted({item["host_port"] for item in props.get("docker_published") or []
                          if item.get("bind") in {"wildcard", "public"} and item.get("protocol") == "tcp" and item["host_port"] not in own_rules})
+        known_fw = bool(firewall.get("known", True)) and props.get("host_firewall_allow_ports") is not None
+        known_listeners = props.get("listening_ports") is not None
+        if not known_fw:
+            engine = f"{firewall.get('engine') or 'unknown'} (unreadable)"
+        else:
+            engine = f"{firewall.get('engine')}" + ("" if firewall.get("active") else " (filters nothing)")
         rows.append({
             "name": asset.name,
-            "engine": f"{firewall.get('engine')}" + ("" if firewall.get("active") else " (filters nothing)"),
-            "host_firewall_admits": firewall.get("world_tcp") or "nothing",
-            "public_listeners": listening.describe() or "none",
+            "engine": engine,
+            "known": known_fw and known_listeners,
+            "host_firewall_admits": (firewall.get("world_tcp") or "nothing") if known_fw else "unknown",
+            "public_listeners": (listening.describe() or "none") if known_listeners else "unknown",
             "docker_bypass": bypass,
             "cloud_admits": cloud.describe() or "nothing",
-            "reachable": cloud.intersection(host_allowed).intersection(listening).describe() or "none",
+            "reachable": (cloud.intersection(host_allowed).intersection(listening).describe() or "none")
+            if known_fw and known_listeners else "unknown",
             # Cloud Firewalls never filter private networks: host firewall and listeners decide alone.
             "private_reachable": (
-                PortSet.of([(port, port) for port in props.get("private_listening_ports") or []])
-                .intersection(port_set(props.get("host_firewall_private_allow_ports"))).describe() or "none"
+                (PortSet.of([(port, port) for port in props.get("private_listening_ports") or []])
+                 .intersection(port_set(props.get("host_firewall_private_allow_ports"))).describe() or "none")
+                if props.get("host_firewall_private_allow_ports") is not None and props.get("private_listening_ports") is not None
+                else "unknown"
             ) if props.get("private_net") else None,
             "containers": sum(1 for other in snapshot.assets if other.type == "container" and other.properties.get("server") == asset.id),
         })

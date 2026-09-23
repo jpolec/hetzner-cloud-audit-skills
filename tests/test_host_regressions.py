@@ -104,3 +104,23 @@ class ParserSemanticsTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class UnknownIsShownAsUnknownTest(unittest.TestCase):
+    def test_summary_topology_and_views_say_unknown(self) -> None:
+        from hetzner_security.diagram import render_host_svg
+        from hetzner_security.findings.summary import build_summary, host_rows
+        from hetzner_security.topology import build_topology
+
+        server = Asset("hcloud:server:db-1", "server", "db-1", {"public_ip": True, "firewall_attached": True, "inbound": []}, {}, "hcloud_api")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "db-1.bundle"
+            path.write_text(_bundle(ufw="ERROR: You need to be root to run this script"))
+            snapshot = apply_host_bundles(Snapshot(assets=[server]), [path])
+        row = build_summary(snapshot, [])["host_evidence"][0]
+        self.assertEqual(row["reachable"], "unknown")
+        self.assertEqual(row["host_firewall_admits"], "unknown")
+        self.assertNotIn("filters nothing", row["engine"])
+        self.assertEqual(build_topology(snapshot)["servers"][0]["host"]["firewall"], "unknown")
+        svg = render_host_svg([{**host_rows(snapshot)[0], "subtitle": "", "containers": []}])
+        self.assertIn("could not be read", svg)

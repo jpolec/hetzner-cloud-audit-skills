@@ -655,6 +655,8 @@ def parse_redis(text: str) -> dict[str, Any]:
         return {"installed": True, "running": False}
     if "NOAUTH" in text:
         return {"installed": True, "running": True, "auth_required": True}
+    if re.search(r"NOPERM|ERR unknown command|ERR unknown subcommand", text):
+        return {"installed": True, "running": True, "error": "CONFIG not readable (renamed or not permitted)"}
     # CONFIG GET prints the key, then the value on the next line; an empty value is an empty line.
     lines = [line.strip() for line in text.splitlines()]
     values: dict[str, str] = {}

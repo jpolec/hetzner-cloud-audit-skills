@@ -65,8 +65,18 @@ class ReadOnlyRobotCollector:
                     firewalls[str(number)] = self._get(f"firewall/{number}")
                 except RobotCollectionError as exc:
                     firewalls[str(number)] = {"error": str(exc)}  # unknown, not "no firewall"
-        vswitches = [self._get(f"vswitch/{item.get('id')}") for item in (self._get("vswitch") or []) if item.get("id") is not None]
-        return {"server": servers, "firewall": firewalls, "vswitch": [item for item in vswitches if item], "key": self._get("key") or []}
+        errors: list[str] = []
+        vswitches: list[Any] = []
+        keys: list[Any] = []
+        try:
+            vswitches = [self._get(f"vswitch/{item.get('id')}") for item in (self._get("vswitch") or []) if item.get("id") is not None]
+        except RobotCollectionError as exc:
+            errors.append(f"vswitch: {exc}")
+        try:
+            keys = self._get("key") or []
+        except RobotCollectionError as exc:
+            errors.append(f"key: {exc}")
+        return {"server": servers, "firewall": firewalls, "vswitch": [item for item in vswitches if item], "key": keys, "errors": errors}
 
 
 def load_robot_file(path: Any) -> dict[str, Any]:
@@ -203,8 +213,14 @@ def normalize_robot(raw: dict[str, Any]) -> tuple[list[Asset], list[Edge], dict[
             "created": key.get("created_at"),
             "fingerprint": key.get("fingerprint"),
         }), {}, "robot_api"))
-    coverage = {"robot_server": {"status": "collected", "count": sum(1 for a in assets if a.type == "robot_server")},
-                "robot_vswitch": {"status": "collected", "count": sum(1 for a in assets if a.type == "vswitch")}}
+    firewall_errors = [key for key, entry in (raw.get("firewall") or {}).items() if isinstance(entry, dict) and entry.get("error")]
+    errors = [str(item) for item in raw.get("errors") or []]
+    coverage = {
+        "robot_server": {"status": "partial" if firewall_errors else "collected", "count": sum(1 for a in assets if a.type == "robot_server"),
+                         **({"firewall_unreadable": firewall_errors} if firewall_errors else {})},
+        "robot_vswitch": {"status": "partial" if any(item.startswith("vswitch") for item in errors) else "collected",
+                          "count": sum(1 for a in assets if a.type == "vswitch")},
+    }
     return assets, edges, coverage
 
 

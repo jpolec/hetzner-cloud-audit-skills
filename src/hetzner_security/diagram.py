@@ -391,6 +391,8 @@ def render_svg(
             flags.insert(0, (f"docker bypass {len(host['docker_bypass'])}", c["critical"]))
         if host and host["firewall"] == "none":
             flags.insert(0, ("no host fw", c["public"]))
+        elif host and host["firewall"] == "unknown":
+            flags.insert(0, ("host fw unknown", c["muted"]))
         if item.get("k8s_role"):
             flags.insert(0, ("k8s cp" if item["k8s_role"] == "control-plane" else "k8s", c["location"]))
         if not item["firewall"] and item["public_ip"]:
@@ -920,7 +922,7 @@ def render_host_svg(
     out: list[str] = []
     add = out.append
     _open_svg(add, c, width, height)
-    exposed = sum(1 for host in hosts if host["reachable"] != "none")
+    exposed = sum(1 for host in hosts if host["reachable"] not in {"none", "unknown"})
     bypass = sum(1 for host in hosts if host["docker_bypass"])
     unfiltered = sum(1 for host in hosts if "filters nothing" in str(host["engine"]))
     _header(
@@ -940,7 +942,7 @@ def render_host_svg(
         add(f'<text x="{margin + 20}" y="{top + 68}" font-size="12.5" fill="{c["muted"]}">Run `hetzner-audit host-bundle` on each server (owner-run, read-only) and pass the output with --host-bundle.</text>')
     y = float(top)
     for host, panel in zip(hosts, heights, strict=True):
-        reachable = host["reachable"] != "none"
+        reachable = host["reachable"] not in {"none", "unknown"}
         add(f'<rect x="{margin}" y="{y}" width="{width - 2 * margin}" height="{panel}" rx="12" fill="{c["surface"]}" stroke="{c["critical"] if reachable else c["line"]}" stroke-width="{1.6 if reachable else 1}" filter="url(#shadow)"/>')
         _icon(add, margin + 16, y + 14, "server", CATEGORY["app"][0], 34)
         add(f'<text x="{margin + 60}" y="{y + 30}" font-size="15" font-weight="800" fill="{c["text"]}">{escape(host["name"])}</text>')
@@ -948,11 +950,13 @@ def render_host_svg(
         stages = [
             ("CLOUD FIREWALL", f"admits {host['cloud_admits']}", c["text"]),
             (f"HOST FIREWALL · {str(host['engine']).split(' ')[0].upper()}",
-             f"admits {host['host_firewall_admits']}" + (" (filters nothing)" if "filters nothing" in str(host["engine"]) else ""),
-             c["public"] if "filters nothing" in str(host["engine"]) else c["text"]),
+             "could not be read" if "unreadable" in str(host["engine"])
+             else f"admits {host['host_firewall_admits']}" + (" (filters nothing)" if "filters nothing" in str(host["engine"]) else ""),
+             c["muted"] if "unreadable" in str(host["engine"]) else c["public"] if "filters nothing" in str(host["engine"]) else c["text"]),
             ("PUBLIC LISTENERS", host["public_listeners"], c["text"]),
             ("DOCKER PUBLISHED", ("bypass " + ", ".join(map(str, host["docker_bypass"]))) if host["docker_bypass"] else "no bypass", c["critical"] if host["docker_bypass"] else c["vpc"]),
-            ("REACHABLE FROM INTERNET", host["reachable"], c["critical"] if reachable else c["vpc"]),
+            ("REACHABLE FROM INTERNET", host["reachable"],
+             c["critical"] if reachable else c["muted"] if host["reachable"] == "unknown" else c["vpc"]),
         ]
         private = host.get("private_reachable")
         sx = margin + 16.0

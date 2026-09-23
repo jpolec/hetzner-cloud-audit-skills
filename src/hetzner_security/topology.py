@@ -261,7 +261,7 @@ def _host_summary(server: Asset) -> dict[str, Any] | None:
     bypass = sorted({item["host_port"] for item in props.get("docker_published") or []
                      if item.get("bind") in {"wildcard", "public"} and item["host_port"] not in own})
     return {
-        "firewall": firewall.get("engine") if firewall.get("active") else "none",
+        "firewall": ("unknown" if not firewall.get("known", True) else firewall.get("engine") if firewall.get("active") else "none"),
         "docker_bypass": bypass,
         "containers": len({item.get("container") for item in props.get("docker_published") or []}),
         "password_ssh": (props.get("sshd") or {}).get("passwordauthentication") == "yes",
