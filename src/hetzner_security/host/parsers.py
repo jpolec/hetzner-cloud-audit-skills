@@ -70,7 +70,7 @@ def parse_meta(text: str) -> dict[str, str]:
 
 Network = ipaddress.IPv4Network | ipaddress.IPv6Network
 # Interfaces that never carry public or Hetzner private-network traffic.
-TUNNEL_IFACES = ("lo", "tailscale", "wg", "docker", "br-", "veth", "cni", "flannel", "cilium", "lxc", "virbr", "zt", "kube")
+TUNNEL_IFACES = ("lo", "tailscale", "wt", "wg", "docker", "br-", "veth", "cni", "flannel", "cilium", "lxc", "virbr", "zt", "kube")
 # Hetzner Cloud uplinks: public NIC (eth0 / enp1s0) and private-network NIC (ens10 / enp7s0).
 PUBLIC_IFACES = {"eth0", "enp1s0", "ens3", "eno1", "enp0s31f6"}
 PRIVATE_IFACES = {"ens10", "enp7s0", "ens11", "enp8s0"}

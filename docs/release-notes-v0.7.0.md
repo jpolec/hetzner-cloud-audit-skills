@@ -12,6 +12,8 @@ v0.7.0 ships roadmap items v0.6 (host evidence and drift) and v0.7 (beyond one C
 - **Honest savings.** Theoretical, expected, and verified savings are separate numbers. RAM and disk telemetry gate rightsizing; `diff` measures what a change actually saved.
 - **Two new views.** `--view host` shows each server's layers and containers; `--view posture` is a domain × severity matrix with coverage and evidence sources. The architecture map now shows load balancers, Kubernetes, Robot, and buckets.
 
+- **Not only Cloudflare.** Fastly, Bunny CDN, AWS CloudFront, Gcore, and Imperva are recognized from their published ranges; Tailscale, Headscale, NetBird, WireGuard, and ZeroTier as mesh VPNs; and servers with no public ingress at all (tunnels) are called out as the good pattern. See [What hetzner-audit sees](coverage.md).
+
 ## Tested how
 
 - Host bundle: fixture-tested, modeled on a real UFW + Docker host, plus adversarial parser cases. It has not yet run live.

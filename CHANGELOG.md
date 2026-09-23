@@ -33,6 +33,10 @@ v0.6 and v0.7 of the roadmap ship together as one release.
 - Console checklist (`hetzner-audit checklist`, `--attestations FILE`): `HETZ-ATT-001..007` for 2FA, member roles, Read & Write tokens, Robot login, S3 keys, Storage Box sub-accounts, and recovery contacts.
 - Views: the architecture map shows load balancers, Kubernetes, Robot servers, vSwitches, buckets, and host flags. New `--view host` (per-VM layers) and `--view posture` (domain × severity matrix with coverage and evidence sources).
 - The audit summary lists every evidence source, a per-server host table (reachable from the Internet and from the private network), and one line per optional source.
+- Edge-provider registry: Cloudflare, Fastly, Bunny CDN, AWS CloudFront, Gcore, and Imperva recognized from their published, dated ranges (`scripts/update_provider_ranges.py`, `--check`). `HETZ-NET-006` now names whichever provider the origin bypasses; maps label edge sources with the provider (VIA CF, VIA FASTLY, …).
+- Mesh VPNs: Tailscale, Headscale, NetBird, WireGuard, and ZeroTier are recognized by range, UDP port, or interface; their UDP ports never count as exposure.
+- "No public ingress" is reported as the good pattern, with tunnel agents (Cloudflare Tunnel, ngrok, frp, Tailscale, NetBird, ZeroTier) named from the host bundle's new `agents` section or container images.
+- `docs/coverage.md`: every recognized component with its evidence source and an honest live/fixture status.
 - `doctor` reports optional sources and credentials (values never printed) and warns when any secret sits in `.env`.
 - The generated benchmark now scores 18 rules, all at 1.00 precision and recall.
 

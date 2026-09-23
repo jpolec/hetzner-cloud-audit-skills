@@ -47,6 +47,10 @@ if have iptables; then limit iptables -S DOCKER-USER 2>&1; else echo 'not instal
 section listeners
 if have ss; then limit ss -H -ltunp 2>&1; else echo 'not installed'; fi
 
+section agents
+# Tunnel and mesh agents (names only): a service published through an outbound tunnel needs no inbound port.
+ps -eo comm= 2>/dev/null | grep -E '^(cloudflared|ngrok|tailscaled|netbird|zerotier-one|frpc)$' | sort -u
+
 section sshd
 if have sshd; then
   limit sshd -T 2>/dev/null | grep -iE '^(port|permitrootlogin|passwordauthentication|kbdinteractiveauthentication|challengeresponseauthentication|pubkeyauthentication|permitemptypasswords|maxauthtries|x11forwarding|allowtcpforwarding|authenticationmethods) '

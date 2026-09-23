@@ -10,6 +10,7 @@
 | Rejected by the verifier | 0 |
 | Suppressed by owner labels | 0 |
 | Collection gaps | none |
+| No public ingress | 0 of 7 servers accept nothing from the Internet |
 
 ### What this audit knows
 

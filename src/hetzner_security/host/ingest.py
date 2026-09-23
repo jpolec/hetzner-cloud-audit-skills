@@ -63,6 +63,7 @@ def parse_bundle(text: str) -> dict[str, Any]:
         "docker_user": parse_docker_user(sections.get("docker_user", "")),
         "listeners": parse_listeners(sections.get("listeners", "")),
         "sshd": parse_sshd(sections.get("sshd", "")),
+        "agents": sorted({line.strip() for line in sections.get("agents", "").splitlines() if line.strip() and " " not in line.strip()}),
         "docker": parse_docker(sections.get("docker", "")),
         "pg_hba": parse_pg_hba(sections.get("pg_hba", "")),
         "redis": parse_redis(sections.get("redis", "")),
@@ -184,6 +185,7 @@ def apply_host_bundle(snapshot: Snapshot, bundle: dict[str, Any], source: str) -
                 "world_tcp_ranges": _ranges(world),
                 "unparsed_rules": len(unparsed) if isinstance(unparsed, list) else 0,
             }
+    props["host_agents"] = bundle.get("agents") or []
     props["docker_published"] = published
     props["docker_user_filters"] = docker_filters
     if listeners is not None:

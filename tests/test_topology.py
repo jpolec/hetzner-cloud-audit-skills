@@ -49,8 +49,8 @@ class TopologyTest(unittest.TestCase):
 
     def test_sources_are_classified_by_trust(self) -> None:
         self.assertEqual(classify_source("0.0.0.0/0", ()), "world")
-        self.assertEqual(classify_source("104.16.0.0/13", ()), "cloudflare")
-        self.assertEqual(classify_source("100.64.0.0/10", ()), "tailscale")
+        self.assertEqual(classify_source("104.16.0.0/13", ()), "edge")
+        self.assertEqual(classify_source("100.64.0.0/10", ()), "mesh")
         self.assertEqual(classify_source("203.0.113.7/32", ()), "allowlist")
 
     def test_exposure_levels(self) -> None:
@@ -58,7 +58,7 @@ class TopologyTest(unittest.TestCase):
         self.assertEqual(servers["synthetic-edge"]["exposure"], "proxied")
         self.assertEqual(servers["synthetic-db"]["exposure"], "critical")
         self.assertEqual(servers["synthetic-vault"]["exposure"], "private")
-        self.assertIn("tailscale", servers["synthetic-vault"]["ingress"])
+        self.assertIn("mesh", servers["synthetic-vault"]["ingress"])
         self.assertEqual(servers["synthetic-vault"]["networks"], [])
 
     def test_renderers_never_print_public_addresses(self) -> None:

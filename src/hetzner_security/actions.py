@@ -264,8 +264,10 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
                 "Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.", [rule])
     for finding in by_rule.get("HETZ-NET-006", []):
         name = _names(snapshot, finding.assets[:1])[0]
-        add(15, f"Restrict {name} web ports to Cloudflare, or confirm direct access is intended", finding.observation, finding, None, "low", None,
-            f"Limit tcp/80 and tcp/443 on {name}'s cloud firewall to Cloudflare ranges in IaC. On the host, check that Docker does not publish 80/443, because Docker bypasses UFW.", ["HETZ-NET-006"])
+        edge = finding.title.split("bypassing ", 1)[-1] if "bypassing " in finding.title else "the edge proxy"
+        add(15, f"Restrict {name} web ports to {edge}, or confirm direct access is intended", finding.observation, finding, None, "low", None,
+            f"Limit tcp/80 and tcp/443 on {name}'s cloud firewall to {edge} ranges in IaC, or publish through a tunnel and close them. "
+            "On the host, check that Docker does not publish 80/443, because Docker bypasses UFW.", ["HETZ-NET-006"])
     lateral = by_rule.get("HETZ-XLY-002", [])
     if lateral:
         targets = sorted({name for finding in lateral for name in _names(snapshot, finding.assets[1:2])})

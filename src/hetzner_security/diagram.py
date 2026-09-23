@@ -20,13 +20,13 @@ THEMES: dict[str, dict[str, str]] = {
         "bg": "#f4f4f4", "surface": "#ffffff", "line": "#e3e3e3", "text": "#1f1f1f", "muted": "#6b6b6b",
         "zone": "#8a8a8a", "vpc": "#1f9d55", "vpc_fill": "#f6fbf8", "location": "#2f6fdb", "band": "#fafafa",
         "critical": "#d50c2d", "public": "#d98e04", "proxied": "#f38020", "private": "#2f6fdb",
-        "world": "#d50c2d", "cloudflare": "#f38020", "tailscale": "#6d4fc2", "allowlist": "#7a7a7a",
+        "world": "#d50c2d", "edge": "#f38020", "mesh": "#6d4fc2", "allowlist": "#7a7a7a",
     },
     "dark": {
         "bg": "#0b1220", "surface": "#111f36", "line": "#23324d", "text": "#e5edf7", "muted": "#8aa0bd",
         "zone": "#8aa0bd", "vpc": "#34d399", "vpc_fill": "#0f1a2e", "location": "#60a5fa", "band": "#0f1a2e",
         "critical": "#f87171", "public": "#fde047", "proxied": "#fb923c", "private": "#60a5fa",
-        "world": "#f87171", "cloudflare": "#fb923c", "tailscale": "#a78bfa", "allowlist": "#94a3b8",
+        "world": "#f87171", "edge": "#fb923c", "mesh": "#a78bfa", "allowlist": "#94a3b8",
     },
 }
 CATEGORY = {
@@ -62,11 +62,26 @@ GLYPHS = {
 }
 SOURCE_STYLE = {
     "world": ("globe", "Internet", "any address"),
-    "cloudflare": ("cloud", "Cloudflare", "proxy ranges only"),
+    "edge": ("cloud", "Edge proxy", "CDN / WAF ranges only"),
     "allowlist": ("list", "Allow-list", "specific public addresses"),
-    "tailscale": ("mesh", "Tailscale", "tailnet · admin + WireGuard"),
+    "mesh": ("mesh", "Mesh VPN", "Tailscale / NetBird · admin"),
 }
-EXPOSURE_PILL = {"critical": "EXPOSED", "public": "PUBLIC", "proxied": "VIA CF"}
+EXPOSURE_PILL = {"critical": "EXPOSED", "public": "PUBLIC", "proxied": "VIA CDN"}
+EDGE_SHORT = {"Cloudflare": "CF", "Fastly": "FASTLY", "Bunny CDN": "BUNNY", "AWS CloudFront": "CLOUDFRONT",
+              "Gcore CDN": "GCORE", "Imperva": "IMPERVA"}
+
+
+def _pill_text(item: dict[str, Any]) -> str:
+    """Exposure pill; a proxied server names its edge provider when there is exactly one."""
+    providers = item.get("edge_providers") or []
+    if item["exposure"] == "proxied" and len(providers) == 1:
+        return f"VIA {EDGE_SHORT.get(providers[0], 'CDN')}"
+    return EXPOSURE_PILL[item["exposure"]]
+
+
+def _edge_label(topology: dict[str, Any]) -> str:
+    providers = topology.get("edge_providers") or []
+    return ", ".join(providers) if providers else "Edge proxy"
 
 
 def _icon(add: Any, x: float, y: float, glyph: str, color: str, size: int = 34) -> None:
@@ -159,7 +174,7 @@ def render_svg(
     edge_targets = {
         item["name"]
         for item in servers
-        if any(port != "icmp" for kind in ("world", "cloudflare", "allowlist") for port in item["ingress"].get(kind, []))
+        if any(port != "icmp" for kind in ("world", "edge", "allowlist") for port in item["ingress"].get(kind, []))
     }
 
     # Columns = locations (like availability zones), widest first.
@@ -183,7 +198,7 @@ def render_svg(
         loc: max(1, min(3, max((len(cell(in_net, loc, tier)) for tier in tiers), default=1)))
         for loc in locations
     }
-    public_kinds = ("world", "cloudflare", "allowlist")
+    public_kinds = ("world", "edge", "allowlist")
     edges = [
         (kind, item["name"], [port for port in item["ingress"][kind] if port != "icmp"])
         for item in servers
@@ -274,8 +289,9 @@ def render_svg(
         [
             ("Servers", f"{stats.get('servers', len(servers))}", f"{stats.get('locations', len(locations))} locations", c["text"]),
             ("Internet-exposed", f"{stats.get('internet_exposed', 0)}", "open to any address", c["critical"] if stats.get("internet_exposed") else c["vpc"]),
-            ("Behind Cloudflare", f"{stats.get('cloudflare_fronted', 0)}", "web ports CF-only", c["cloudflare"]),
-            ("Tailscale admin", f"{stats.get('tailscale_admin', 0)}", "admin ports on tailnet", c["tailscale"]),
+            ("Behind edge proxy", f"{stats.get('edge_fronted', 0)}", _short(_edge_label(topology), 30), c["edge"]),
+            ("Mesh VPN admin", f"{stats.get('mesh_admin', 0)}", "admin ports on the mesh", c["mesh"]),
+            ("No public ingress", f"{stats.get('no_public_ingress', 0)}", f"{stats.get('tunnels', 0)} with a tunnel agent seen", c["vpc"]),
             ("Private network", f"{stats.get('private_members', 0)}", "servers · not filtered by cloud FW", c["public"] if stats.get("private_members", 0) > 1 else c["vpc"]),
             ("Volumes", f"{stats.get('volumes', 0)}", f"{stats.get('volume_gb', 0):,} GB · {stats.get('unattached_volumes', 0)} unattached", c["text"]),
             ("Delete-protected", f"{stats.get('delete_protected', 0)}/{stats.get('servers', len(servers))}", "servers protected from deletion", c["public"] if stats.get("delete_protected", 0) < stats.get("servers", 0) else c["vpc"]),
@@ -322,22 +338,24 @@ def render_svg(
         add(f'<text x="{vpc_x + 12}" y="{outside_y + 20}" font-size="12" font-weight="700" fill="{c["muted"]}">OUTSIDE THE PRIVATE NETWORK · public interface + cloud firewall only</text>')
 
     # --- trust sources
-    kinds = [kind for kind in ("world", "cloudflare", "allowlist", "tailscale") if any(kind in item["ingress"] for item in servers)]
+    kinds = [kind for kind in ("world", "edge", "allowlist", "mesh") if any(kind in item["ingress"] for item in servers)]
     source_pos: dict[str, tuple[float, float]] = {}
     sy = zone_y + 20.0
     for kind in kinds:
         glyph, name, note = SOURCE_STYLE[kind]
+        if kind == "edge":
+            name = _short(_edge_label(topology), 22)
         add(f'<rect x="{margin}" y="{sy}" width="{source_w}" height="60" rx="12" fill="{c["surface"]}" stroke="{c[kind]}" stroke-width="1.6" filter="url(#shadow)"/>')
         _icon(add, margin + 12, sy + 13, glyph, c[kind], 34)
         add(f'<text x="{margin + 56}" y="{sy + 27}" font-size="14" font-weight="700" fill="{c["text"]}">{escape(name)}</text>')
         add(f'<text x="{margin + 56}" y="{sy + 44}" font-size="11" fill="{c["muted"]}">{escape(note)}</text>')
         source_pos[kind] = (margin + source_w, sy + 30)
         sy += 84
-    if "tailscale" in source_pos:
-        ts_x, ts_y = source_pos["tailscale"]
-        reached = sum(1 for item in servers if "tailscale" in item["ingress"])
-        add(f'<path d="M {ts_x} {ts_y} L {vpc_x - 2} {ts_y}" stroke="{c["tailscale"]}" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>')
-        add(f'<text x="{margin + source_w / 2}" y="{ts_y + 44}" text-anchor="middle" font-size="11" fill="{c["tailscale"]}">reaches {reached} servers</text>')
+    if "mesh" in source_pos:
+        ts_x, ts_y = source_pos["mesh"]
+        reached = sum(1 for item in servers if "mesh" in item["ingress"])
+        add(f'<path d="M {ts_x} {ts_y} L {vpc_x - 2} {ts_y}" stroke="{c["mesh"]}" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>')
+        add(f'<text x="{margin + source_w / 2}" y="{ts_y + 44}" text-anchor="middle" font-size="11" fill="{c["mesh"]}">reaches {reached} servers</text>')
 
     # --- public edges: source → gutter → lane above the node row → down into the node
     gutters = {kind: zone_x - 30 + index * 7 for index, kind in enumerate(public_kinds)}
@@ -397,7 +415,9 @@ def render_svg(
             flags.insert(0, ("k8s cp" if item["k8s_role"] == "control-plane" else "k8s", c["location"]))
         if not item["firewall"] and item["public_ip"]:
             flags.insert(0, ("no firewall", c["critical"]))
-        pill = (EXPOSURE_PILL[item["exposure"]], c[item["exposure"]]) if item["exposure"] in EXPOSURE_PILL else None
+        pill = (_pill_text(item), c[item["exposure"]]) if item["exposure"] in EXPOSURE_PILL else None
+        if item.get("tunnels"):
+            flags.insert(0, ("tunnel", c["vpc"]))
         node(nx, ny, item["name"], detail, "security" if item["sensitive"] and item["group"] == "security" else ("data" if item["sensitive"] else item["group"]), pill, flags)
     for box in boxes:
         if box["name"] in storage_positions:
@@ -424,7 +444,7 @@ def render_svg(
         lx += 36 + len(label) * 6.6 + 14
     lx = margin + 16.0
     line_y = legend_y + 76
-    for kind, label, dash in (("world", "Internet ingress", ""), ("cloudflare", "Cloudflare-only ingress", ""), ("tailscale", "Tailscale admin", "6 5")):
+    for kind, label, dash in (("world", "Internet ingress", ""), ("edge", "Edge-proxy-only ingress", ""), ("mesh", "Mesh VPN admin", "6 5")):
         add(f'<path d="M {lx} {line_y} L {lx + 34} {line_y}" stroke="{c[kind]}" stroke-width="2.2" stroke-dasharray="{dash}" marker-end="url(#arrow)"/>')
         add(f'<text x="{lx + 42}" y="{line_y + 4}" font-size="11.5" fill="{c["text"]}">{escape(label)}</text>')
         lx += 60 + len(label) * 6.4 + 18
@@ -475,7 +495,7 @@ def _beyond_sections(topology: dict[str, Any], c: dict[str, str]) -> list[tuple[
         for item in topology.get("robot_servers") or []
     ]
     robot += [
-        (item["name"], f"vSwitch · VLAN {item['vlan']}", "vswitch", ("HYBRID", c["tailscale"]) if item["cloud_networks"] else None,
+        (item["name"], f"vSwitch · VLAN {item['vlan']}", "vswitch", ("HYBRID", c["mesh"]) if item["cloud_networks"] else None,
          [(f"{len(item['members'])} dedicated ↔ {', '.join(item['cloud_networks']) or 'no cloud net'}", c["muted"])])
         for item in topology.get("vswitches") or []
     ]
@@ -518,18 +538,18 @@ def _draw_beyond(
 def _chips(item: dict[str, Any]) -> list[tuple[str, str]]:
     """Ingress summary per trust class, as (text, theme key) chips."""
     chips: list[tuple[str, str]] = []
-    labels = {"world": "Internet", "cloudflare": "Cloudflare", "allowlist": "allow-list"}
-    for kind in ("world", "cloudflare", "allowlist"):
+    labels = {"world": "Internet", "edge": ", ".join(item.get("edge_providers") or []) or "edge proxy", "allowlist": "allow-list"}
+    for kind in ("world", "edge", "allowlist"):
         ports = [port.split("/")[-1] if port.startswith("tcp/") else port for port in item["ingress"].get(kind, []) if port != "icmp"]
         if ports:
             chips.append((f"{labels[kind]} {','.join(ports)}", kind))
     admin = [
         port.split("/")[-1] if port.startswith("tcp/") else port
-        for port in item["ingress"].get("tailscale", [])
+        for port in item["ingress"].get("mesh", [])
         if port.startswith("tcp/")
     ]
     if admin:
-        chips.append((f"Tailscale {','.join(admin)}", "tailscale"))
+        chips.append((f"mesh VPN {','.join(admin)}", "mesh"))
     return chips
 
 
@@ -545,7 +565,7 @@ def _vm_card(
         weight = "700" if color_key not in {"muted", "text"} else "400"
         add(f'<text x="{x + 54}" y="{y + 40 + index * 14}" font-size="10.5" font-weight="{weight}" fill="{c[color_key]}">{escape(text[:34])}</text>')
     if item["exposure"] in EXPOSURE_PILL:
-        text = EXPOSURE_PILL[item["exposure"]]
+        text = _pill_text(item)
         pw = 8 + len(text) * 6.4
         add(f'<rect x="{x + w - pw - 8}" y="{y - 8}" width="{pw:.1f}" height="16" rx="8" fill="{c[item["exposure"]]}"/>')
         add(f'<text x="{x + w - pw / 2 - 8:.1f}" y="{y + 3.5}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">{escape(text)}</text>')
@@ -558,7 +578,7 @@ def _category(item: dict[str, Any]) -> str:
 
 
 def _high_value(item: dict[str, Any]) -> bool:
-    """Databases, identity, and secrets hosts, plus data-role hosts that face the Internet or Cloudflare."""
+    """Databases, identity, and secrets hosts, plus data-role hosts that face the Internet or an edge proxy."""
     return bool(item["sensitive"]) or (item["group"] == "data" and item["exposure"] in {"public", "critical", "proxied"})
 
 
@@ -604,9 +624,9 @@ def render_connectivity_svg(
             ("In private network", str(len(in_net)), f"{network['name']} · {network.get('ip_range', '')}", c["vpc"]),
             ("Reachable pairs", f"{len(in_net) * max(len(in_net) - 1, 0)}", "any-to-any, every port", c["public"] if len(in_net) > 1 else c["vpc"]),
             ("High-value on shared L3", str(len(high_value)), _short(", ".join(roles) or "none", 34), c["critical"] if high_value else c["vpc"]),
-            ("Entry points in network", str(len(entry)), "Internet or Cloudflare ingress", c["critical"] if entry else c["vpc"]),
+            ("Entry points in network", str(len(entry)), "Internet or edge-proxy ingress", c["critical"] if entry else c["vpc"]),
             ("Outside network", str(len(outside)), "public interface + cloud FW only", c["text"]),
-            ("Tailscale admin", str(stats.get("tailscale_admin", 0)), "admin ports on tailnet", c["tailscale"]),
+            ("Mesh VPN admin", str(stats.get("mesh_admin", 0)), "admin ports on the mesh", c["mesh"]),
         ],
     )
 
@@ -622,7 +642,7 @@ def render_connectivity_svg(
     add(f'<text x="{margin + 18}" y="{bus_y + 22}" font-size="13" font-weight="700" fill="{c["vpc"]}">{escape(network["name"])} · {escape(network.get("ip_range", ""))} — any-to-any on every port: Hetzner Cloud Firewalls do not filter private networks</text>')
     if high_value:
         lines_blast = [
-            f"Blast radius: any of the {len(in_net) - 1} other members, including {len(entry)} Internet/Cloudflare "
+            f"Blast radius: any of the {len(in_net) - 1} other members, including {len(entry)} Internet/edge-proxy "
             f"entry point{'s' if len(entry) != 1 else ''}, has L3 access to {', '.join(item['name'] for item in high_value)} on every port.",
             "Cloud firewalls do not stop it; only host firewalls, localhost binds, and service authentication do (not observed by this audit).",
         ]
@@ -660,7 +680,7 @@ def render_connectivity_svg(
 
     add(f'<text x="{margin}" y="{top - 12}" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">OTHER MEMBERS</text>')
     if entry_up:
-        add(f'<text x="{width - margin}" y="{entry_top - 12}" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["critical"]}">ENTRY POINTS · Internet or Cloudflare ingress</text>')
+        add(f'<text x="{width - margin}" y="{entry_top - 12}" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["critical"]}">ENTRY POINTS · Internet or edge-proxy ingress</text>')
     if lower:
         add(f'<text x="{width - margin}" y="{lower_top - 4}" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["critical"]}">HIGH-VALUE HOSTS ON THE SHARED NETWORK</text>')
     for item in in_net:
@@ -695,7 +715,7 @@ def render_connectivity_svg(
     add(f'<path d="M {lx} {ly} L {lx + 30} {ly}" stroke="{c["critical"]}" stroke-width="1.8" opacity="0.7" marker-end="url(#arrow)"/>')
     add(f'<text x="{lx + 40}" y="{ly + 4}" font-size="11.5" fill="{c["text"]}">entry point → network → high-value host (all ports; cloud FW does not filter)</text>')
     lx += 470
-    for key, label in (("world", "Internet ports"), ("cloudflare", "Cloudflare-only ports"), ("tailscale", "Tailscale admin ports")):
+    for key, label in (("world", "Internet ports"), ("edge", "Edge-proxy-only ports"), ("mesh", "Mesh VPN admin ports")):
         add(f'<text x="{lx}" y="{ly + 4}" font-size="11.5" font-weight="700" fill="{c[key]}">{escape(label)}</text>')
         lx += 22 + len(label) * 6.6
     add("</svg>")

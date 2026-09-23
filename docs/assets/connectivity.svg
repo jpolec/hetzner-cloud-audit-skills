@@ -22,18 +22,18 @@
 <rect x="770.0" y="124" width="235.3" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <text x="784.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">ENTRY POINTS IN NETWORK</text>
 <text x="784.0" y="178" font-size="28" font-weight="800" fill="#d50c2d">4</text>
-<text x="784.0" y="198" font-size="11.5" fill="#6b6b6b">Internet or Cloudflare ingress</text>
+<text x="784.0" y="198" font-size="11.5" fill="#6b6b6b">Internet or edge-proxy ingress</text>
 <rect x="1017.3" y="124" width="235.3" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <text x="1031.3" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">OUTSIDE NETWORK</text>
 <text x="1031.3" y="178" font-size="28" font-weight="800" fill="#1f1f1f">2</text>
 <text x="1031.3" y="198" font-size="11.5" fill="#6b6b6b">public interface + cloud FW only</text>
 <rect x="1264.7" y="124" width="235.3" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
-<text x="1278.7" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">TAILSCALE ADMIN</text>
+<text x="1278.7" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">MESH VPN ADMIN</text>
 <text x="1278.7" y="178" font-size="28" font-weight="800" fill="#6d4fc2">10</text>
-<text x="1278.7" y="198" font-size="11.5" fill="#6b6b6b">admin ports on tailnet</text>
+<text x="1278.7" y="198" font-size="11.5" fill="#6b6b6b">admin ports on the mesh</text>
 <rect x="28" y="530" width="1472" height="34" rx="17" fill="#f6fbf8" stroke="#1f9d55" stroke-width="2"/>
 <text x="46" y="552" font-size="13" font-weight="700" fill="#1f9d55">core-net · 10.40.0.0/16 — any-to-any on every port: Hetzner Cloud Firewalls do not filter private networks</text>
-<text x="532" y="620" font-size="12" font-weight="700" fill="#d50c2d">Blast radius: any of the 11 other members, including 4 Internet/Cloudflare entry points, has L3 access to pg-main, sso-1 on every port.</text>
+<text x="532" y="620" font-size="12" font-weight="700" fill="#d50c2d">Blast radius: any of the 11 other members, including 4 Internet/edge-proxy entry points, has L3 access to pg-main, sso-1 on every port.</text>
 <text x="532" y="637" font-size="12" font-weight="400" fill="#d50c2d">Cloud firewalls do not stop it; only host firewalls, localhost binds, and service authentication do (not observed by this audit).</text>
 <path d="M 144.0 468 L 144.0 528" stroke="#d50c2d" stroke-width="2" marker-end="url(#arrow)"/>
 <path d="M 144.0 352 L 144.0 528" stroke="#e3e3e3" stroke-width="1.4"/>
@@ -48,7 +48,7 @@
 <path d="M 1384.0 352 L 1384.0 528" stroke="#e3e3e3" stroke-width="1.4"/>
 <path d="M 888.0 468 L 888.0 528" stroke="#d50c2d" stroke-width="2" marker-end="url(#arrow)"/>
 <text x="28" y="256" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">OTHER MEMBERS</text>
-<text x="1500" y="372" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#d50c2d">ENTRY POINTS · Internet or Cloudflare ingress</text>
+<text x="1500" y="372" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#d50c2d">ENTRY POINTS · Internet or edge-proxy ingress</text>
 <text x="1500" y="602" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#d50c2d">HIGH-VALUE HOSTS ON THE SHARED NETWORK</text>
 <rect x="28" y="384" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="38" y="396" width="34" height="34" rx="7" fill="#6b7280"/>
@@ -56,7 +56,7 @@
 <text x="82" y="408" font-size="13" font-weight="700" fill="#1f1f1f">analytics-1</text>
 <text x="82" y="424" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.170 · cpx22 · fsn1</text>
 <text x="82" y="438" font-size="10.5" font-weight="700" fill="#f38020">Cloudflare 80,443</text>
-<text x="82" y="452" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22</text>
+<text x="82" y="452" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22</text>
 <rect x="205.6" y="376" width="46.4" height="16" rx="8" fill="#f38020"/>
 <text x="228.8" y="387.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">VIA CF</text>
 <rect x="28" y="268" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
@@ -64,20 +64,20 @@
 <g transform="translate(43 285) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
 <text x="82" y="292" font-size="13" font-weight="700" fill="#1f1f1f">api-1</text>
 <text x="82" y="308" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.38 · cpx32 · fsn1</text>
-<text x="82" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,all</text>
+<text x="82" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,all</text>
 <rect x="276" y="268" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="286" y="280" width="34" height="34" rx="7" fill="#6b7280"/>
 <g transform="translate(291 285) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
 <text x="330" y="292" font-size="13" font-weight="700" fill="#1f1f1f">etl-1</text>
 <text x="330" y="308" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.52 · cx43 · fsn1</text>
-<text x="330" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale all</text>
+<text x="330" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN all</text>
 <rect x="276" y="384" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="286" y="396" width="34" height="34" rx="7" fill="#7c4dff"/>
 <g transform="translate(291 401) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8"/></g>
 <text x="330" y="408" font-size="13" font-weight="700" fill="#1f1f1f">gw-1</text>
 <text x="330" y="424" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.24 · cx23 · fsn1</text>
 <text x="330" y="438" font-size="10.5" font-weight="700" fill="#f38020">Cloudflare 80,443</text>
-<text x="330" y="452" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,all</text>
+<text x="330" y="452" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,all</text>
 <rect x="453.6" y="376" width="46.4" height="16" rx="8" fill="#f38020"/>
 <text x="476.8" y="387.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">VIA CF</text>
 <rect x="524" y="268" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
@@ -91,27 +91,27 @@
 <g transform="translate(787 285) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
 <text x="826" y="292" font-size="13" font-weight="700" fill="#1f1f1f">lake-1</text>
 <text x="826" y="308" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.114 · cpx42 · fsn1</text>
-<text x="826" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,7001</text>
+<text x="826" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,7001</text>
 <rect x="28" y="612" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="38" y="624" width="34" height="34" rx="7" fill="#2f6fdb"/>
 <g transform="translate(43 629) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></g>
 <text x="82" y="636" font-size="13" font-weight="700" fill="#1f1f1f">pg-main</text>
 <text x="82" y="652" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.17 · cx33 · fsn1</text>
-<text x="82" y="666" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,all</text>
+<text x="82" y="666" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,all</text>
 <text x="82" y="680" font-size="10.5" font-weight="700" fill="#d50c2d">reachable from 11 VMs</text>
 <rect x="1020" y="268" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="1030" y="280" width="34" height="34" rx="7" fill="#2f6fdb"/>
 <g transform="translate(1035 285) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></g>
 <text x="1074" y="292" font-size="13" font-weight="700" fill="#1f1f1f">pg-replica</text>
 <text x="1074" y="308" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.59 · cx33 · nbg1</text>
-<text x="1074" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,all</text>
+<text x="1074" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,all</text>
 <rect x="524" y="384" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="534" y="396" width="34" height="34" rx="7" fill="#6b7280"/>
 <g transform="translate(539 401) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
 <text x="578" y="408" font-size="13" font-weight="700" fill="#1f1f1f">preview-1</text>
 <text x="578" y="424" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.51 · cpx22 · hel1</text>
 <text x="578" y="438" font-size="10.5" font-weight="700" fill="#d50c2d">Internet 80,443</text>
-<text x="578" y="452" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22</text>
+<text x="578" y="452" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22</text>
 <rect x="701.6" y="376" width="46.4" height="16" rx="8" fill="#d98e04"/>
 <text x="724.8" y="387.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">PUBLIC</text>
 <rect x="276" y="612" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
@@ -119,14 +119,14 @@
 <g transform="translate(291 629) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
 <text x="330" y="636" font-size="13" font-weight="700" fill="#1f1f1f">sso-1</text>
 <text x="330" y="652" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.31 · cx23 · nbg1</text>
-<text x="330" y="666" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,all</text>
+<text x="330" y="666" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,all</text>
 <text x="330" y="680" font-size="10.5" font-weight="700" fill="#d50c2d">reachable from 11 VMs</text>
 <rect x="1268" y="268" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="1278" y="280" width="34" height="34" rx="7" fill="#7c4dff"/>
 <g transform="translate(1283 285) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8"/></g>
 <text x="1322" y="292" font-size="13" font-weight="700" fill="#1f1f1f">web-1</text>
 <text x="1322" y="308" font-size="10.5" font-weight="400" fill="#6b6b6b">10.40.2.45 · cx33 · nbg1</text>
-<text x="1322" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">Tailscale 22,all</text>
+<text x="1322" y="322" font-size="10.5" font-weight="700" fill="#6d4fc2">mesh VPN 22,all</text>
 <rect x="772" y="384" width="232" height="84" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
 <rect x="782" y="396" width="34" height="34" rx="7" fill="#7c4dff"/>
 <g transform="translate(787 401) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8"/></g>
@@ -175,6 +175,6 @@
 <path d="M 244.0 1114 L 274.0 1114" stroke="#d50c2d" stroke-width="1.8" opacity="0.7" marker-end="url(#arrow)"/>
 <text x="284.0" y="1118" font-size="11.5" fill="#1f1f1f">entry point → network → high-value host (all ports; cloud FW does not filter)</text>
 <text x="714.0" y="1118" font-size="11.5" font-weight="700" fill="#d50c2d">Internet ports</text>
-<text x="828.4" y="1118" font-size="11.5" font-weight="700" fill="#f38020">Cloudflare-only ports</text>
-<text x="989.0" y="1118" font-size="11.5" font-weight="700" fill="#6d4fc2">Tailscale admin ports</text>
+<text x="828.4" y="1118" font-size="11.5" font-weight="700" fill="#f38020">Edge-proxy-only ports</text>
+<text x="989.0" y="1118" font-size="11.5" font-weight="700" fill="#6d4fc2">Mesh VPN admin ports</text>
 </svg>

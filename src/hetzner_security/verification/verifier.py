@@ -77,7 +77,7 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
     if candidate.rule_id == "HETZ-NET-006":
         return _needs(
             result,
-            "Cloudflare-only peers suggest the origin should not be public; confirm with the owner whether direct access is intended.",
+            "Peers that accept web traffic only from an edge proxy suggest the origin should not be public; confirm with the owner whether direct access is intended.",
         )
 
     if candidate.rule_id.startswith("HETZ-NET-") and candidate.rule_id != "HETZ-NET-005":

@@ -104,10 +104,25 @@ def build_summary(
         "suppressed": suppressed or [],
         "missing_layers": missing_layers,
         "host_evidence": host_rows(snapshot),
+        "ingress": _ingress_summary(snapshot),
         "other_sources": other_sources(snapshot),
         "cost": cost,
         "changes": change_summary(snapshot) if any(str(key).endswith("actions") for key in coverage) else None,
         "projects": project_summary(snapshot) if snapshot.metadata.get("projects") else [],
+    }
+
+
+def _ingress_summary(snapshot: Snapshot) -> dict[str, Any]:
+    """The good pattern, named explicitly: servers that accept nothing from the Internet."""
+    from ..topology import build_topology
+
+    topology = build_topology(snapshot)
+    servers = [item for item in topology["servers"] if item["public_ip"]]
+    return {
+        "servers": len(servers),
+        "no_public_ingress": sum(1 for item in servers if item["no_public_ingress"]),
+        "tunnels": sorted({name for item in topology["servers"] for name in item["tunnels"]}),
+        "edge_providers": topology.get("edge_providers") or [],
     }
 
 
@@ -246,6 +261,14 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
         rows.insert(1, ("Projects", " · ".join(
             f"{item['project']} ({item['assets'].get('server', 0)} servers)" for item in summary["projects"]
         )))
+    ingress = summary.get("ingress")
+    if ingress and ingress["servers"]:
+        rows.append((
+            "No public ingress",
+            f"{ingress['no_public_ingress']} of {ingress['servers']} servers accept nothing from the Internet"
+            + (f" · tunnel agents: {', '.join(ingress['tunnels'])}" if ingress["tunnels"] else "")
+            + (f" · edge proxies: {', '.join(ingress['edge_providers'])}" if ingress["edge_providers"] else ""),
+        ))
     changes = summary.get("changes")
     if changes:
         top = ", ".join(f"{command} {count}" for command, count in list(changes["by_command"].items())[:4])

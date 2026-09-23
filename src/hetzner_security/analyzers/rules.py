@@ -21,7 +21,9 @@ from ..models import (
     Snapshot,
     Verification,
 )
-from ..topology import CLOUDFLARE_RANGES_AS_OF, classify_source
+from ..provider_ranges import EDGE_RANGES
+from ..providers import edge_provider, edge_ranges_as_of
+from ..topology import classify_source
 
 Rule = Callable[[Snapshot, AttackGraph], list[Finding]]
 CGNAT_RANGE = ipaddress.IPv4Network("100.64.0.0/10")
@@ -797,23 +799,42 @@ def _is_private_source(source: str) -> bool:
     return network.is_private
 
 
-def cloudflare_origin_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
-    """Flag web origins open to any address when peers restrict web ports to Cloudflare."""
+def edge_origin_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    """Flag web origins open to any address when peers restrict web ports to an edge proxy (CDN/WAF).
+
+    The edge provider is recognized from its published, dated ranges (Cloudflare, Fastly, Bunny CDN,
+    AWS CloudFront, Gcore, Imperva); the finding names the provider the peers use.
+    """
     web_ports = {80, 443}
 
-    def web_sources(asset: Asset) -> set[str]:
-        classes: set[str] = set()
+    def web_rules(asset: Asset) -> list[dict[str, object]]:
+        output = []
         for rule in asset.properties.get("inbound", []) or []:
             start, end = _port_bounds(rule)
-            if rule.get("protocol", "tcp") != "tcp" or not any(start <= port <= end for port in web_ports):
-                continue
-            classes |= {classify_source(str(source), ()) for source in rule.get("sources", []) if not _is_private_source(str(source))}
-        return classes
+            if rule.get("protocol", "tcp") == "tcp" and any(start <= port <= end for port in web_ports):
+                output.append(rule)
+        return output
+
+    def web_sources(asset: Asset) -> set[str]:
+        return {
+            classify_source(str(source), ())
+            for rule in web_rules(asset)
+            for source in rule.get("sources", []) or []  # type: ignore[attr-defined]
+            if not _is_private_source(str(source))
+        }
+
+    def providers(asset: Asset) -> set[str]:
+        return {
+            name for rule in web_rules(asset) for source in rule.get("sources", []) or []  # type: ignore[attr-defined]
+            if (name := edge_provider(str(source)))
+        }
 
     servers = [asset for asset in snapshot.assets if asset.type == "server" and asset.properties.get("public_ip")]
-    fronted = [asset for asset in servers if web_sources(asset) == {"cloudflare"}]
+    fronted = [asset for asset in servers if web_sources(asset) == {"edge"}]
     if not fronted:
         return []
+    names = sorted({name for peer in fronted for name in providers(peer)})
+    label = " / ".join(names) or "the edge proxy"
     output = []
     for asset in servers:
         if "world" not in web_sources(asset):
@@ -826,21 +847,22 @@ def cloudflare_origin_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Fin
         output.append(
             _candidate(
                 "HETZ-NET-006",
-                "Web origin is reachable directly, bypassing Cloudflare",
+                f"Web origin is reachable directly, bypassing {label}",
                 Severity.MEDIUM,
                 0.8,
                 [asset.id],
-                f"{asset.name} accepts HTTP/HTTPS from any address, while {len(fronted)} other server(s) accept web traffic only from Cloudflare.",
-                "Origins behind Cloudflare accept web traffic only from Cloudflare ranges.",
+                f"{asset.name} accepts HTTP/HTTPS from any address, while {len(fronted)} other server(s) accept web traffic only from {label}.",
+                f"Origins behind {label} accept web traffic only from its published ranges, or use a tunnel with no inbound port.",
                 "tcp/80 or tcp/443 is open to 0.0.0.0/0 or ::/0.",
                 [_evidence(asset, "firewall_rule", rule, "properties.inbound") for rule in rules]
-                + [_evidence(peer, "cloudflare_only_peer", sorted(web_sources(peer)), "properties.inbound") for peer in fronted[:3]]
-                + [_evidence(asset, "cloudflare_ranges_as_of", CLOUDFLARE_RANGES_AS_OF, "topology.CLOUDFLARE_RANGES")],
+                + [_evidence(peer, "edge_only_peer", sorted(providers(peer)), "properties.inbound") for peer in fronted[:3]]
+                + [_evidence(asset, "edge_ranges_as_of", {name: edge_ranges_as_of(name) for name in names}, "provider_ranges.EDGE_RANGES")],
                 ["internet", asset.id],
-                ["The origin is meant to be served through Cloudflare."],
-                "Direct origin access bypasses Cloudflare WAF, rate limiting, and DDoS protection, and can expose the origin IP.",
-                "Restrict tcp/80 and tcp/443 to Cloudflare ranges, or use Cloudflare Tunnel, if direct access is not intended.",
-                ["https://www.cloudflare.com/ips/", "https://developers.cloudflare.com/fundamentals/concepts/cloudflare-ip-addresses/"],
+                [f"The origin is meant to be served through {label}."],
+                f"Direct origin access bypasses {label}: its WAF, rate limiting, and DDoS protection, and it can reveal the origin IP.",
+                f"Restrict tcp/80 and tcp/443 to {label} ranges, or publish through a tunnel (Cloudflare Tunnel, Tailscale Funnel, ngrok) "
+                "and close the ports, if direct access is not intended.",
+                sorted({str(entry["source"]) for entry in EDGE_RANGES.values() if entry["name"] in names}),
             )
         )
     return output
@@ -920,7 +942,7 @@ RULES: tuple[Rule, ...] = (
     public_service_exposure,
     internet_host_without_firewall,
     firewall_quality,
-    cloudflare_origin_bypass,
+    edge_origin_bypass,
     expectation_drift,
     cross_environment_data_path,
     broad_private_data_path,
