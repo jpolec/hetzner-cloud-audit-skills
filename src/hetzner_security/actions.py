@@ -309,6 +309,7 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
     generic = {
         "HETZ-FW-001": (11, "security", "low"),
         "HETZ-CERT-001": (12, "security", "low"),
+        "HETZ-LB-006": (16, "security", "low"),
         "HETZ-LB-002": (18, "security", "low"),
         "HETZ-STO-001": (25, "security", "low"),
         "HETZ-DNS-001": (28, "security", "low"),

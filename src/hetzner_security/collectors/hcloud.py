@@ -469,6 +469,35 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
                     ),
                 )
             )
+    # Load balancers forward Internet traffic: listen port on the LB, destination port on each target.
+    for lb in raw.get("load_balancer", []):
+        lid = f"hcloud:load_balancer:{lb.get('id')}"
+        public = bool((lb.get("public_net") or {}).get("enabled", True))
+        services = lb.get("services") or []
+        target_servers: list[tuple[Any, bool]] = []
+        for target in lb.get("targets") or []:
+            if target.get("type") == "server" and (target.get("server") or {}).get("id") is not None:
+                target_servers.append((target["server"]["id"], bool(target.get("use_private_ip"))))
+            for nested in target.get("targets") or []:  # label_selector targets resolve to servers
+                if (nested.get("server") or {}).get("id") is not None:
+                    target_servers.append((nested["server"]["id"], bool(nested.get("use_private_ip"))))
+        for service in services:
+            listen, destination = service.get("listen_port"), service.get("destination_port")
+            evidence = (Evidence("hcloud_api", "load_balancer_service", lid, service, "properties.services"),)
+            if public and isinstance(listen, int):
+                edges.append(Edge("internet", lid, "allows", "tcp", listen, evidence))
+            if isinstance(destination, int):
+                for server_id, private in target_servers:
+                    edges.append(
+                        Edge(
+                            lid,
+                            f"hcloud:server:{server_id}",
+                            "allows",
+                            "tcp",
+                            destination,
+                            (Evidence("hcloud_api", "load_balancer_target", lid, {"server": server_id, "use_private_ip": private, "port": destination}, "properties.targets"),),
+                        )
+                    )
     return edges
 
 

@@ -307,7 +307,14 @@ def _answer(snapshot: Snapshot, question: str) -> dict[str, Any]:
     else:
         return {"question": question, "result": "unsupported_question", "answer": "Use a question about Internet-to-database or staging-to-production reachability.", "coverage": _coverage_summary(snapshot), "paths": []}
     # Internet questions are about direct exposure; multi-hop pivots are reported separately.
-    indirect = [path for path in paths if path["source"] == "internet" and len(path["path"]) > 1]
+    # A hop through a load balancer is forwarding, not a pivot: only other intermediate hosts make a path indirect.
+    asset_types = {asset.id: asset.type for asset in snapshot.assets}
+    indirect = [
+        path
+        for path in paths
+        if path["source"] == "internet"
+        and any(asset_types.get(node) != "load_balancer" for node in path["path"][1:-1])
+    ]
     paths = [path for path in paths if path not in indirect]
     confirmed = [path for path in paths if path["result"] == "reachable"]
     possible = [path for path in paths if path["result"] == "cloud_path_present"]

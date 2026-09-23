@@ -21,6 +21,7 @@
     {"id":"HETZ-LB-003","category":"hetzner","layers":["load_balancer","tls"],"title":"Load balancer serves HTTP without redirecting to HTTPS"},
     {"id":"HETZ-LB-004","category":"hetzner","layers":["load_balancer","availability"],"title":"Load balancer reports unhealthy targets"},
     {"id":"HETZ-LB-005","category":"hetzner","layers":["load_balancer","availability"],"title":"Load balancer has a single target"},
+    {"id":"HETZ-LB-006","category":"hetzner","layers":["load_balancer","cloud_firewall"],"title":"Load-balancer backend is reachable directly, bypassing the load balancer","absence_requires_validation":true},
     {"id":"HETZ-CERT-001","category":"hetzner","layers":["certificate","tls"],"title":"Certificate is expired, expiring soon, or failing to renew"},
     {"id":"HETZ-CERT-002","category":"hetzner","layers":["certificate","governance"],"title":"Certificate is not used by any load balancer"},
     {"id":"HETZ-DNS-001","category":"hetzner","layers":["dns","takeover"],"title":"DNS record points to an IP this project does not own","absence_requires_validation":true},

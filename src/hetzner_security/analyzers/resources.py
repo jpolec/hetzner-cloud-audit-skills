@@ -265,6 +265,47 @@ def load_balancer_hygiene(snapshot: Snapshot, graph: AttackGraph) -> list[Findin
     return output
 
 
+def load_balancer_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    """A load-balancer target that also accepts the target port from the whole Internet."""
+    output: list[Finding] = []
+    servers = {asset.id: asset for asset in _of(snapshot, "server")}
+    for lb in _of(snapshot, "load_balancer"):
+        for edge in graph.outgoing.get(lb.id, []):
+            server = servers.get(edge.target)
+            if server is None or edge.port is None:
+                continue
+            direct = [
+                rule
+                for rule in server.properties.get("inbound", []) or []
+                if rule.get("protocol", "tcp") == "tcp"
+                and set(rule.get("sources", []) or []) & {"0.0.0.0/0", "::/0"}
+                and (rule.get("port_from") is None or int(rule.get("port_from")) <= edge.port <= int(rule.get("port_to") or rule.get("port_from")))
+            ]
+            if not direct:
+                continue
+            output.append(
+                _candidate(
+                    "HETZ-LB-006",
+                    "Load-balancer backend is reachable directly, bypassing the load balancer",
+                    Severity.MEDIUM,
+                    0.8,
+                    [server.id, lb.id],
+                    f"{server.name} receives tcp/{edge.port} from {lb.name} and also accepts tcp/{edge.port} from any address.",
+                    "Backends accept application traffic only from the load balancer (preferably over the private network).",
+                    f"world rule on tcp/{edge.port}",
+                    [_evidence(server, "firewall_rule", rule, "properties.inbound") for rule in direct]
+                    + [_evidence(lb, "load_balancer_target", edge.port, "properties.targets")],
+                    ["internet", f"tcp/{edge.port}", server.id],
+                    ["The backend is meant to be reached only through the load balancer."],
+                    "Direct requests skip TLS termination, health-based routing, and any protection in front of the load balancer.",
+                    "Target the backend over its private IP and remove the public rule for the target port.",
+                    ["https://docs.hetzner.com/cloud/load-balancers/overview/"],
+                    f"{lb.id}:{edge.port}",
+                )
+            )
+    return output
+
+
 def certificate_lifecycle(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     output: list[Finding] = []
     now = _now(snapshot)
@@ -448,6 +489,7 @@ RESOURCE_RULES = (
     storage_box_exposure,
     operating_system_lifecycle,
     load_balancer_hygiene,
+    load_balancer_bypass,
     certificate_lifecycle,
     dangling_dns,
     placement_spread,

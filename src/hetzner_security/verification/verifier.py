@@ -45,6 +45,8 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
             result,
             "The address may live at another provider or in another project; confirm before calling it dangling.",
         )
+    if candidate.rule_id == "HETZ-LB-006":
+        return _needs(result, "Direct backend access may be intended; confirm with the owner and check the host firewall.")
     if candidate.rule_id == "HETZ-IMG-001":
         return _needs(
             result,

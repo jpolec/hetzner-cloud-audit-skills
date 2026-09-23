@@ -65,6 +65,44 @@ class LoadBalancerTest(unittest.TestCase):
         self.assertFalse([rule for rule in _findings(clean) if rule.startswith("HETZ-LB-")])
 
 
+class LoadBalancerGraphTest(unittest.TestCase):
+    RAW = {
+        "server": [
+            {"id": 1, "name": "pg-main", "labels": {"role": "db"}, "public_net": {"ipv4": {"ip": "203.0.113.5"}}, "private_net": [], "inbound": [
+                {"protocol": "tcp", "port_from": 5432, "port_to": 5432, "sources": ["0.0.0.0/0"]}
+            ]},
+        ],
+        "load_balancer": [
+            {"id": 9, "name": "lb", "public_net": {"enabled": True},
+             "services": [{"protocol": "tcp", "listen_port": 5432, "destination_port": 5432}],
+             "targets": [{"type": "label_selector", "targets": [{"type": "server", "server": {"id": 1}, "use_private_ip": True}]}]},
+        ],
+        "network": [],
+    }
+
+    def _snapshot(self) -> Snapshot:
+        from hetzner_security.collectors.hcloud import _derive_edges
+
+        server = _asset("server", "1", {**self.RAW["server"][0]}, {"role": "db"})
+        server.name = "pg-main"
+        lb = _asset("load_balancer", "9", self.RAW["load_balancer"][0])
+        return Snapshot(assets=[server, lb], edges=_derive_edges(self.RAW), metadata=NOW)
+
+    def test_lb_forwarding_is_direct_exposure_and_bypass_is_flagged(self) -> None:
+        from hetzner_security.cli.main import _answer
+
+        snapshot = self._snapshot()
+        edges = {(edge.source, edge.target, edge.port) for edge in snapshot.edges if edge.relation == "allows"}
+        self.assertIn(("internet", "hcloud:load_balancer:9", 5432), edges)
+        self.assertIn(("hcloud:load_balancer:9", "hcloud:server:1", 5432), edges)
+        answer = _answer(snapshot, "Can the Internet reach any database?")
+        self.assertEqual(answer["indirect_paths"], [])  # through the LB is direct, not a pivot
+        self.assertEqual(len(answer["paths"]), 1)
+        self.assertEqual(_findings(*snapshot.assets).get("HETZ-LB-006"), None)  # edges needed: use hunt on snapshot
+        findings = {item.rule_id: item.status.value for item in verify_all(hunt(snapshot), snapshot)}
+        self.assertEqual(findings.get("HETZ-LB-006"), "needs_validation")
+
+
 class CertificateTest(unittest.TestCase):
     def test_expiring_failed_unused_and_clean(self) -> None:
         soon = _asset("certificate", "soon", {"not_valid_after": "2026-10-01T00:00:00Z", "used_by": [{"id": 1}], "status": {}})
