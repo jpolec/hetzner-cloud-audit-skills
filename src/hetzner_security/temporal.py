@@ -72,7 +72,8 @@ def diff_snapshots(before: Snapshot, after: Snapshot, regression_policy: str = "
         asset = after_assets.get(item["asset"])
         item["name"] = asset.name if asset else item["asset"]
     new_exposures = [item for item in growth if item["source_class"] in {"world", "wide"}]
-    new_allowlisted = [item for item in growth if item["source_class"] == "allowlist"]
+    # Everything that is not world or wide: allow-listed sources and edge proxies (edge:<provider>).
+    new_trusted = [item for item in growth if item["source_class"] not in {"world", "wide"}]
     coverage_regressions = _coverage_regressions(before, after)
     regressed_sources = {item["source"] for item in coverage_regressions}
     removed_candidates = sorted(before_assets.keys() - after_assets.keys())
@@ -100,8 +101,10 @@ def diff_snapshots(before: Snapshot, after: Snapshot, regression_policy: str = "
         "new_edges": [edge.to_dict() for edge in new_edges],
         "removed_edges": [edge.to_dict() for edge in removed_edges],
         "uncertain_removed_edges": [edge.to_dict() for edge in uncertain_removed_edges],
+        "new_ingress_flows": growth,  # every new ingress flow; the two lists below partition it
         "new_exposures": new_exposures,
-        "new_allowlisted_flows": new_allowlisted,
+        "new_trusted_flows": new_trusted,
+        "new_allowlisted_flows": new_trusted,  # kept for compatibility; same as new_trusted_flows
         "closed_exposures": closed,
         "new_egress": new_egress,
         "coverage_regressions": coverage_regressions,
@@ -254,9 +257,9 @@ def render_diff_markdown(diff: dict[str, Any]) -> str:
         lines.extend(["## New Internet egress (destinations the servers may now reach)", ""])
         lines.extend(_flow_line(item) for item in diff["new_egress"])
         lines.append("")
-    if diff.get("new_allowlisted_flows"):
+    if diff.get("new_trusted_flows"):
         lines.extend(["## Newly allowed sources (allow-lists and edge proxies)", ""])
-        lines.extend(_flow_line(item) for item in diff["new_allowlisted_flows"])
+        lines.extend(_flow_line(item) for item in diff["new_trusted_flows"])
         lines.append("")
     if diff["coverage_regressions"]:
         lines.extend(["## Coverage regressions", ""])

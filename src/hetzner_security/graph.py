@@ -109,6 +109,12 @@ class AttackGraph:
             )
         )
 
+    def _pivots(self, path: list[Edge], source: str) -> int:
+        return sum(
+            1 for edge in path
+            if transition_kind(edge, self.assets) == TRANSITION_PIVOT and not (edge.source == source and edge.relation == "attached_to")
+        )
+
     def resolve(self, value: str) -> str:
         if value in self.assets or value == "internet":
             return value
@@ -151,7 +157,9 @@ class AttackGraph:
                     "No matching allowed path is present in the collected graph; an unobserved host or runtime control may still exist."
                 ],
             }
-        path = min(paths, key=len)
+        # Prefer the path needing the fewest compromised hosts, then the shortest: a direct path matters
+        # more than a shorter one that first requires taking over another server.
+        path = min(paths, key=lambda candidate: (self._pivots(candidate, resolved_source), len(candidate)))
         evidence = [item.to_dict() for edge in path for item in edge.evidence]
         target_asset = self.assets.get(resolved_target)
         target_type = target_asset.type if target_asset is not None else None
@@ -217,7 +225,9 @@ class AttackGraph:
             "Application authentication policy is not observed.",
         ]
         transitions = [
-            {"from": edge.source, "to": edge.target, "kind": transition_kind(edge, self.assets), "port": edge.port}
+            {"from": edge.source, "to": edge.target, "port": edge.port,
+             # The attacker already controls the source, so leaving it is not an extra pivot.
+             "kind": "START" if edge.source == resolved_source and edge.relation == "attached_to" else transition_kind(edge, self.assets)}
             for edge in path
         ]
         pivots = sum(1 for item in transitions if item["kind"] == TRANSITION_PIVOT)
@@ -230,7 +240,9 @@ class AttackGraph:
                 "pivots_required": pivots,
                 "host_layer": "reachable" if complete else ("refuted or unknown" if host_known else "not observed"),
             },
-            "result": "reachable" if complete else "cloud_path_present",
+            # "reachable_after_pivot": every layer admits the flow, but only once another host is compromised,
+            # which the evidence does not prove.
+            "result": ("reachable" if pivots == 0 else "reachable_after_pivot") if complete else "cloud_path_present",
             "confidence": 0.97 if complete else 0.72,
             "source": resolved_source,
             "target": resolved_target,
