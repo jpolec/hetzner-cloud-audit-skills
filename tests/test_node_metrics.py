@@ -148,3 +148,13 @@ class PrometheusTransportTest(unittest.TestCase):
         with mock.patch.dict(os.environ, {}, clear=True):
             with self.assertRaises(ValueError):
                 collect_prometheus("http://prom.internal:9090")
+
+
+class PrometheusRedirectTest(unittest.TestCase):
+    def test_redirects_leaving_host_or_https_are_refused(self) -> None:
+        from hetzner_security.node_metrics import _SameOriginRedirects
+
+        handler = _SameOriginRedirects("https", "prom.example.test")
+        for target in ("http://prom.example.test/api", "https://evil.example.test/api"):
+            with self.assertRaises(ValueError):
+                handler.redirect_request(None, None, 302, "Found", {}, target)

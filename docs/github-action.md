@@ -24,7 +24,7 @@ jobs:
     environment: hetzner-read-only
     steps:
       - uses: actions/checkout@v7
-      - uses: jpolec/hetzner-cloud-audit-skills@v0.8.0
+      - uses: jpolec/hetzner-cloud-audit-skills@v0.8.1
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
         with:
@@ -42,7 +42,7 @@ jobs:
 Store snapshots as protected workflow artifacts or in an access-controlled evidence store. Do not commit real topology snapshots to a public repository.
 
 ```yaml
-- uses: jpolec/hetzner-cloud-audit-skills@v0.8.0
+- uses: jpolec/hetzner-cloud-audit-skills@v0.8.1
   with:
     mode: diff
     baseline: evidence/previous.json

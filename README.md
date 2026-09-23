@@ -60,7 +60,7 @@ A missing collector is reported as a gap. It is never reported as "secure". Conf
 
 | | **AI agent skill**: fastest, recommended | **Command-line tool** |
 |---|---|---|
-| **Install** | `npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills/tree/v0.8.0 --skill hetzner-security-audit` | `uvx hetzner-audit …`, or `git clone` and `uv run` |
+| **Install** | `npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills/tree/v0.8.1 --skill hetzner-security-audit` | `uvx hetzner-audit …`, or `git clone` and `uv run` |
 | **Run** | Ask your agent: *"audit my Hetzner infrastructure"* | `hetzner-audit audit`, `hetzner-audit map` |
 | **What happens** | The agent runs the preflight, snapshot, audit, and diagrams. It then explains the findings in plain language and walks you through the fixes. | Markdown, JSON, SARIF, and SVG files land in your output folder |
 | **Best for** | A first look, questions like *"can staging reach prod?"*, and guided remediation | CI, cron jobs, scripting, and repeatable reports |
@@ -94,10 +94,10 @@ This keeps the token out of shell history. **Never paste it into an agent prompt
 ### Option A: AI agent skill (about 30 seconds)
 
 ```sh
-npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills/tree/v0.8.0 --skill hetzner-security-audit
+npx skills add https://github.com/jpolec/hetzner-cloud-audit-skills/tree/v0.8.1 --skill hetzner-security-audit
 ```
 
-The `/tree/v0.8.0` part pins the skill to a tagged release, which is what you want for a security tool. Drop it to follow `main` (development).
+The `/tree/v0.8.1` part pins the skill to a tagged release, which is what you want for a security tool. Drop it to follow `main` (development).
 
 Start your agent (for example `claude` or `codex`) **from the same terminal**, so it inherits `HCLOUD_TOKEN` without ever seeing the value. Then just ask:
 
@@ -132,7 +132,7 @@ cd hetzner-cloud-audit-skills
 uv run hetzner-audit audit --format markdown --output _output/audit.md
 ```
 
-To pin a release, use `uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.8.0' hetzner-audit --help`. For CI, see the [GitHub Action](#9-track-changes-in-ci).
+To pin a release, use `uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.8.1' hetzner-audit --help`. For CI, see the [GitHub Action](#9-track-changes-in-ci).
 
 `doctor` confirms the token works without printing it. It shows the project scope (server, firewall, network, and volume counts), so you can check you picked the right project. It also warns if reports would land in a Git-tracked directory.
 
@@ -370,7 +370,7 @@ The diff compares **exact allowed-flow spaces**, not graph edges: for every serv
 Closed exposure is listed too. It also reports asset and fact changes and collector coverage regressions. A resource that failed to collect is not reported as deleted. Each fact records its source, observation time, collector version, and run ID.
 
 ```yaml
-- uses: jpolec/hetzner-cloud-audit-skills@v0.8.0
+- uses: jpolec/hetzner-cloud-audit-skills@v0.8.1
   env:
     HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
   with:

@@ -5,7 +5,7 @@ v0.8.0 is about correctness and measurement, not new integrations. It follows th
 ## Highlights
 
 - **Exact diff.** Exposure is now the exact set of (source address, port) pairs the firewalls admit, per family and protocol, for ingress and egress. Widening an allow-list from /32 to /24, swapping one trusted address for another, or opening Internet egress is a change; `--regression-policy strict` fails the job on it, `broad` keeps failing only on new world or wide exposure.
-- **Egress.** Hetzner Cloud Firewalls allow all outbound traffic until a firewall has an outbound rule. The report now counts servers that can connect anywhere (on the maintainer's project: all of them, databases and vault included), and the policy can forbid it per role.
+- **Egress.** Hetzner Cloud Firewalls allow all outbound traffic until a firewall has an outbound rule. The report now counts servers that can connect anywhere, naming data and identity hosts, and the policy can forbid it per role.
 - **Hybrid load balancers.** IP targets resolve to Cloud or Robot dedicated servers, or stay visible as endpoints.
 - **Typed attack paths.** `path` tells direct exposure apart from reachability after compromising another host.
 - **Honest labels.** Every finding says whether its rule has been run on a live project or only on fixtures. "Verified savings" became "measured savings", split into the effect of your change and provider price changes.

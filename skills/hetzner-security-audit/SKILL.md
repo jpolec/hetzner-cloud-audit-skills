@@ -35,9 +35,9 @@ The default CLI flags are `--read-only --no-ssh`. The tool exposes no Hetzner mu
 Prefer an existing `hetzner-audit` executable; `hetzner-sec` is a legacy compatibility alias. In a checked-out project, use `PYTHONPATH=src python3 -m hetzner_security.cli.main`. Otherwise, explain that installing the skill does not install an executable and request approval before downloading or executing the pinned release:
 
 ```sh
-uvx hetzner-audit==0.8.0 --help
+uvx hetzner-audit==0.8.1 --help
 # or, from the tagged source:
-uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.8.0' hetzner-audit --help
+uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.8.1' hetzner-audit --help
 ```
 
 Never silently install from `main` or an unpinned branch. If `uvx` is unavailable, give the operator the tagged `uv tool install` or virtual-environment installation command from the project README.

@@ -66,8 +66,27 @@ def apply_node_metrics(snapshot: Snapshot, metrics: dict[str, Any]) -> Snapshot:
     return result
 
 
+MAX_PROMETHEUS_RESPONSE = 32 * 1024 * 1024
+
+
+class _SameOriginRedirects(urllib.request.HTTPRedirectHandler):
+    """Follow a redirect only to the same scheme and host; never downgrade or leave the host.
+
+    The Authorization header would otherwise travel with the redirect to wherever it points.
+    """
+
+    def __init__(self, scheme: str, host: str | None) -> None:
+        self.scheme, self.host = scheme, host
+
+    def redirect_request(self, req: Any, fp: Any, code: int, msg: str, headers: Any, newurl: str) -> Any:
+        target = urllib.parse.urlsplit(newurl)
+        if target.scheme != self.scheme or target.hostname != self.host:
+            raise ValueError(f"Prometheus redirected to {target.scheme}://{target.hostname}; refusing to follow with credentials")
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 def collect_prometheus(
-    url: str, days: int = 30, *, urlopen: Any = urllib.request.urlopen, allow_insecure: bool = False
+    url: str, days: int = 30, *, urlopen: Any = None, allow_insecure: bool = False
 ) -> dict[str, Any]:
     """Run the fixed read-only instant queries and group results by node exporter nodename.
 
@@ -88,13 +107,18 @@ def collect_prometheus(
     headers = {"Accept": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
+    if urlopen is None:
+        urlopen = urllib.request.build_opener(_SameOriginRedirects(parsed.scheme, parsed.hostname)).open
 
     def query(expression: str) -> list[dict[str, Any]]:
         request = urllib.request.Request(  # noqa: S310 -- owner-supplied Prometheus URL, GET only
             f"{base}/api/v1/query?{urllib.parse.urlencode({'query': expression})}", headers=headers, method="GET"
         )
         with urlopen(request, timeout=60) as response:
-            payload = json.loads(response.read())
+            body = response.read(MAX_PROMETHEUS_RESPONSE + 1)
+        if len(body) > MAX_PROMETHEUS_RESPONSE:
+            raise ValueError(f"Prometheus response exceeds {MAX_PROMETHEUS_RESPONSE} bytes")
+        payload = json.loads(body)
         if payload.get("status") != "success":
             raise ValueError(f"Prometheus query failed: {payload.get('error', 'unknown error')}")
         return list(payload.get("data", {}).get("result", []))

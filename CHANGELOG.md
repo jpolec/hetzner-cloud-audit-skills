@@ -4,6 +4,17 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-09-23
+
+### Security
+
+- `anonymize` now renumbers every provider ID (also small ones and IDs inside text such as volume device paths), keeps label values only when they are generic words (environment `prod`/`staging`/…, `sensitivity`, `stateful`, `audit.ignore` true/false), reduces role labels to generic role words, and replaces label keys that carry a domain or name. A canary test plants an email, a domain, a customer name, and small IDs in every label and ID field.
+- The Prometheus client follows redirects only to the same scheme and host, so the bearer token never travels to another host or over HTTP, and caps response size at 32 MiB.
+
+### Documentation
+
+- Release notes no longer describe the maintainer's own infrastructure.
+
 ## [0.8.0] - 2026-09-23
 
 Correctness and validation before breadth: this release adds no new provider integrations.
@@ -292,7 +303,8 @@ v0.6 and v0.7 of the roadmap ship together as one release.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.0...HEAD
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.1...HEAD
+[0.8.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.4.0...v0.7.0
 [0.4.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.1...v0.4.0

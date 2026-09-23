@@ -50,3 +50,34 @@ class AnonymizeTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CanaryTest(unittest.TestCase):
+    """Identifying strings planted in every label and ID field must not survive (reviewer's reproduction)."""
+
+    def test_canaries_do_not_survive(self) -> None:
+        raw = {
+            "metadata": {"project": "acme-billing"},
+            "assets": [
+                {"id": "hcloud:server:12345", "type": "server", "name": "acme-db-1", "source": "hcloud_api",
+                 "labels": {"environment": "acme-prod", "audit.owner": "alice@acme.com", "audit.ignore": "true",
+                            "acme.com/team": "payments", "role": "acme-db", "sensitivity": "high"},
+                 "properties": {"id": 12345, "private_net": [{"network": 4711, "ip": "10.0.0.5"}], "volumes": [777],
+                                "description": "Acme Corp billing DB, shop.acme.com"}},
+                {"id": "hcloud:network:4711", "type": "network", "name": "acme-net", "source": "hcloud_api", "labels": {},
+                 "properties": {"id": 4711, "ip_range": "10.0.0.0/16", "servers": [12345]}},
+            ],
+            "edges": [{"source": "hcloud:network:4711", "target": "hcloud:server:12345", "relation": "contains", "evidence": []}],
+        }
+        result = anonymize_snapshot(raw)
+        text = json.dumps(result).lower()
+        for canary in ("acme", "alice", "12345", "4711", "payments", "shop."):
+            self.assertNotIn(canary, text, canary)
+        labels = result["assets"][0]["labels"]
+        self.assertEqual(labels["sensitivity"], "high")
+        self.assertEqual(labels["audit.ignore"], "true")
+        self.assertEqual(labels["role"], "db")
+        # References stay consistent after renumbering.
+        server_id = result["assets"][0]["id"].rsplit(":", 1)[-1]
+        self.assertEqual(result["assets"][1]["properties"]["servers"], [int(server_id)])
+        self.assertEqual(result["edges"][0]["target"], result["assets"][0]["id"])

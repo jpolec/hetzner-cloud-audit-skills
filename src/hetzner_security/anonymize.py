@@ -2,10 +2,12 @@
 
 Consistent replacement, so topology and findings survive:
 - asset names become <role or type>-<n>; every other occurrence of a name is rewritten too;
-- label values are replaced, except environment, role, sensitivity, stateful, and audit.* labels;
+- label values are replaced unless they are generic words (environment prod/staging/…, sensitivity,
+  stateful, audit.ignore true/false); role labels keep only generic role words; label keys that are
+  not plain words (domains, customer names) are replaced;
 - public IPv4/IPv6 addresses map into documentation ranges (prefix length kept); world, private,
   CGNAT/mesh, and known edge-provider ranges are kept, because rules depend on them;
-- provider IDs above 65535 are renumbered; non-standard ports are renumbered (well-known and
+- every provider ID is renumbered (in asset IDs and ID fields); non-standard ports are renumbered (well-known and
   sensitive ports are kept);
 - domain names, emails, descriptions, comments, fingerprints, and key material are replaced.
 
@@ -23,7 +25,16 @@ from .analyzers.rules import SENSITIVE_SERVICES
 from .flows import INTERNAL
 from .providers import edge_provider, is_mesh
 
-KEEP_LABELS = {"environment", "sensitivity", "stateful"}
+# Label values kept only when they are one of these generic words; anything else is replaced.
+SAFE_LABEL_VALUES = {
+    "environment": {"prod", "production", "staging", "stage", "dev", "development", "test", "testing", "qa", "preview",
+                    "sandbox", "demo", "shared", "ops"},
+    "sensitivity": {"high", "medium", "low"},
+    "stateful": {"true", "false"},
+}
+# Keys whose integer values are provider IDs (renumbered regardless of size).
+ID_KEYS = {"id", "server", "network", "servers", "networks", "firewall_ids", "volumes", "load_balancers", "assignee_id",
+           "image", "placement_group", "floating_ips", "primary_ips", "server_number", "zone", "certificate_id", "storage_box"}
 # Role words rules and diagrams understand; anything else in a role label is replaced.
 ROLE_WORDS = {
     "app", "api", "web", "fe", "frontend", "backend", "edge", "proxy", "lb", "gateway", "worker", "service", "bus", "agent",
@@ -105,7 +116,7 @@ class Anonymizer:
             if value in KEEP_PORTS or 30000 <= value <= 32767 or value < 1024:
                 return value
             return self.ports.setdefault(value, 20000 + len(self.ports))
-        if value > 65535:
+        if key in ID_KEYS or value > 65535:
             return self.ids.setdefault(value, 1_000_000 + len(self.ids))
         return value
 
@@ -115,21 +126,23 @@ class Anonymizer:
             output: dict[str, Any] = {}
             for name, item in value.items():
                 if name == "labels" and isinstance(item, dict):
-                    output[name] = {label: self.label_value(label, text) for label, text in item.items()}
+                    output[name] = {self.label_key(label): self.label_value(label, text) for label, text in item.items()}
                 elif name in TEXT_KEYS and isinstance(item, str) and item:
                     output[name] = f"[{name} removed]"
                 else:
                     output[name] = self.walk(item, name)
             return output
         if isinstance(value, list):
+            if key in ID_KEYS:
+                return self.id_list(value, key)
             return [self.walk(item, key) for item in value]
         if isinstance(value, bool):
             return value
         if isinstance(value, int):
             return self.number(value, key)
         if isinstance(value, str):
-            if key == "id" and value.isdigit() and int(value) > 65535:
-                return str(self.number(int(value), key))
+            if key in ID_KEYS and value.isdigit():
+                return str(self.number(int(value), "id"))
             if key in PORT_KEYS and re.fullmatch(r"\d+(-\d+)?", value):
                 return "-".join(str(self.number(int(part), key)) for part in value.split("-"))
             return self.text(value)
@@ -142,11 +155,21 @@ class Anonymizer:
         words = [word for word in re.split(r"[-_./ ]+", value.lower()) if word in ROLE_WORDS]
         return "-".join(words) or self.labels.setdefault(f"role:{value}", f"role-{len(self.labels) + 1}")
 
+    def label_key(self, key: str) -> str:
+        """Keys can carry a domain or a customer name (acme.com/team): keep only plain generic keys."""
+        if key.startswith("audit.") and re.fullmatch(r"audit\.(ignore)(\.HETZ-[A-Z0-9]+-\d{3})?", key):
+            return key
+        if re.fullmatch(r"[a-z][a-z_-]{0,30}", key) and key not in self.names:
+            return key
+        return self.labels.setdefault(f"key:{key}", f"label-{len(self.labels) + 1}")
+
     def label_value(self, label: str, value: Any) -> Any:
         if not isinstance(value, str):
             return value
-        if label in KEEP_LABELS or label.startswith("audit."):
-            return value
+        if value.lower() in SAFE_LABEL_VALUES.get(label, set()):
+            return value.lower()
+        if label.startswith("audit.ignore") and value.lower() in {"true", "false"}:
+            return value.lower()
         if label == "role":
             return self.role(value)
         return self.label(value)
@@ -154,6 +177,9 @@ class Anonymizer:
     def asset_id(self, value: str) -> str:
         parts = value.split(":")
         return ":".join(str(self.number(int(part), "id")) if part.isdigit() else self.text(part) for part in parts)
+
+    def id_list(self, value: Any, key: str) -> Any:
+        return [self.number(item, "id") if isinstance(item, int) and not isinstance(item, bool) else self.walk(item, key) for item in value]
 
     def snapshot(self, raw: dict[str, Any]) -> dict[str, Any]:
         counters: dict[str, int] = {}
@@ -199,7 +225,16 @@ class Anonymizer:
 
 
 def anonymize_snapshot(raw: dict[str, Any]) -> dict[str, Any]:
-    return Anonymizer().snapshot(raw)
+    anonymizer = Anonymizer()
+    result = anonymizer.snapshot(raw)
+    # IDs also hide inside text (for example /dev/disk/by-id/scsi-0HC_Volume_<id>): one final pass
+    # replaces every known original ID wherever it appears, in a single substitution.
+    originals = {str(original): str(mapped) for original, mapped in anonymizer.ids.items() if original >= 1000}
+    if originals:
+        text = json.dumps(result)
+        text = re.sub(r"(?<!\d)(\d{4,})(?!\d)", lambda match: originals.get(match.group(1), match.group(1)), text)
+        result = json.loads(text)
+    return result
 
 
 def leftovers(original: dict[str, Any], anonymized: dict[str, Any]) -> list[str]:
