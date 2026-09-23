@@ -31,7 +31,7 @@ Collectors do not assign severity. Analyzers generate candidates. The verifier c
 - `CoverageUnit`: stable asset/layer/attack-class identity and current/prior result fingerprints.
 - `ArchitectureRecommendation`: independently reviewed cost/security/reliability decision with timestamped metrics, price basis, risk, confidence, and rollback criteria.
 
-The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.3 and small-to-medium projects. `reachable`, `cloud_path_present`, and `unknown` remain distinct so provider reachability is not mistaken for an observed application path.
+The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.5 and small-to-medium projects. `reachable`, `cloud_path_present`, and `unknown` remain distinct so provider reachability is not mistaken for an observed application path.
 
 Snapshots serialize assets, edges, facts, expectations, signals, endpoint coverage, and run identity. Diff compares stable fact and edge identities and reports coverage regression separately from state removal.
 
@@ -48,3 +48,8 @@ Cost analysis uses the same normalized boundary but a separate recommendation sc
 ## MCP decision
 
 Deferred. A read-only MCP facade could expose asset lists, topology, findings, and evidence, but the project first needs stable authorization, pagination, evidence freshness, and output contracts. The CLI and SKILL packages already serve humans, CI, and agents without an always-on server.
+
+## Reachability semantics
+
+A path in the attack graph is a pivot chain: each hop is its own flow, so an attacker may enter host A on one port and then reach host B on another. Only the final hop is filtered by the requested protocol and port. Load-balancer hops are forwarding, not pivots: the LB's listen port and the target's destination port are separate edges, and `ask` treats such paths as direct exposure. Internet exposure itself is computed separately in `flows.py` as sets of allowed flows per asset, keyed by (address family, protocol, source class). The snapshot diff compares those sets, so a range that widens counts as a regression, and a new public IP behind a deny-all firewall does not.
+
