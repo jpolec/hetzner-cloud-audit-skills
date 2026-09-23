@@ -9,9 +9,14 @@ from pathlib import Path
 from typing import Any
 
 from .models import Snapshot
+from .schema import validate
+
+MAX_POLICY_BYTES = 1024 * 1024
 
 
 def load_policy(path: Path) -> dict[str, Any]:
+    if path.stat().st_size > MAX_POLICY_BYTES:
+        raise ValueError(f"policy {path} exceeds {MAX_POLICY_BYTES} bytes")
     raw = path.read_bytes()
     if path.suffix.lower() == ".json":
         value = json.loads(raw)
@@ -21,6 +26,8 @@ def load_policy(path: Path) -> dict[str, Any]:
         raise ValueError("policy must be JSON or TOML; YAML is intentionally not parsed without a safe dependency")
     if not isinstance(value, dict):
         raise ValueError("policy root must be an object")
+    # Policy as code: a misspelled field must fail loudly, never be ignored.
+    validate(value, "policy.schema.json", f"policy {path}")
     return value
 
 

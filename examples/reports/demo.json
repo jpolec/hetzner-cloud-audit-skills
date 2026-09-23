@@ -34,7 +34,7 @@
       ],
       "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -54,7 +54,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -90,7 +90,7 @@
       ],
       "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -110,7 +110,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -146,7 +146,7 @@
       ],
       "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -166,7 +166,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -202,7 +202,7 @@
       ],
       "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -222,7 +222,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -258,7 +258,7 @@
       ],
       "impact": "Deletion, corruption, or compromise may cause unrecoverable service data loss.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -278,7 +278,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -932,7 +932,7 @@
       ],
       "impact": "An unauthenticated network peer can reach a sensitive service boundary.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -958,7 +958,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "high"
+        "potential_severity": "high"
       }
     },
     {
@@ -1433,7 +1433,7 @@
       ],
       "impact": "Services that bind broadly may be reachable without a network policy boundary.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -1453,7 +1453,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -1488,7 +1488,7 @@
       ],
       "impact": "Services that bind broadly may be reachable without a network policy boundary.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -1508,7 +1508,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {
@@ -1616,7 +1616,7 @@
       ],
       "impact": "A reachable client can select an allowed database role without presenting a password.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -1642,7 +1642,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "critical"
+        "potential_severity": "critical"
       }
     },
     {
@@ -1891,7 +1891,7 @@
       ],
       "impact": "Impact depends on exploit preconditions; reachability changes priority but not vulnerable status.",
       "verification": {
-        "method": "independent completeness challenge",
+        "method": "deterministic completeness challenge",
         "result": "needs_validation",
         "evidence": [
           {
@@ -1921,7 +1921,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
-        "candidate_severity": "medium"
+        "potential_severity": "medium"
       }
     },
     {

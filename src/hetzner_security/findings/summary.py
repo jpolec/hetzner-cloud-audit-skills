@@ -48,6 +48,7 @@ def _grouped(findings: list[Finding]) -> list[dict[str, Any]]:
                 "rule_id": finding.rule_id,
                 "title": finding.title,
                 "severity": finding.severity.value if finding.severity else None,
+                "potential": finding.metadata.get("potential_severity"),
                 "assets": 0,
                 "findings": 0,
                 "evidence": evidence_level(finding),
@@ -318,7 +319,7 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
     ] or ["- None."]
     lines += ["", "### Needs host or runtime validation", ""]
     lines += [
-        f"- {item['rule_id']} · {md(item['title'])}" + _affected(item) + f" · evidence {item['evidence'][0]} ({item['evidence'][1]})"
+        f"- {(('potential ' + item['potential'].upper() + ' · ') if item.get('potential') else '')}{item['rule_id']} · {md(item['title'])}" + _affected(item) + f" · evidence {item['evidence'][0]} ({item['evidence'][1]})"
         for item in pending
     ] or ["- None."]
     lines += ["", "### Collection gaps", ""]

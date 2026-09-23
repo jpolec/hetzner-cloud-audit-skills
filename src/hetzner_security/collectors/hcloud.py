@@ -233,7 +233,7 @@ class ReadOnlyHCloudCollector:
         edges: list[Edge] = []
         for zone in raw_by_kind.get("zone", []):
             zone_id = str(zone.get("id", zone.get("name", "unknown")))
-            for rrset in self._list(f"zones/{zone_id}/rrsets", "rrsets"):
+            for rrset in map(_minimize_rrset, self._list(f"zones/{zone_id}/rrsets", "rrsets")):
                 rr_name = str(rrset.get("name", "unknown"))
                 rr_type = str(rrset.get("type", "unknown"))
                 assets.append(
@@ -332,6 +332,18 @@ class ReadOnlyHCloudCollector:
             "failed": failures,
             "window_days": self.metrics_days,
         }
+
+
+# Record values the rules read. Other record types (TXT, MX, CAA, SRV, …) keep name, type, and count:
+# TXT values often carry verification tokens or ACME challenges that no rule needs.
+DNS_VALUE_TYPES = {"A", "AAAA", "CNAME"}
+
+
+def _minimize_rrset(rrset: dict[str, Any]) -> dict[str, Any]:
+    if str(rrset.get("type", "")).upper() in DNS_VALUE_TYPES:
+        return rrset
+    records = rrset.get("records") or []
+    return {**rrset, "records": [], "record_count": len(records), "values_omitted": True}
 
 
 def _action_time(row: dict[str, Any]) -> datetime | None:
@@ -487,9 +499,9 @@ def _normalize_resources(
             for rule in firewalls.get(firewall_id, {}).get("rules", [])
             if rule.get("direction") == "in"
         ]
-        server["public_ip"] = bool(
-            public_net.get("ipv4", {}).get("ip") or public_net.get("ipv6", {}).get("ip")
-        )
+        server["public_ipv4"] = bool((public_net.get("ipv4") or {}).get("ip"))
+        server["public_ipv6"] = bool((public_net.get("ipv6") or {}).get("ip"))
+        server["public_ip"] = server["public_ipv4"] or server["public_ipv6"]
         server["firewall_attached"] = bool(firewall_ids)
         server["firewall_ids"] = firewall_ids
         server["inbound"] = inbound
@@ -549,7 +561,10 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
             evidence = (
                 Evidence("hcloud_api", "firewall_rule", sid, rule, "properties.inbound"),
             )
-            if set(rule.get("sources", [])) & {"0.0.0.0/0", "::/0"}:
+            # A world rule admits Internet traffic only over a family the server has a public address in.
+            reachable = {"0.0.0.0/0"} if server.get("public_ipv4") else set()
+            reachable |= {"::/0"} if server.get("public_ipv6") else set()
+            if set(rule.get("sources", [])) & reachable:
                 edges.append(Edge("internet", sid, "allows", protocol, port, evidence))
         # Hetzner Cloud Firewalls do not filter private network traffic, so every attached
         # server accepts every port from the network until a host firewall says otherwise.

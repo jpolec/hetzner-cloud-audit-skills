@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from ..attestations import CHECKLIST, TITLES
+from ..attestations import ACCOUNT_ASSET_ID, CHECKLIST, TITLES
 from ..graph import AttackGraph
 from ..models import Evidence, Finding, Severity, Snapshot
 from .rules import _candidate
@@ -26,7 +26,7 @@ def console_attestations(snapshot: Snapshot, graph: AttackGraph) -> list[Finding
                 ("Not verified yet: " if unknown else "") + TITLES[key],
                 Severity(severity),
                 0.7 if unknown else 0.9,
-                [],
+                [ACCOUNT_ASSET_ID],
                 f"Owner answer: {answer!r}" + (f" ({notes[key]})" if notes.get(key) else "") + ".",
                 question.rstrip("?") + ".",
                 f"answered by {attestations.get('answered_by') or 'unnamed'} on {attestations.get('date') or 'unknown date'}",

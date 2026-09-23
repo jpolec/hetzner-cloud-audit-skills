@@ -12,7 +12,7 @@ from copy import deepcopy
 from pathlib import Path
 from typing import Any
 
-from .models import Snapshot
+from .models import Asset, Snapshot
 
 MAX_TERRAFORM_BYTES = 128 * 1024 * 1024
 # Terraform resource type -> snapshot asset type.
@@ -165,6 +165,13 @@ def apply_terraform(snapshot: Snapshot, path: Path) -> Snapshot:
                         "path": terraform["source"],
                     }
                 )
+    # Resources that exist only in Terraform, and the plan itself, become assets findings can cite.
+    for item in missing:
+        result.assets.append(Asset(f"terraform:{item['address']}", "terraform_resource", str(item["address"]),
+                                   {"expected_asset_id": item["asset_id"], "type": item["type"]}, {}, "terraform"))
+    if terraform["changes"]:
+        result.assets.append(Asset("terraform:plan", "terraform_plan", f"Terraform plan ({terraform['source']})",
+                                   {"changes": len(terraform["changes"])}, {}, "terraform"))
     managed_types = {MANAGED_TYPES[str(resource["type"])] for resource in terraform["resources"] if resource["type"] in MANAGED_TYPES}
     unmanaged = [
         {"asset_id": asset.id, "type": asset.type, "name": asset.name}

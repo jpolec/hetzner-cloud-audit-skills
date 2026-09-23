@@ -8,7 +8,7 @@ import json
 from collections.abc import Callable
 from dataclasses import replace
 
-from ..flows import PortSet, port_set
+from ..flows import PortSet, port_set, public_families
 from ..graph import AttackGraph
 from ..host.parsers import pg_remote_decisions
 from ..models import (
@@ -118,12 +118,24 @@ def _candidate(
     )
 
 
+def _reachable_public_sources(asset: Asset) -> set[str]:
+    """World sources that can actually reach the asset: a public interface in that family is required."""
+    families = public_families(asset)
+    sources = {"any", "internet"} if families else set()
+    if "ipv4" in families:
+        sources.add("0.0.0.0/0")
+    if "ipv6" in families:
+        sources.add("::/0")
+    return sources
+
+
 def _public_ports(asset: Asset, protocol: str = "tcp") -> list[dict[str, object]]:
     rules = asset.properties.get("inbound", [])
+    reachable = _reachable_public_sources(asset)
     return [
         rule
         for rule in rules
-        if set(rule.get("sources", [])) & PUBLIC_SOURCES and rule.get("protocol", "tcp") == protocol
+        if set(rule.get("sources", [])) & reachable and rule.get("protocol", "tcp") == protocol
     ]
 
 
@@ -243,28 +255,47 @@ def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Find
     return output
 
 
+def _firewall_guards_public_server(firewall: Asset, servers: dict[str, Asset]) -> bool:
+    """True when the firewall applies to at least one server with a public interface (or attachment is unknown)."""
+    applied = firewall.properties.get("applied_to")
+    if applied is None:
+        return True  # normalized fixtures without attachment data: assume it is used
+    targets: list[str] = []
+    for item in applied or []:
+        for resource in [item, *(item.get("applied_to_resources") or [])]:
+            server_id = (resource.get("server") or {}).get("id") if isinstance(resource, dict) else None
+            if server_id is not None:
+                targets.append(f"hcloud:server:{server_id}")
+    return any(target not in servers or public_families(servers[target]) for target in targets)
+
+
 def firewall_quality(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     """Firewall hygiene visible from the API alone: all-ports-open, unattached, IPv4/IPv6 drift, duplicates."""
     output: list[Finding] = []
+    servers = {asset.id: asset for asset in snapshot.assets if asset.type == "server"}
     for firewall in (asset for asset in snapshot.assets if asset.type == "firewall"):
         inbound = firewall.properties.get("inbound", []) or []
+        live = _firewall_guards_public_server(firewall, servers)
         for rule in inbound:
             sources = _string_set(rule.get("sources"))
             if rule.get("protocol") in {"tcp", "udp"} and sources & WORLD_SOURCES and _all_ports(rule):
                 output.append(
                     _candidate(
                         "HETZ-FW-001",
-                        "Firewall rule opens every port to the whole Internet",
-                        Severity.HIGH,
+                        "Firewall rule opens every port to the whole Internet" if live
+                        else "Unused or private-only firewall would open every port to the Internet",
+                        Severity.HIGH if live else Severity.LOW,
                         0.97,
                         [firewall.id],
-                        f"{firewall.name} admits {str(rule.get('protocol')).upper()} on all ports from {sorted(sources & WORLD_SOURCES)}.",
+                        f"{firewall.name} admits {str(rule.get('protocol')).upper()} on all ports from {sorted(sources & WORLD_SOURCES)}"
+                        + ("." if live else "; it protects no server with a public address, so nothing is exposed today."),
                         "Inbound rules name the specific ports a service needs.",
-                        "protocol any-port rule with a world source",
+                        "protocol any-port rule with a world source" + ("" if live else "; not applied to a public server"),
                         [_evidence(firewall, "firewall_rule", rule, "properties.inbound")],
                         ["internet", f"{rule.get('protocol')}/1-65535", firewall.id],
-                        [],
-                        "Every listener on every attached server is reachable from the Internet, including ones started later.",
+                        [] if live else ["The firewall is later applied to a server with a public address."],
+                        "Every listener on every attached server is reachable from the Internet, including ones started later." if live
+                        else "A latent hazard: applying this firewall to a public server would expose every listener on it.",
                         "Replace the rule with explicit ports; keep admin access on a VPN or allow-list.",
                         ["https://docs.hetzner.com/cloud/firewalls/overview/"],
                         str(rule.get("protocol")),

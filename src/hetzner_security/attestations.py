@@ -12,7 +12,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .models import Snapshot
+from .models import Asset, Snapshot
 
 # key, rule, severity, question, where to look (finding titles are in TITLES)
 CHECKLIST: tuple[tuple[str, str, str, str, str], ...] = (
@@ -81,7 +81,13 @@ def load_attestations(path: Path) -> dict[str, Any]:
     return raw
 
 
+ACCOUNT_ASSET_ID = "account:hetzner"
+
+
 def apply_attestations(snapshot: Snapshot, raw: dict[str, Any], source: str) -> Snapshot:
+    # Console controls belong to the account, so findings about them cite this asset.
+    if not any(asset.id == ACCOUNT_ASSET_ID for asset in snapshot.assets):
+        snapshot.assets.append(Asset(ACCOUNT_ASSET_ID, "account", "Hetzner account (console)", {}, {}, "owner_attestation"))
     snapshot.metadata["attestations"] = {
         "source": source,
         "answered_by": raw.get("answered_by") or None,

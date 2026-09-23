@@ -143,6 +143,20 @@ def source_class(source: str) -> tuple[str, str] | None:
 Exposure = dict[tuple[str, str, str], PortSet]  # (family, protocol, class) -> ports
 
 
+def public_families(asset: Asset) -> set[str]:
+    """Address families in which a server has a public interface.
+
+    Without one, a world-open firewall rule admits nothing from the Internet. Snapshots that only
+    record ``public_ip`` count both families; assets that are not servers are treated as public.
+    """
+    props = asset.properties
+    if asset.type != "server":
+        return {"ipv4", "ipv6"}
+    if "public_ipv4" in props or "public_ipv6" in props:
+        return {family for family in ("ipv4", "ipv6") if props.get(f"public_{family}")}
+    return {"ipv4", "ipv6"} if props.get("public_ip", True) else set()
+
+
 def asset_exposure(asset: Asset, edges: Iterable[Edge] = ()) -> Exposure:
     """Effective public ingress of one asset.
 
@@ -164,13 +178,16 @@ def asset_exposure(asset: Asset, edges: Iterable[Edge] = ()) -> Exposure:
                     for family in ("ipv4", "ipv6"):
                         add((family, "tcp", "world"), PortSet.of([(port, port)]))
         return exposure
+    families = public_families(asset)
+    if not families:
+        return exposure  # no public interface: no Internet exposure, whatever the rules say
     inbound = props.get("inbound")
     if isinstance(inbound, list):
         for rule in inbound:
             protocol = str(rule.get("protocol", "tcp"))
             for source in rule.get("sources", []) or []:
                 classified = source_class(str(source))
-                if classified:
+                if classified and classified[0] in families:
                     add((classified[0], protocol, classified[1]), rule_ports(rule))
         return exposure
     for edge in edges:

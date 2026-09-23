@@ -14,6 +14,13 @@ def render_json(findings: list[Finding]) -> str:
     return json.dumps({"schema_version": "1.0.0", "findings": [f.to_dict() for f in findings]}, indent=2)
 
 
+def _severity_label(finding: Finding) -> str:
+    if finding.severity:
+        return finding.severity.value.upper()
+    potential = finding.metadata.get("potential_severity")
+    return f"UNSCORED (potential {str(potential).upper()})" if potential else "UNSCORED"
+
+
 def render_markdown(
     findings: list[Finding],
     metadata: dict[str, Any] | None = None,
@@ -91,7 +98,7 @@ def render_markdown(
             path = " → ".join(label(step) for step in finding.attack_path)
         lines.extend(
             [
-                f"## {(finding.severity.value.upper() if finding.severity else 'UNSCORED')} · {finding.rule_id} · {md(finding.title)}"
+                f"## {_severity_label(finding)} · {finding.rule_id} · {md(finding.title)}"
                 + (f" ({len(members)} assets)" if len(members) > 1 else ""),
                 "",
                 f"- **Status:** {finding.status.value}",

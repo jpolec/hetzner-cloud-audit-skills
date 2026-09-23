@@ -20,7 +20,7 @@
 - **Which three servers make up half of your bill?** Which of them could be smaller or run on ARM?
 - **What changed since last week?** A new public port, or a firewall that quietly disappeared?
 
-One read-only token and one command answer all of it. You get an architecture map, a blast-radius view, a per-VM cost breakdown, and a ranked list of what to do next. Every finding cites its evidence.
+One read-only token and one command answer the provider-level part of all of it; host details (UFW, Docker, databases) come from an optional read-only bundle you run yourself. You get an architecture map, a blast-radius view, a per-VM cost breakdown, and a ranked list of what to do next. Every finding cites its evidence.
 
 ![Architecture diagram of an example Hetzner project: summary tiles, trust sources, private network, location columns, role tiers, recommended actions, and legend](https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/architecture.png)
 
@@ -209,7 +209,7 @@ Mark databases and secrets hosts with the label `sensitivity=high` so detection 
 
 **You stay in control of the noise.** Add `audit.ignore=true`, or `audit.ignore.HETZ-BCP-001=true` for a single rule, to a resource that is deliberately different, such as a throwaway build box. The finding moves to a **Suppressed by owner labels** section of the report instead of disappearing silently.
 
-> <img src="https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/icons/warning.svg" width="22" height="22" alt=""> **Hetzner Cloud Firewalls do not filter private network traffic** ([Hetzner FAQ](https://docs.hetzner.com/cloud/firewalls/faq/)). Every server on a private network reaches every port on every other member, and firewall rules with private source ranges have no effect on that traffic. `hetzner-audit` models it that way, so only host-firewall evidence can mark a private path as blocked.
+> <img src="https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/icons/warning.svg" width="22" height="22" alt=""> **Hetzner Cloud Firewalls do not filter private network traffic** ([Hetzner FAQ](https://docs.hetzner.com/cloud/firewalls/faq/)). Every member of a private network has a route to every other member, and firewall rules with private source ranges have no effect on that traffic. Whether a port is actually reachable is then decided by the listener, its bind address, the host firewall, and application controls. `hetzner-audit` models it that way: a private path is `cloud_path_present` until host evidence confirms or refutes it.
 
 ![Per-VM connectivity of an example project: entry points, private network, high-value hosts, and blast radius](https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/connectivity.png)
 
@@ -396,7 +396,8 @@ Observed facts, owner policy, IaC declarations, and inferred hypotheses are kept
   - email addresses and reverse-DNS names;
   - Storage Box usernames and hostnames;
   - SSH public-key material and comments;
-  - uploaded certificate PEMs, sshd user lists, Redis passwords, and container environment variables (never collected).
+  - uploaded certificate PEMs, sshd user lists, Redis passwords, and container environment variables (never collected);
+  - DNS record values other than A, AAAA, and CNAME (TXT often holds verification tokens), kept only as a count.
 - **Nothing leaves your machine.** No telemetry and no hosted backend.
 - **Crafted names cannot hijack reports.** Provider text is escaped in Markdown and Mermaid, so a server name cannot inject links, HTML, or instructions into a report an agent reads.
 - **Bounded and polite.** API calls retry 429 and 5xx responses with backoff and honor `Retry-After`. Pagination and path search are capped.

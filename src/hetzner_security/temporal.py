@@ -46,7 +46,13 @@ def diff_snapshots(before: Snapshot, after: Snapshot) -> dict[str, Any]:
     new_edges = [after_edges[key] for key in sorted(after_edges.keys() - before_edges.keys())]
     removed_edge_candidates = [before_edges[key] for key in sorted(before_edges.keys() - after_edges.keys())]
     # Semantic exposure diff: flows allowed now minus flows allowed before (see flows.py).
-    growth = exposure_growth(snapshot_exposure(before), snapshot_exposure(after))
+    before_exposure, after_exposure = snapshot_exposure(before), snapshot_exposure(after)
+    growth = exposure_growth(before_exposure, after_exposure)
+    # The reverse difference: flows allowed before and not now (a closed rule or a removed public IP).
+    closed = [item for item in exposure_growth(after_exposure, before_exposure) if item["source_class"] in {"world", "wide"}]
+    for item in closed:
+        asset = before_assets.get(item["asset"])
+        item["name"] = asset.name if asset else item["asset"]
     for item in growth:
         asset = after_assets.get(item["asset"])
         item["name"] = asset.name if asset else item["asset"]
@@ -81,6 +87,7 @@ def diff_snapshots(before: Snapshot, after: Snapshot) -> dict[str, Any]:
         "uncertain_removed_edges": [edge.to_dict() for edge in uncertain_removed_edges],
         "new_exposures": new_exposures,
         "new_allowlisted_flows": new_allowlisted,
+        "closed_exposures": closed,
         "coverage_regressions": coverage_regressions,
         "security_regression": bool(new_exposures),
         "cost": _cost_delta(before, after),
@@ -172,6 +179,14 @@ def render_diff_markdown(diff: dict[str, Any]) -> str:
     if diff["new_exposures"]:
         lines.extend(["## New exposure (flows allowed now that were not allowed before)", ""])
         for item in diff["new_exposures"]:
+            lines.append(
+                f"- `{md(item.get('name', item['asset']))}` · {item['family']} {item['protocol'].upper()} "
+                f"{item['ports']} from {item['source_class']} sources"
+            )
+        lines.append("")
+    if diff.get("closed_exposures"):
+        lines.extend(["## Closed exposure (flows allowed before that are not allowed now)", ""])
+        for item in diff["closed_exposures"]:
             lines.append(
                 f"- `{md(item.get('name', item['asset']))}` · {item['family']} {item['protocol'].upper()} "
                 f"{item['ports']} from {item['source_class']} sources"

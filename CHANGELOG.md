@@ -51,16 +51,28 @@ v0.6 and v0.7 of the roadmap ship together as one release.
   - Object Storage settings that could not be read were reported as insecure;
   - merge failed on shared system images and dropped host, Terraform, and checklist evidence;
   - `diff` reported collection failures as verified savings.
+- A second external review of the v0.5 code found that provider-level exposure ignored the public interface. Fixed across rules, graph, and diff:
+  - a world-open firewall rule on a server without a public address (or without one in that address family) is no longer Internet exposure, no longer an attack-graph edge, and no longer a `diff` regression;
+  - an all-ports rule on a firewall that protects no public server is a LOW latent hazard, not a confirmed HIGH finding, so `--fail-on confirmed-high` no longer trips on it;
+  - `diff` also lists closed exposures (a removed rule or public IP).
 - `HETZ-LB-004` reads the health of label-selector targets.
 - Uploaded certificate PEMs are no longer stored in snapshots.
 - Hypotheses keep the rule's proposed severity in metadata for views; they stay unscored.
 
+### Changed
+
+- Findings, policies, and coverage ledgers are validated against the JSON Schemas at runtime (standard library only; schemas ship in the wheel). A misspelled policy field is now an error instead of being ignored. Validation found two schema gaps that are fixed: rule IDs with digits (`HETZ-K8S-…`) and account- or Terraform-level findings without an asset (they now cite `account:hetzner` or `terraform:<address>`).
+- Verifier method names say "deterministic" instead of "independent", which described more than the code does.
+- Hypotheses keep the rule's proposed impact as `metadata.potential_severity`; `--severity` filters on it and reports show "potential HIGH".
+
 ### Security
 
+- DNS snapshots keep record values only for A, AAAA, and CNAME. TXT, MX, CAA, and other values (often verification or ACME tokens) are replaced by a record count.
+- Size caps for Trivy reports (128 MiB), policies (1 MiB), and coverage ledgers (64 MiB).
 - The host script prints no environment variables, no sshd user lists, and no Redis passwords or ACL hashes.
 - Object Storage XML is size-capped and rejected when it carries a DTD.
 
-## [0.5.0] - 2026-09-23
+## [0.5.0] - 2026-09-23 (not tagged separately; included in 0.7.0)
 
 ### Added
 

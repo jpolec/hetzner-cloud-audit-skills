@@ -70,6 +70,11 @@ Scenario = Callable[[_Project, bool], None]
 
 
 def _ssh(project: _Project, bad: bool) -> None:
+    if not bad and project.rng.random() < 0.5:
+        # Clean twin: the same world-open rule on a server without a public interface is not exposure.
+        server = project.server([_rule("tcp", 22, 22, WORLD)])
+        server.properties.update({"public_ip": False, "public_ipv4": False, "public_ipv6": False})
+        return
     server = project.server([_rule("tcp", 22, 22, WORLD if bad else ["100.64.0.0/10"])])
     if bad:
         project.plant("HETZ-NET-001", server)

@@ -55,6 +55,7 @@ from ..node_metrics import (
 )
 from ..policy import apply_policy, load_policy
 from ..projects import merge_snapshots, tag_project
+from ..schema import validate
 from ..temporal import diff_snapshots, render_diff_markdown
 from ..text import md
 from ..topology import build_topology, render_mermaid, render_topology_markdown
@@ -307,6 +308,9 @@ def _host_view_rows(snapshot: Snapshot) -> list[dict[str, Any]]:
 def _findings_and_suppressed(snapshot: Snapshot, *, verify: bool = True) -> tuple[list[Finding], list[dict[str, Any]]]:
     candidates = hunt(snapshot)
     findings = verify_all(candidates, snapshot) if verify else candidates
+    # Every record is checked against the published schema before any report is derived from it.
+    for finding in findings:
+        validate(finding.to_dict(), "finding.schema.json", f"finding {finding.id}")
     return apply_suppressions(findings, snapshot)
 
 
@@ -383,7 +387,13 @@ def run(args: argparse.Namespace) -> int:
     else:
         findings, suppressed = _findings_and_suppressed(snapshot, verify=args.verify)
         minimum = SEVERITY_ORDER[args.severity]
-        findings = [finding for finding in findings if finding.severity is None or SEVERITY_ORDER[finding.severity.value] <= minimum]
+        # Hypotheses are filtered by their potential severity, so `--severity high` drops potential lows.
+        findings = [
+            finding for finding in findings
+            if SEVERITY_ORDER.get(
+                finding.severity.value if finding.severity else str(finding.metadata.get("potential_severity") or "info"), 4
+            ) <= minimum
+        ]
         if args.coverage_ledger:
             units = plan_coverage(snapshot)
             update_coverage(units, findings)

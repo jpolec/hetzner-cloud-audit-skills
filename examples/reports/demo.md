@@ -116,11 +116,11 @@ Provider backups are off.
 
 ### Needs host or runtime validation
 
-- HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets) · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
-- HETZ-NET-001 · SSH reachable from the public internet · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
-- HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets) · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
-- HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
-- HETZ-VULN-001 · Vulnerable component in non-public workload · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
+- potential MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets) · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
+- potential HIGH · HETZ-NET-001 · SSH reachable from the public internet · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
+- potential MEDIUM · HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets) · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
+- potential CRITICAL · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
+- potential MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
 
 ### Collection gaps
 
@@ -497,7 +497,7 @@ Provider backups are off.
 
 **Remediation:** Separate environment networks and enforce target-side allowlists for the exact clients.
 
-## UNSCORED · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets)
+## UNSCORED (potential MEDIUM) · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets)
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
@@ -517,7 +517,7 @@ Provider backups are off.
 
 **Remediation:** Enable provider or application-consistent backups and record a restore test.
 
-## UNSCORED · HETZ-NET-001 · SSH reachable from the public internet
+## UNSCORED (potential HIGH) · HETZ-NET-001 · SSH reachable from the public internet
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
@@ -537,7 +537,7 @@ Provider backups are off.
 
 **Remediation:** Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.
 
-## UNSCORED · HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets)
+## UNSCORED (potential MEDIUM) · HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets)
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
@@ -557,7 +557,7 @@ Provider backups are off.
 
 **Remediation:** Attach a least-privilege Hetzner firewall or provide verified host-firewall evidence.
 
-## UNSCORED · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
+## UNSCORED (potential CRITICAL) · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
 
 - **Status:** needs_validation
 - **Confidence:** 0.69
@@ -577,7 +577,7 @@ Provider backups are off.
 
 **Remediation:** Replace trust with scram-sha-256 or certificate authentication and scope the CIDR.
 
-## UNSCORED · HETZ-VULN-001 · Vulnerable component in non-public workload
+## UNSCORED (potential MEDIUM) · HETZ-VULN-001 · Vulnerable component in non-public workload
 
 - **Status:** needs_validation
 - **Confidence:** 0.69

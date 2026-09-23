@@ -55,7 +55,7 @@ Goal: one read-only token, zero SSH, a complete and honest provider-level report
 
 Also done in v0.4: architecture, per-VM connectivity, and per-VM cost diagrams. Private networks are now modeled as unfiltered by cloud firewalls.
 
-## v0.5.0 — close the gap between collection and analysis (released 2026-09-23)
+## v0.5.0 — close the gap between collection and analysis (never tagged on its own; ships in v0.7.0)
 
 Driven by an external review that noted the collector was wide and the analyzer narrow:
 
@@ -68,7 +68,7 @@ Driven by an external review that noted the collector was wide and the analyzer 
 - Core correctness from an architecture review: semantic flow-set diff, listener ∩ host-firewall confirmation, load balancers in the attack graph, stateful detection, and an honest metrics window.
 - SSH key strength and age, `audit.ignore` owner labels, suggested `hcloud` commands, traffic quota and overage, and a generated TP/FP/FN benchmark.
 
-## v0.6 + v0.7 — host evidence, drift, and beyond one project (released together as v0.7.0, 2026-09-23)
+## v0.6 + v0.7 — host evidence, drift, and beyond one project (ship together as v0.7.0)
 
 Done:
 

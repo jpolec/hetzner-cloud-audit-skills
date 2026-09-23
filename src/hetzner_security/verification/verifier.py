@@ -125,7 +125,7 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
             return _set(
                 result,
                 FindingStatus.REJECTED,
-                "independent graph traversal",
+                "deterministic graph traversal",
                 candidate.evidence,
                 "No matching source-to-target path exists.",
                 confidence=0.05,
@@ -138,7 +138,7 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
             return _set(
                 result,
                 FindingStatus.REJECTED,
-                "independent graph traversal",
+                "deterministic graph traversal",
                 candidate.evidence,
                 "The cited cloud-level path no longer exists in the snapshot.",
                 confidence=0.05,
@@ -254,7 +254,7 @@ def _needs(finding: Finding, note: str) -> Finding:
     return _set(
         finding,
         FindingStatus.NEEDS_VALIDATION,
-        "independent completeness challenge",
+        "deterministic completeness challenge",
         finding.evidence,
         note,
         confidence=min(finding.confidence, 0.69),
@@ -274,8 +274,9 @@ def _set(
     finding.confidence = confidence
     if status != FindingStatus.CONFIRMED:
         if finding.severity is not None:
-            # Hypotheses are unscored; keep what the rule proposed so views can place them.
-            finding.metadata["candidate_severity"] = finding.severity.value
+            # Severity is confirmed impact, so hypotheses carry none; the rule's proposal is kept as
+            # potential_severity so filters and views can rank "possibly critical, one proof missing".
+            finding.metadata["potential_severity"] = finding.severity.value
         finding.severity = None
     finding.verification = Verification(method=method, result=status, evidence=evidence, notes=notes)
     return finding

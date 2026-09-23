@@ -52,6 +52,9 @@ exclude = [".claude", "_output", "_gtm", "dist", "publish_pypi.sh", "reports"]
 [tool.hatch.build.targets.wheel]
 packages = ["src/hetzner_security"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"schemas" = "hetzner_security/schemas"
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"

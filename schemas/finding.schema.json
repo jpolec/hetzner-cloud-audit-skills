@@ -12,7 +12,7 @@
   ],
   "properties": {
     "id": {"type": "string", "minLength": 1},
-    "rule_id": {"type": "string", "pattern": "^HETZ-[A-Z]+-[0-9]{3}$"},
+    "rule_id": {"type": "string", "pattern": "^HETZ-[A-Z0-9]+-[0-9]{3}$"},
     "title": {"type": "string", "minLength": 1},
     "severity": {"enum": ["critical", "high", "medium", "low", "info", null]},
     "confidence": {"type": "number", "minimum": 0, "maximum": 1},

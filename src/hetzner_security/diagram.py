@@ -1035,7 +1035,7 @@ def posture_matrix(findings: list[Any]) -> dict[str, dict[str, dict[str, int]]]:
             continue
         domain = next((name for name, prefixes in POSTURE_DOMAINS if finding.rule_id.startswith(prefixes)), "Governance and drift")
         # Hypotheses carry no severity; place them by the rule's candidate severity when known.
-        severity = finding.severity.value if finding.severity else str(finding.metadata.get("candidate_severity") or "unscored")
+        severity = finding.severity.value if finding.severity else str(finding.metadata.get("potential_severity") or "unscored")
         cell = matrix[domain].setdefault(severity, {"confirmed": 0, "needs_validation": 0})
         cell[status] = cell.get(status, 0) + 1
     return matrix

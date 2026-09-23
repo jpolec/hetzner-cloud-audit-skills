@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-v0.3.x receives best-effort security fixes while the project is in alpha.
+The latest release (v0.7.x) receives best-effort security fixes while the project is in alpha. Older versions are not patched; upgrade instead.
 
 ## Reporting a vulnerability
 

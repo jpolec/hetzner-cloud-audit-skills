@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import Snapshot
+from .schema import validate
 
 
 @dataclass
@@ -55,10 +56,17 @@ def update_coverage(units: list[CoverageUnit], findings: list[Any]) -> None:
         ) or ["normalized_snapshot"]
 
 
+MAX_LEDGER_BYTES = 64 * 1024 * 1024
+
+
 def save_coverage(path: Path, units: list[CoverageUnit], *, prior_path: Path | None = None) -> None:
     prior: dict[str, Any] = {}
     if prior_path and prior_path.exists():
-        prior = {item["coverage_id"]: item for item in json.loads(prior_path.read_text())}
+        if prior_path.stat().st_size > MAX_LEDGER_BYTES:
+            raise ValueError(f"coverage ledger {prior_path} exceeds {MAX_LEDGER_BYTES} bytes")
+        previous = json.loads(prior_path.read_text())
+        validate(previous, "coverage-ledger.schema.json", f"coverage ledger {prior_path}")
+        prior = {item["coverage_id"]: item for item in previous}
     payload = []
     for unit in units:
         item = asdict(unit)
