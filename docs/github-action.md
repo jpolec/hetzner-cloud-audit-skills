@@ -53,3 +53,16 @@ Store snapshots as protected workflow artifacts or in an access-controlled evide
 ```
 
 For pull requests, prefer offline Terraform/fixture evidence. GitHub does not pass repository secrets to ordinary fork workflows, and the audit must not weaken that boundary.
+
+## Failing the job
+
+`fail-on` (audit mode) decides when the job fails:
+
+| Value | Job fails when |
+|---|---|
+| `none` (default) | never; the report and SARIF are artifacts only |
+| `confirmed` | any confirmed finding exists |
+| `confirmed-high` | a confirmed finding is high or critical |
+
+`needs_validation` findings never fail the job. They are hypotheses the Hetzner API cannot prove, such as a firewall rule without an observed listener. In SARIF they appear with level `none`, so code scanning shows them without raising alerts. A green job therefore means "nothing *confirmed* at this threshold". It does not mean the infrastructure is secure: host firewalls, listeners, and service configuration are not observed without host evidence.
+

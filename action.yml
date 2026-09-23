@@ -31,6 +31,10 @@ inputs:
     description: Fail diff mode when a new Internet exposure is observed
     required: false
     default: "true"
+  fail-on:
+    description: "Audit mode: none, confirmed, or confirmed-high. needs_validation findings never fail the job."
+    required: false
+    default: none
 
 runs:
   using: composite
@@ -52,12 +56,17 @@ runs:
         AUDIT_FORMAT: ${{ inputs.format }}
         AUDIT_OUTPUT: ${{ inputs.output }}
         AUDIT_FAIL: ${{ inputs.fail-on-regression }}
+        AUDIT_FAIL_ON: ${{ inputs.fail-on }}
       run: |
         set -eu
         common=(--format "$AUDIT_FORMAT" --output "$AUDIT_OUTPUT")
         if [ -n "$AUDIT_POLICY" ]; then common+=(--policy "$AUDIT_POLICY"); fi
         case "$AUDIT_MODE" in
-          audit|snapshot|cost)
+          audit)
+            if [ -n "$AUDIT_INPUT" ]; then common+=(--input "$AUDIT_INPUT"); fi
+            hetzner-audit audit "${common[@]}" --read-only --no-ssh --no-external-tools --fail-on "$AUDIT_FAIL_ON"
+            ;;
+          snapshot|cost)
             if [ -n "$AUDIT_INPUT" ]; then common+=(--input "$AUDIT_INPUT"); fi
             hetzner-audit "$AUDIT_MODE" "${common[@]}" --read-only --no-ssh --no-external-tools
             ;;

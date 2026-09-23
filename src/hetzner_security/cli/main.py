@@ -19,7 +19,7 @@ from ..doctor import render_doctor_markdown, run_doctor
 from ..findings import render_json, render_markdown, render_sarif
 from ..findings.summary import build_summary
 from ..graph import AttackGraph, render_path_markdown
-from ..models import Finding, Severity, Snapshot
+from ..models import Finding, FindingStatus, Severity, Snapshot
 from ..policy import apply_policy, load_policy
 from ..temporal import diff_snapshots, render_diff_markdown
 from ..topology import build_topology, render_mermaid, render_topology_markdown
@@ -48,6 +48,12 @@ def build_parser() -> argparse.ArgumentParser:
         cmd.add_argument("--severity", choices=tuple(SEVERITY_ORDER), default="info")
         cmd.add_argument("--verify", action=argparse.BooleanOptionalAction, default=True)
         cmd.add_argument("--coverage-ledger", type=Path)
+        cmd.add_argument(
+            "--fail-on",
+            choices=("none", "confirmed", "confirmed-high"),
+            default="none",
+            help="Exit 1 on confirmed findings (any severity, or high/critical only). needs_validation never fails.",
+        )
 
     cost = subparsers.add_parser("cost")
     _common(cost, formats=("json", "markdown"))
@@ -220,6 +226,13 @@ def run(args: argparse.Namespace) -> int:
             renderer = {"json": render_json, "sarif": render_sarif}[args.format]
             output = renderer(findings)
     _write(output, args.output)
+    if getattr(args, "fail_on", "none") != "none" and args.command not in {"snapshot", "inventory"}:
+        confirmed = [item for item in findings if item.status == FindingStatus.CONFIRMED]
+        if args.fail_on == "confirmed-high":
+            confirmed = [item for item in confirmed if item.severity and item.severity.value in {"critical", "high"}]
+        if confirmed:
+            print(f"hetzner-audit: {len(confirmed)} confirmed finding(s) match --fail-on {args.fail_on}", file=sys.stderr)
+            return 1
     return 0
 
 
