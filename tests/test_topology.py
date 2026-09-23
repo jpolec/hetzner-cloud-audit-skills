@@ -2,12 +2,12 @@ from __future__ import annotations
 
 import unittest
 
+from hetzner_security.diagram import render_svg
 from hetzner_security.models import Asset, Snapshot
 from hetzner_security.topology import (
     build_topology,
     classify_source,
     render_mermaid,
-    render_svg,
     render_topology_markdown,
 )
 
@@ -70,6 +70,13 @@ class TopologyTest(unittest.TestCase):
         self.assertTrue(render_svg(topology).startswith("<svg"))
         self.assertIn("#f4f4f4", render_svg(topology))
         self.assertIn("#0b1220", render_svg(topology, theme="dark"))
+
+    def test_svg_is_well_formed_xml_with_special_characters(self) -> None:
+        import xml.dom.minidom
+
+        self.snapshot.assets.append(_server("a&b<c>", "edge", [_rule("tcp", 443, ["0.0.0.0/0"])]))
+        document = xml.dom.minidom.parseString(render_svg(build_topology(self.snapshot)))  # noqa: S318 -- our own output
+        self.assertEqual(document.documentElement.tagName, "svg")
 
 
 if __name__ == "__main__":

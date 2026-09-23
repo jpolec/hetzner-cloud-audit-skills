@@ -158,6 +158,7 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
                 "type": server_type.get("name", ""),
                 "deprecated_type": server_type.get("deprecated") is True,
                 "location": location.get("name", ""),
+                "network_zone": location.get("network_zone", ""),
                 "status": props.get("status", ""),
                 "public_ip": bool(props.get("public_ip")),
                 "firewall": bool(props.get("firewall_attached")),
@@ -173,16 +174,65 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
                 "exposure": exposure,
             }
         )
+    unattached = [
+        asset for asset in snapshot.assets if asset.type == "volume" and not asset.properties.get("server")
+    ]
+    storage_boxes = []
+    for asset in snapshot.assets:
+        if asset.type != "storage_box":
+            continue
+        box_location = asset.properties.get("location")
+        box_type = asset.properties.get("storage_box_type")
+        storage_boxes.append(
+            {
+                "name": asset.name,
+                "location": box_location.get("name", "") if isinstance(box_location, dict) else str(box_location or ""),
+                "type": box_type.get("name", "") if isinstance(box_type, dict) else str(box_type or ""),
+            }
+        )
+    volumes_all = [asset for asset in snapshot.assets if asset.type == "volume"]
+    stats = {
+        "servers": len(servers),
+        "locations": len({item["location"] for item in servers if item["location"]}),
+        "internet_exposed": sum(1 for item in servers if item["exposure"] in {"public", "critical"}),
+        "cloudflare_fronted": sum(1 for item in servers if item["exposure"] == "proxied"),
+        "tailscale_admin": sum(
+            1 for item in servers if any(port.startswith("tcp/") for port in item["ingress"].get("tailscale", []))
+        ),
+        "broad_private_ingress": sum(1 for item in servers if "tcp/all" in item["ingress"].get("private", [])),
+        "no_firewall": sum(1 for item in servers if item["public_ip"] and not item["firewall"]),
+        "volumes": len(volumes_all),
+        "volume_gb": sum(int(item.properties.get("size", 0) or 0) for item in volumes_all),
+        "unattached_volumes": len(unattached),
+        "deprecated_types": sum(1 for item in servers if item["deprecated_type"]),
+        "delete_protected": sum(1 for item in servers if item["delete_protection"]),
+        "backups_enabled": sum(1 for item in servers if item["backups"]),
+    }
     return {
         "networks": [
-            {"name": item.name, "ip_range": item.properties.get("ip_range", "")} for item in networks
+            {
+                "name": item.name,
+                "ip_range": item.properties.get("ip_range", ""),
+                "subnets": [
+                    str(subnet.get("ip_range"))
+                    for subnet in item.properties.get("subnets", []) or []
+                    if isinstance(subnet, dict) and subnet.get("ip_range")
+                ],
+                "network_zone": next(
+                    (
+                        str(subnet.get("network_zone"))
+                        for subnet in item.properties.get("subnets", []) or []
+                        if isinstance(subnet, dict) and subnet.get("network_zone")
+                    ),
+                    "",
+                ),
+            }
+            for item in networks
         ],
         "servers": servers,
-        "unattached_volumes": [
-            asset.name
-            for asset in snapshot.assets
-            if asset.type == "volume" and not asset.properties.get("server")
-        ],
+        "storage_boxes": storage_boxes,
+        "unattached_volumes": [asset.name for asset in unattached],
+        "stats": stats,
         "collected_at": snapshot.metadata.get("collected_at"),
     }
 
@@ -292,179 +342,3 @@ def render_topology_markdown(topology: dict[str, Any]) -> str:
         lines.extend(["", "Unattached volumes: " + ", ".join(topology["unattached_volumes"])])
     lines.extend(["", "Public IP addresses are intentionally omitted. The map shows provider firewall intent, not host or application controls."])
     return "\n".join(lines)
-
-
-# ---------------------------------------------------------------- SVG rendering
-
-SVG_THEMES: dict[str, dict[str, str]] = {
-    # Light theme: neutral console look (grey canvas, white cards, red accent).
-    "light": {
-        "bg": "#f4f4f4",
-        "panel": "#ffffff",
-        "panel_stroke": "#e3e3e3",
-        "card": "#ffffff",
-        "text": "#1f1f1f",
-        "muted": "#6b6b6b",
-        "accent": "#d50c2d",
-        "critical": "#d50c2d",
-        "public": "#d98e04",
-        "proxied": "#1f9d55",
-        "private": "#2f6fdb",
-        "world": "#d50c2d",
-        "cloudflare": "#f38020",
-        "tailscale": "#6d4fc2",
-        "allowlist": "#7a7a7a",
-    },
-    "dark": {
-        "bg": "#0b1220",
-        "panel": "#0f1a2e",
-        "panel_stroke": "#23324d",
-        "card": "#111f36",
-        "text": "#e5edf7",
-        "muted": "#8aa0bd",
-        "accent": "#f87171",
-        "critical": "#f87171",
-        "public": "#fde047",
-        "proxied": "#34d399",
-        "private": "#60a5fa",
-        "world": "#fde047",
-        "cloudflare": "#fb923c",
-        "tailscale": "#a78bfa",
-        "allowlist": "#94a3b8",
-    },
-}
-
-
-def render_svg(topology: dict[str, Any], title: str = "Hetzner network map", theme: str = "light") -> str:
-    """Render a dependency-free SVG: trust sources on the left, servers grouped by role."""
-    card_w, card_h, gap_x, gap_y, lane_h = 214, 64, 18, 16, 16
-    left_w, margin, per_row = 230, 32, 5
-    x0 = margin + left_w + 56
-    servers = topology["servers"]
-    public_kinds = ("world", "cloudflare", "allowlist")
-    edges = [
-        (kind, server["name"], [port for port in server["ingress"][kind] if port != "icmp"])
-        for server in servers
-        for kind in public_kinds
-        if any(port != "icmp" for port in server["ingress"].get(kind, []))
-    ]
-    network_title = ", ".join(f"{net['name']} · {net['ip_range']}" for net in topology["networks"])
-    sections = [
-        (f"PRIVATE NETWORK  {network_title}", [item for item in servers if item["networks"]]),
-        ("NO PRIVATE NETWORK", [item for item in servers if not item["networks"]]),
-    ]
-    sections = [(name, members) for name, members in sections if members]
-
-    # Layout pass: panels, group headings, one routing lane per public edge above its row.
-    y = margin + 84
-    panels: list[tuple[str, int, int]] = []
-    headings: list[tuple[str, int]] = []
-    positions: dict[str, tuple[int, int]] = {}
-    for section_title, members in sections:
-        top = y
-        y += 40
-        groups: dict[str, list[dict[str, Any]]] = {}
-        for server in members:
-            groups.setdefault(server["group"], []).append(server)
-        for key in [group for group, _t, _w in GROUPS] + ["other"]:
-            if key not in groups:
-                continue
-            headings.append((_group_title(key).upper(), y))
-            y += 28
-            for start in range(0, len(groups[key]), per_row):
-                chunk = groups[key][start : start + per_row]
-                names = {item["name"] for item in chunk}
-                lanes = sum(1 for _kind, name, _p in edges if name in names)
-                y += lanes * lane_h + (10 if lanes else 0)
-                for index, server in enumerate(chunk):
-                    positions[server["name"]] = (x0 + index * (card_w + gap_x), y)
-                y += card_h + gap_y
-            y += 10
-        panels.append((section_title, top, y - top))
-        y += 24
-    width = x0 + per_row * (card_w + gap_x) + margin
-    height = y + margin - 8
-    colors = SVG_THEMES[theme]
-    out: list[str] = []
-    add = out.append
-    add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">')
-    add(f'<rect width="100%" height="100%" rx="16" fill="{colors["bg"]}"/>')
-    add(
-        '<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker>'
-        '<filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>'
-    )
-    add(f'<text x="{margin}" y="{margin + 16}" font-size="22" font-weight="700" fill="{colors["text"]}">{escape(title)}</text>')
-    counts: dict[str, int] = {}
-    for server in servers:
-        counts[server["exposure"]] = counts.get(server["exposure"], 0) + 1
-    summary = f"{len(servers)} servers · " + " · ".join(f"{counts.get(key, 0)} {key}" for key in ("critical", "public", "proxied", "private"))
-    add(f'<text x="{margin}" y="{margin + 42}" font-size="13" fill="{colors["muted"]}">{escape(summary)} · read-only API evidence · public IPs omitted</text>')
-    legend_x = width - margin - 4 * 104
-    for index, key in enumerate(("critical", "public", "proxied", "private")):
-        add(f'<rect x="{legend_x + index * 104}" y="{margin + 6}" width="12" height="12" rx="3" fill="none" stroke="{colors[key]}" stroke-width="2"/>')
-        add(f'<text x="{legend_x + index * 104 + 18}" y="{margin + 16}" font-size="12" fill="{colors["muted"]}">{key}</text>')
-    for section_title, top, panel_h in panels:
-        add(f'<rect x="{x0 - 20}" y="{top}" width="{width - x0 - margin + 20}" height="{panel_h}" rx="14" fill="{colors["panel"]}" stroke="{colors["panel_stroke"]}"/>')
-        add(f'<text x="{x0}" y="{top + 26}" font-size="13" font-weight="600" letter-spacing="0.5" fill="{colors["muted"]}">{escape(section_title)}</text>')
-    for heading, heading_y in headings:
-        add(f'<text x="{x0}" y="{heading_y + 16}" font-size="11.5" font-weight="700" letter-spacing="1" fill="{colors["muted"]}">{escape(heading)}</text>')
-    # Trust sources.
-    kinds = [kind for kind in ("world", "cloudflare", "allowlist", "tailscale") if any(kind in item["ingress"] for item in servers)]
-    source_pos: dict[str, tuple[int, int]] = {}
-    source_y = margin + 84
-    for kind in kinds:
-        color = colors[kind]
-        add(f'<rect x="{margin}" y="{source_y}" width="{left_w}" height="52" rx="26" fill="{colors["panel"]}" stroke="{color}" stroke-width="2"/>')
-        add(f'<text x="{margin + left_w / 2}" y="{source_y + 31}" text-anchor="middle" font-size="14" font-weight="600" fill="{color}">{escape(SOURCE_LABELS[kind])}</text>')
-        source_pos[kind] = (margin + left_w, source_y + 26)
-        source_y += 80
-    if "tailscale" in source_pos:
-        tx, ty = source_pos["tailscale"]
-        reached = sum(1 for item in servers if "tailscale" in item["ingress"])
-        add(f'<text x="{margin + left_w / 2}" y="{ty + 44}" text-anchor="middle" font-size="11.5" fill="{colors["tailscale"]}">admin + WireGuard → {reached} servers</text>')
-    # Public edges: source → gutter → lane above the target row → down into the card.
-    gutters = {kind: x0 - 44 + index * 8 for index, kind in enumerate(public_kinds)}
-    lane_used: dict[int, int] = {}
-    for kind, name, ports in edges:
-        if name not in positions or kind not in source_pos:
-            continue
-        card_x, card_y = positions[name]
-        start_x, start_y = source_pos[kind]
-        used = lane_used.get(card_y, 0)
-        lane_used[card_y] = used + 1
-        lane_y = card_y - 12 - used * lane_h
-        target_x = card_x + card_w - 30
-        color = colors[kind]
-        add(
-            f'<path d="M {start_x} {start_y} L {gutters[kind]} {start_y} L {gutters[kind]} {lane_y} L {target_x} {lane_y} L {target_x} {card_y}" '
-            f'stroke="{color}" stroke-width="{2.4 if kind == "world" else 1.8}" fill="none" stroke-linejoin="round" marker-end="url(#arrow)"/>'
-        )
-        label = ", ".join(ports)
-        add(f'<text x="{target_x - 8}" y="{lane_y - 4}" text-anchor="end" font-size="11" font-weight="600" fill="{color}">{escape(label)}</text>')
-    for server in servers:
-        card_x, card_y = positions[server["name"]]
-        stroke = colors[server["exposure"]]
-        # Light cards use a neutral border and shadow; exposure is carried by the left stripe.
-        border, border_w, shadow = (
-            (stroke, 1.6, "") if theme == "dark" else (colors["panel_stroke"], 1, ' filter="url(#shadow)"')
-        )
-        add(f'<rect x="{card_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="10" fill="{colors["card"]}" stroke="{border}" stroke-width="{border_w}"{shadow}/>')
-        add(f'<rect x="{card_x}" y="{card_y + 8}" width="4" height="{card_h - 16}" rx="2" fill="{stroke}"/>')
-        add(f'<text x="{card_x + 12}" y="{card_y + 22}" font-size="14" font-weight="700" fill="{colors["text"]}">{escape(server["name"])}</text>')
-        detail = " · ".join(item for item in (server["role"], server["type"], server["location"]) if item)
-        add(f'<text x="{card_x + 12}" y="{card_y + 40}" font-size="11.5" fill="{colors["muted"]}">{escape(detail[:34])}</text>')
-        badges = []
-        if server["sensitive"]:
-            badges.append(("sensitive", colors["critical"]))
-        if server["volume_gb"]:
-            badges.append((f"{server['volume_gb']} GB vol", colors["muted"]))
-        if server["deprecated_type"]:
-            badges.append(("deprecated type", colors["public"]))
-        if server["delete_protection"]:
-            badges.append(("protected", colors["proxied"]))
-        badge_x = card_x + 12
-        for text, color in badges[:3]:
-            add(f'<text x="{badge_x}" y="{card_y + 56}" font-size="10.5" font-weight="600" fill="{color}">{escape(text)}</text>')
-            badge_x += 10 + int(len(text) * 6.2)
-    add("</svg>")
-    return "\n".join(out)

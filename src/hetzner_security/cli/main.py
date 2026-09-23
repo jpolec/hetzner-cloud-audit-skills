@@ -13,13 +13,14 @@ from ..collectors.fixture import load_snapshot
 from ..collectors.hcloud import HCloudCollectionError, ReadOnlyHCloudCollector
 from ..cost import analyze_cost, render_cost_markdown
 from ..coverage import plan_coverage, render_coverage, save_coverage, update_coverage
+from ..diagram import render_svg
 from ..doctor import render_doctor_markdown, run_doctor
 from ..findings import render_json, render_markdown, render_sarif
 from ..graph import AttackGraph, render_path_markdown
 from ..models import Finding, Severity, Snapshot
 from ..policy import apply_policy, load_policy
 from ..temporal import diff_snapshots, render_diff_markdown
-from ..topology import build_topology, render_mermaid, render_svg, render_topology_markdown
+from ..topology import build_topology, render_mermaid, render_topology_markdown
 from ..verification import verify_all
 
 SEVERITY_ORDER = {severity.value: index for index, severity in enumerate(Severity)}
@@ -80,7 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     topology = subparsers.add_parser("map", help="Network map as Markdown/Mermaid, SVG, or JSON")
     _common(topology, formats=("markdown", "mermaid", "svg", "json"))
-    topology.add_argument("--title", default="Hetzner network map")
+    topology.add_argument("--title", default="Hetzner Cloud architecture")
     topology.add_argument("--theme", choices=("light", "dark"), default="light", help="SVG color theme")
     return parser
 
