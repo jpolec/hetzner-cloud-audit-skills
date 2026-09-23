@@ -57,7 +57,13 @@ Do not infer live reachability from repository text alone.
 
 Create a coverage unit for each material `(asset, layer, attack class)` combination. Use stable IDs and write a coverage ledger. Read a compatible prior ledger before planning: recheck changed evidence, prioritize prior gaps, retain rejected fingerprints, and do not claim that an unchanged source revision proves unchanged cloud state.
 
-Run:
+Run the preflight first and stop if it fails. Show the owner the project scope it reports, and ask them to confirm it is the intended project before collecting:
+
+```sh
+hetzner-audit doctor --report-dir audit
+```
+
+Then run:
 
 ```sh
 hetzner-audit snapshot --format json --output audit/snapshot.json --read-only --no-ssh

@@ -10,6 +10,7 @@ import ipaddress
 import json
 import os
 import re
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import UTC, datetime, timedelta
@@ -45,7 +46,9 @@ HETZNER_RESOURCE_ENDPOINTS = {
 
 
 class HCloudCollectionError(RuntimeError):
-    pass
+    def __init__(self, message: str, status: int | None = None) -> None:
+        super().__init__(message)
+        self.status = status
 
 
 class ReadOnlyHCloudCollector:
@@ -95,6 +98,12 @@ class ReadOnlyHCloudCollector:
                 if not isinstance(payload, dict):
                     raise HCloudCollectionError(f"unexpected response shape for {endpoint}")
                 return {str(key): value for key, value in payload.items()}
+        except urllib.error.HTTPError as exc:
+            raise HCloudCollectionError(
+                f"read-only GET failed for {endpoint}: HTTP {exc.code}", status=exc.code
+            ) from exc
+        except HCloudCollectionError:
+            raise
         except Exception as exc:
             raise HCloudCollectionError(f"read-only GET failed for {endpoint}: {exc}") from exc
 

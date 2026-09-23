@@ -71,6 +71,14 @@ export HCLOUD_TOKEN
 
 This keeps the token out of shell history. Never paste it into an agent prompt, command argument, `.env`, screenshot, or report.
 
+Then check the setup before collecting anything:
+
+```sh
+uvx hetzner-audit doctor --report-dir ./_output
+```
+
+`doctor` confirms the token works without printing it. It lists which Hetzner endpoints it can read and shows the project's scope (server, firewall, network, and volume counts), so you can check you picked the right project. It also warns if reports would land in a Git-tracked directory.
+
 ### Option A: agent skill
 
 ```sh
@@ -136,6 +144,14 @@ Out of the box, the API-only layer checks:
 The Hetzner API cannot see host listeners, Docker port publishing, PostgreSQL HBA, Redis ACLs, or guest memory. Those findings stay `needs_validation` and show what evidence is missing.
 
 ## Commands
+
+### Check the setup
+
+```sh
+hetzner-audit doctor --report-dir ./_output
+```
+
+It exits non-zero when the token is missing or rejected, or when core endpoints are unreadable. That makes it a useful first step in CI as well.
 
 ### Map the network
 

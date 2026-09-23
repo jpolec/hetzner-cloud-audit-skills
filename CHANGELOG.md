@@ -4,6 +4,22 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- `hetzner-audit doctor` checks, without printing the token:
+  - the Python version and token presence;
+  - API access and per-endpoint readability;
+  - project scope counts;
+  - optional tools;
+  - whether the report directory is Git-tracked, and whether a `.env` file holds the token.
+
+  It exits non-zero on a missing or rejected token or unreadable core endpoints.
+- The v0.4 roadmap in `docs/roadmap.md`.
+
+### Changed
+
+- Collector errors carry the HTTP status, so 401, 403, 404, and 429 can be told apart.
+
 ## [0.3.1] - 2026-09-23
 
 ### Added

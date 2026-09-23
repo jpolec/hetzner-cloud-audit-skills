@@ -13,6 +13,7 @@ from ..collectors.fixture import load_snapshot
 from ..collectors.hcloud import HCloudCollectionError, ReadOnlyHCloudCollector
 from ..cost import analyze_cost, render_cost_markdown
 from ..coverage import plan_coverage, render_coverage, save_coverage, update_coverage
+from ..doctor import render_doctor_markdown, run_doctor
 from ..findings import render_json, render_markdown, render_sarif
 from ..graph import AttackGraph, render_path_markdown
 from ..models import Finding, Severity, Snapshot
@@ -72,6 +73,11 @@ def build_parser() -> argparse.ArgumentParser:
     ask.add_argument("question")
     _common(ask, formats=("json", "markdown"))
 
+    doctor = subparsers.add_parser("doctor", help="Check token, API access, scope, tools, and report privacy")
+    doctor.add_argument("--format", choices=("markdown", "json"), default="markdown")
+    doctor.add_argument("--output", type=Path)
+    doctor.add_argument("--report-dir", type=Path, default=Path("."), help="Where you plan to write reports")
+
     topology = subparsers.add_parser("map", help="Network map as Markdown/Mermaid, SVG, or JSON")
     _common(topology, formats=("markdown", "mermaid", "svg", "json"))
     topology.add_argument("--title", default="Hetzner network map")
@@ -121,6 +127,10 @@ def _findings(snapshot: Snapshot, *, verify: bool = True) -> list[Finding]:
 
 
 def run(args: argparse.Namespace) -> int:
+    if args.command == "doctor":
+        result = run_doctor(report_dir=args.report_dir)
+        _write(json.dumps(result, indent=2) if args.format == "json" else render_doctor_markdown(result), args.output)
+        return 1 if result["status"] == "fail" else 0
     if args.command == "diff":
         diff = diff_snapshots(load_snapshot(args.before), load_snapshot(args.after))
         output = json.dumps(diff, indent=2) if args.format == "json" else render_diff_markdown(diff)

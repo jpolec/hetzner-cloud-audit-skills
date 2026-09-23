@@ -75,7 +75,15 @@ Environment variables are inherited by child processes. Use a dedicated terminal
 
 ## 6. Run the safe checks
 
-First confirm the planned collector without sending an API request:
+Check the token, API access, and project scope. The token value is never printed:
+
+```sh
+hetzner-audit doctor --report-dir ./_output
+```
+
+Confirm the reported server and firewall counts match the project you meant to audit.
+
+You can also preview the planned collector without sending any API request:
 
 ```sh
 hetzner-audit inventory --dry-run --read-only --no-ssh
