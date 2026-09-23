@@ -16,6 +16,7 @@ from typing import Any
 from ..flows import PortSet, asset_exposure, port_set
 from ..models import Asset, Edge, Evidence, Snapshot
 from .parsers import (
+    MAX_BUNDLE_BYTES,
     evaluate_chain,
     iptables_filters,
     parse_docker,
@@ -300,11 +301,19 @@ def _reach_evidence(server: Asset, target: Asset, port: int) -> tuple[Evidence, 
     )
 
 
+def read_bundle(path: Path) -> str:
+    """Check the size before reading, so a huge file is refused without being loaded."""
+    size = path.stat().st_size
+    if size > MAX_BUNDLE_BYTES:
+        raise ValueError(f"host bundle {path} is {size} bytes; the limit is {MAX_BUNDLE_BYTES}")
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
 def apply_host_bundles(snapshot: Snapshot, paths: list[Path]) -> Snapshot:
     result = deepcopy(snapshot)
     statuses = []
     for path in paths:
-        bundle = parse_bundle(path.read_text(encoding="utf-8", errors="replace"))
+        bundle = parse_bundle(read_bundle(path))
         statuses.append(apply_host_bundle(result, bundle, path.name))
     result.metadata["host_bundles"] = statuses
     return result

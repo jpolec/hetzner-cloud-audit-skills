@@ -227,3 +227,195 @@ def exposure_growth(before: dict[str, Exposure], after: dict[str, Exposure]) -> 
                     }
                 )
     return growth
+
+
+# ---------------------------------------------------------------- exact flow space (for diff)
+#
+# Exposure as a set of rectangles: source addresses (integer interval) × destination ports, per
+# (address family, protocol). `After - Before` is computed exactly, so widening 1.2.3.4/32 to
+# 1.2.3.0/24, or swapping one trusted /32 for another, is a change even when the source class
+# (world / wide / allow-list) stays the same. Classification happens after the difference.
+
+Rect = tuple[int, int, int, int]  # source first, source last, port first, port last
+FAMILY_BITS = {"ipv4": 32, "ipv6": 128, "any": 0}  # "any": fixture edges without an address family
+FlowSpace = dict[tuple[str, str], list[Rect]]  # (family, protocol) -> rectangles
+
+
+def _rect_minus(a: Rect, b: Rect) -> list[Rect]:
+    """a minus b as up to four disjoint rectangles."""
+    s1, s2, p1, p2 = a
+    t1, t2, q1, q2 = b
+    if t2 < s1 or t1 > s2 or q2 < p1 or q1 > p2:
+        return [a]
+    pieces: list[Rect] = []
+    if s1 < t1:
+        pieces.append((s1, t1 - 1, p1, p2))
+    if t2 < s2:
+        pieces.append((t2 + 1, s2, p1, p2))
+    mid1, mid2 = max(s1, t1), min(s2, t2)
+    if p1 < q1:
+        pieces.append((mid1, mid2, p1, q1 - 1))
+    if q2 < p2:
+        pieces.append((mid1, mid2, q2 + 1, p2))
+    return pieces
+
+
+def space_minus(after: list[Rect], before: list[Rect]) -> list[Rect]:
+    remaining = list(after)
+    for cut in before:
+        remaining = [piece for rect in remaining for piece in _rect_minus(rect, cut)]
+        if not remaining:
+            break
+    return remaining
+
+
+def asset_flowspace(asset: Asset, edges: Iterable[Edge] = ()) -> FlowSpace:
+    """Exact public ingress space of one asset (public sources only; internal ranges excluded)."""
+    space: FlowSpace = {}
+    families = public_families(asset)
+    props = asset.properties
+
+    def add(family: str, protocol: str, network: ipaddress.IPv4Network | ipaddress.IPv6Network, ports: PortSet) -> None:
+        for first, last in ports:
+            space.setdefault((family, protocol), []).append(
+                (int(network.network_address), int(network.broadcast_address), first, last)
+            )
+
+    if asset.type == "load_balancer":
+        if (props.get("public_net") or {}).get("enabled", True):
+            for service in props.get("services") or []:
+                port = service.get("listen_port")
+                if isinstance(port, int):
+                    add("ipv4", "tcp", ipaddress.ip_network(WORLD["ipv4"]), PortSet.of([(port, port)]))
+                    add("ipv6", "tcp", ipaddress.ip_network(WORLD["ipv6"]), PortSet.of([(port, port)]))
+        return space
+    if not families:
+        return space
+    inbound = props.get("inbound")
+    if isinstance(inbound, list):
+        for rule in inbound:
+            protocol = str(rule.get("protocol", "tcp"))
+            for source in rule.get("sources", []) or []:
+                if source_class(str(source)) is None:
+                    continue  # internal range: not Internet exposure
+                network = ipaddress.ip_network(str(source), strict=False)
+                family = "ipv4" if network.version == 4 else "ipv6"
+                if family in families:
+                    add(family, protocol, network, rule_ports(rule))
+        return space
+    for edge in edges:
+        if edge.source == "internet" and edge.target == asset.id and edge.relation == "allows":
+            ports = PortSet.of([(edge.port, edge.port)]) if edge.port is not None else PortSet.full()
+            for first, last in ports:  # the whole Internet, family unknown
+                space.setdefault(("any", edge.protocol or "tcp"), []).append((0, 0, first, last))
+    return space
+
+
+def snapshot_flowspace(snapshot: Snapshot) -> dict[str, FlowSpace]:
+    edges = list(snapshot.edges)
+    return {
+        asset.id: space
+        for asset in snapshot.assets
+        if asset.type in {"server", "load_balancer", "service"} and (space := asset_flowspace(asset, edges))
+    }
+
+
+def _summarize_sources(rects: list[Rect], family: str) -> tuple[list[str], int]:
+    """CIDRs covering the source intervals (first few) and the number of addresses."""
+    if family == "any":
+        return ["any"], 0
+    intervals = sorted({(first, last) for first, last, _p1, _p2 in rects})
+    merged: list[list[int]] = []
+    for first, last in intervals:
+        if merged and first <= merged[-1][1] + 1:
+            merged[-1][1] = max(merged[-1][1], last)
+        else:
+            merged.append([first, last])
+    make = ipaddress.IPv4Address if family == "ipv4" else ipaddress.IPv6Address
+    cidrs: list[str] = []
+    for first, last in merged:
+        cidrs.extend(str(net) for net in ipaddress.summarize_address_range(make(first), make(last)))
+        if len(cidrs) > 8:
+            break
+    return cidrs, sum(last - first + 1 for first, last in merged)
+
+
+def classify_space(rects: list[Rect], family: str, sources: list[str], count: int) -> str:
+    """Risk class of a flow-space difference: world, wide, edge:<provider>, or allowlist."""
+    bits = FAMILY_BITS[family]
+    if family == "any" or any(first == 0 and last == 2**bits - 1 for first, last, _p1, _p2 in rects):
+        return "world"
+    if count >= 2 ** (bits - WIDE_PREFIX[family]):
+        return "wide"
+    from .providers import edge_provider  # late import: providers imports nothing from flows
+
+    providers = {edge_provider(cidr) for cidr in sources}
+    if sources and len(providers) == 1 and None not in providers:
+        return f"edge:{providers.pop()}"
+    return "allowlist"
+
+
+def flowspace_growth(before: dict[str, FlowSpace], after: dict[str, FlowSpace]) -> list[dict[str, Any]]:
+    """Exact AFTER minus BEFORE per asset, family, and protocol, classified by risk afterwards."""
+    growth = []
+    for asset_id, space in sorted(after.items()):
+        previous = before.get(asset_id, {})
+        for key, rects in sorted(space.items()):
+            added = space_minus(rects, previous.get(key, []))
+            if not added:
+                continue
+            family, protocol = key
+            sources, count = _summarize_sources(added, family)
+            ports = PortSet.of([(p1, p2) for _s1, _s2, p1, p2 in added])
+            growth.append({
+                "asset": asset_id,
+                "family": family,
+                "protocol": protocol,
+                "source_class": classify_space(added, family, sources, count),
+                "sources": sources,
+                "source_addresses": count,
+                "ports": ports.describe(),
+                "port_count": ports.size(),
+            })
+    return growth
+
+
+def egress_flowspace(asset: Asset) -> FlowSpace:
+    """Internet destinations × ports a server may connect to, as the Cloud Firewall allows.
+
+    No firewall, or no outbound rule in the attached firewalls, means all egress is allowed; with at
+    least one outbound rule, only the listed destinations and ports are (Hetzner's implicit deny).
+    """
+    space: FlowSpace = {}
+    props = asset.properties
+    if asset.type != "server" or not public_families(asset):
+        return space  # without a public interface there is no direct path to the Internet
+    outbound = props.get("outbound") or []
+    if not props.get("firewall_attached") or not outbound:
+        for family in public_families(asset):
+            network = ipaddress.ip_network(WORLD[family])
+            for protocol in ("tcp", "udp"):
+                space.setdefault((family, protocol), []).append((int(network.network_address), int(network.broadcast_address), 0, MAX_PORT))
+        return space
+    for rule in outbound:
+        protocol = str(rule.get("protocol", "tcp"))
+        for destination in rule.get("destinations", []) or []:
+            if source_class(str(destination)) is None:
+                continue
+            network = ipaddress.ip_network(str(destination), strict=False)
+            family = "ipv4" if network.version == 4 else "ipv6"
+            if family in public_families(asset):
+                for first, last in rule_ports(rule):
+                    space.setdefault((family, protocol), []).append((int(network.network_address), int(network.broadcast_address), first, last))
+    return space
+
+
+def egress_summary(asset: Asset) -> dict[str, Any]:
+    """unrestricted (all ports to the whole Internet), limited, or none, with the allowed TCP/UDP ports."""
+    space = egress_flowspace(asset)
+    if not space:
+        return {"state": "none", "ports": {}}
+    world = {key: rects for key, rects in space.items() if any(first == 0 and last == 2 ** FAMILY_BITS[key[0]] - 1 for first, last, _a, _b in rects)}
+    ports = {f"{family}/{protocol}": PortSet.of([(p1, p2) for _s1, _s2, p1, p2 in rects]).describe() for (family, protocol), rects in world.items()}
+    unrestricted = any(value == "all" for value in ports.values())
+    return {"state": "unrestricted" if unrestricted else "limited", "ports": ports}

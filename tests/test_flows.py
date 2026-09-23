@@ -68,7 +68,9 @@ class SemanticDiffTest(unittest.TestCase):
         after = Snapshot(assets=[_server("api", [_rule(443, 443, ["0.0.0.0/0"]), _rule(22, 22, ["203.0.113.7/32"])])])
         diff = diff_snapshots(before, after)
         self.assertFalse(diff["security_regression"])
-        self.assertEqual(diff["new_allowlisted_flows"][0]["ports"], "22")
+        # 203.0.113.7 -> 22 was already inside "world, every port": nothing new, exactly.
+        self.assertEqual(diff["new_allowlisted_flows"], [])
+        self.assertFalse(diff_snapshots(before, after, "strict")["security_regression"])
 
     def test_random_rule_sets_growth_equals_set_difference(self) -> None:
         rng = random.Random(7)
@@ -106,3 +108,50 @@ class SemanticDiffTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FlowSpaceTest(unittest.TestCase):
+    """Exact source × port difference, checked against brute force on a small address block."""
+
+    def test_cidr_widening_and_source_swap_are_changes(self) -> None:
+        before = Snapshot(assets=[_server("db", [_rule(22, 22, ["198.51.100.4/32"])])])
+        widened = Snapshot(assets=[_server("db", [_rule(22, 22, ["198.51.100.0/24"])])])
+        swapped = Snapshot(assets=[_server("db", [_rule(22, 22, ["192.0.2.9/32"])])])
+        wide = diff_snapshots(before, widened, "strict")
+        self.assertTrue(wide["security_regression"])
+        self.assertEqual(wide["new_allowlisted_flows"][0]["source_addresses"], 255)
+        self.assertFalse(diff_snapshots(before, widened, "broad")["security_regression"])
+        swap = diff_snapshots(before, swapped, "strict")
+        self.assertEqual(swap["new_allowlisted_flows"][0]["sources"], ["192.0.2.9/32"])
+        self.assertEqual(swap["closed_exposures"][0]["sources"], ["198.51.100.4/32"])
+
+    def test_growth_to_wide_is_a_broad_regression(self) -> None:
+        before = Snapshot(assets=[_server("db", [_rule(22, 22, ["198.51.100.0/24"])])])
+        after = Snapshot(assets=[_server("db", [_rule(22, 22, ["198.0.0.0/7"])])])
+        diff = diff_snapshots(before, after)
+        self.assertTrue(diff["security_regression"])
+        self.assertEqual(diff["new_exposures"][0]["source_class"], "wide")
+
+    def test_random_rules_match_brute_force(self) -> None:
+        import ipaddress
+
+        from hetzner_security.flows import asset_flowspace, space_minus
+
+        rng = random.Random(11)
+        block = [str(net) for net in ipaddress.ip_network("203.0.113.0/28").subnets(new_prefix=30)] + ["203.0.113.0/28", "203.0.113.5/32"]
+        addresses = [int(ipaddress.ip_address("203.0.113.0")) + offset for offset in range(16)]
+
+        def rules() -> list[dict[str, object]]:
+            output = []
+            for _ in range(rng.randint(0, 4)):
+                first = rng.randint(1, 30)
+                output.append(_rule(first, first + rng.randint(0, 8), [rng.choice(block)]))
+            return output
+
+        def members(rects: list[tuple[int, int, int, int]]) -> set[tuple[int, int]]:
+            return {(ip, port) for s1, s2, p1, p2 in rects for ip in addresses if s1 <= ip <= s2 for port in range(p1, p2 + 1)}
+
+        for _ in range(200):
+            before = asset_flowspace(_server("s", rules())).get(("ipv4", "tcp"), [])
+            after = asset_flowspace(_server("s", rules())).get(("ipv4", "tcp"), [])
+            self.assertEqual(members(space_minus(after, before)), members(after) - members(before))

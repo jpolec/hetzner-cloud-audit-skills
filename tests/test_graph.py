@@ -59,3 +59,21 @@ class AttackGraphTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TransitionKindsTest(unittest.TestCase):
+    def test_lb_forwarding_is_direct_and_private_pivot_is_not(self) -> None:
+        from hetzner_security.graph import AttackGraph
+        from hetzner_security.models import Asset, Edge, Snapshot
+
+        assets = [Asset("lb", "load_balancer", "lb"), Asset("web", "server", "web"), Asset("net", "network", "net"),
+                  Asset("db", "server", "db")]
+        edges = [Edge("internet", "lb", "allows", "tcp", 443), Edge("lb", "web", "allows", "tcp", 8080),
+                 Edge("web", "net", "attached_to"), Edge("net", "db", "allows", "tcp", 5432)]
+        graph = AttackGraph(Snapshot(assets=assets, edges=edges))
+        to_web = graph.explain_path("internet", "web", protocol="tcp", port=8080)
+        self.assertEqual([item["kind"] for item in to_web["transitions"]], ["FILTER", "FORWARD"])
+        self.assertTrue(to_web["reachability"]["direct"])
+        to_db = graph.explain_path("internet", "db", protocol="tcp", port=5432)
+        self.assertIn("PIVOT", [item["kind"] for item in to_db["transitions"]])
+        self.assertFalse(to_db["reachability"]["direct"])

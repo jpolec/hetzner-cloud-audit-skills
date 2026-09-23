@@ -13,13 +13,13 @@
     "annual_net": 1080.0,
     "theoretical_monthly_net": 90.0,
     "expected_monthly_net": 40.0,
-    "verified_monthly_net": 0.0,
+    "measured_monthly_net": 0.0,
     "confirmed_monthly_net": 0.0,
     "basis": "Maximum non-overlapping candidate per asset; all require validation.",
     "definitions": {
       "theoretical": "every candidate, best one per asset",
       "expected": "unused resources, plus rightsizing whose CPU, RAM, and disk telemetry cover the window",
-      "verified": "measured after the change: `hetzner-audit diff before.json after.json` reports the cost delta"
+      "measured": "post-change catalog saving: `hetzner-audit diff before.json after.json` prices both snapshots at the earlier catalog, so provider price changes are reported separately; not an invoice reconciliation"
     }
   },
   "servers": [
@@ -178,7 +178,7 @@
       "evidence": [
         {
           "source": "cost_analyzer",
-          "observation": "30-day CPU p95 uses 10.00% of aggregate vCPU capacity."
+          "observation": "CPU p95 over 30.0 observed days (unspecified requested) uses 10.00% of aggregate vCPU capacity."
         }
       ],
       "cross_domain_impacts": {

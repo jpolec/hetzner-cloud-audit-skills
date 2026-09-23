@@ -3,7 +3,7 @@
 - Current catalog estimate: **EUR 220.00/month** (EUR 2640.00/year)
 - Potential savings identified: **EUR 90.00/month** (EUR 1080.00/year)
 - Expected savings (unused resources, plus rightsizing with full CPU/RAM/disk telemetry): **EUR 40.00/month**
-- Verified savings: **EUR 0.00/month** (measured with `hetzner-audit diff` after a change)
+- Measured savings: **EUR 0.00/month** (post-change catalog delta from `hetzner-audit diff`; not invoice-verified)
 - All proposed savings require validation; no infrastructure changes were made.
 
 ## Recommendations

@@ -49,6 +49,7 @@ def _grouped(findings: list[Finding]) -> list[dict[str, Any]]:
                 "title": finding.title,
                 "severity": finding.severity.value if finding.severity else None,
                 "potential": finding.metadata.get("potential_severity"),
+                "maturity": finding.metadata.get("rule_maturity", "fixture"),
                 "assets": 0,
                 "findings": 0,
                 "evidence": evidence_level(finding),
@@ -88,7 +89,7 @@ def build_summary(
             "potential_annual": report["identified_potential_savings"]["annual_net"],
             "confirmed_monthly": report["identified_potential_savings"]["confirmed_monthly_net"],
             "expected_monthly": report["identified_potential_savings"].get("expected_monthly_net", 0.0),
-            "verified_monthly": report["identified_potential_savings"].get("verified_monthly_net", 0.0),
+            "measured_monthly": report["identified_potential_savings"].get("measured_monthly_net", 0.0),
             "metrics_collected": any(item.get("cpu_samples") for item in servers),
             **{key: value for key, value in cost_insights(report).items() if key not in {"waste", "storage_heavy"}},
         }
@@ -106,10 +107,24 @@ def build_summary(
         "missing_layers": missing_layers,
         "host_evidence": host_rows(snapshot),
         "ingress": _ingress_summary(snapshot),
+        "egress": _egress_summary(snapshot),
         "other_sources": other_sources(snapshot),
         "cost": cost,
         "changes": change_summary(snapshot) if any(str(key).endswith("actions") for key in coverage) else None,
         "projects": project_summary(snapshot) if snapshot.metadata.get("projects") else [],
+    }
+
+
+def _egress_summary(snapshot: Snapshot) -> dict[str, Any]:
+    from ..analyzers.egress import SENSITIVE_ROLES
+    from ..flows import egress_summary
+
+    servers = [asset for asset in snapshot.assets if asset.type == "server" and asset.properties.get("public_ip", True)]
+    open_servers = [asset for asset in servers if egress_summary(asset)["state"] == "unrestricted"]
+    return {
+        "servers": len(servers),
+        "unrestricted": len(open_servers),
+        "sensitive_unrestricted": sorted(asset.name for asset in open_servers if asset.labels.get("role", "").lower() in SENSITIVE_ROLES),
     }
 
 
@@ -270,6 +285,14 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
             + (f" · tunnel agents: {', '.join(ingress['tunnels'])}" if ingress["tunnels"] else "")
             + (f" · edge proxies: {', '.join(ingress['edge_providers'])}" if ingress["edge_providers"] else ""),
         ))
+    egress = summary.get("egress")
+    if egress and egress["servers"]:
+        rows.append((
+            "Internet egress",
+            f"{egress['unrestricted']} of {egress['servers']} public servers may connect anywhere (no outbound firewall rule)"
+            + (f" · including data/identity hosts: {', '.join(egress['sensitive_unrestricted'][:5])}" if egress["sensitive_unrestricted"] else "")
+            + " · limit it per role with internet_egress in the policy's roles section",
+        ))
     changes = summary.get("changes")
     if changes:
         top = ", ".join(f"{command} {count}" for command, count in list(changes["by_command"].items())[:4])
@@ -289,9 +312,10 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
                 if cost["metrics_collected"]
                 else "not evaluated: CPU metrics not collected (run `hetzner-audit cost --metrics-days 30`)",
             ),
-            ("Savings: theoretical · expected · verified",
-             f"{currency} {cost['potential_monthly']:,.2f} · {cost.get('expected_monthly', 0):,.2f} · {cost.get('verified_monthly', 0):,.2f} per month "
-             "(expected = unused resources plus rightsizing with full CPU/RAM/disk telemetry; verified = measured by `diff` after a change)"),
+            ("Savings: theoretical · expected · measured",
+             f"{currency} {cost['potential_monthly']:,.2f} · {cost.get('expected_monthly', 0):,.2f} · {cost.get('measured_monthly', 0):,.2f} per month "
+             "(expected = unused resources plus rightsizing with full CPU/RAM/disk telemetry; measured = catalog delta from `diff` "
+             "after a change, priced at the earlier catalog; invoices are not reconciled)"),
         ]
     lines = ["## At a glance", "", "| | |", "|---|---|", *(f"| {name} | {md(value).replace(chr(92) + '`', '`')} |" for name, value in rows), ""]
     lines += render_coverage_markdown(summary.get("coverage", []), summary.get("provenance", []))
@@ -315,11 +339,13 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
         f"- **{(item['severity'] or 'unscored').upper()}** · {item['rule_id']} · {md(item['title'])}"
         + _affected(item)
         + f" · evidence {item['evidence'][0]}"
+        + (" · rule tested on fixtures only" if item.get("maturity") == "fixture" else "")
         for item in confirmed
     ] or ["- None."]
     lines += ["", "### Needs host or runtime validation", ""]
     lines += [
         f"- {(('potential ' + item['potential'].upper() + ' · ') if item.get('potential') else '')}{item['rule_id']} · {md(item['title'])}" + _affected(item) + f" · evidence {item['evidence'][0]} ({item['evidence'][1]})"
+        + (" · rule tested on fixtures only" if item.get("maturity") == "fixture" else "")
         for item in pending
     ] or ["- None."]
     lines += ["", "### Collection gaps", ""]

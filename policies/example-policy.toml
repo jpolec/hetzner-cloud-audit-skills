@@ -18,3 +18,10 @@ public = false
 [required_controls.production_stateful]
 deletion_protection = true
 backup_evidence = "required"
+
+# Egress per server role (the `role` label): false = no direct Internet egress, or a list of allowed ports.
+[roles.db]
+internet_egress = false
+
+[roles.app]
+internet_egress = ["tcp/443", "udp/123"]

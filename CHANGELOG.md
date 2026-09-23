@@ -4,6 +4,36 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-23
+
+Correctness and validation before breadth: this release adds no new provider integrations.
+
+### Added
+
+- Exact flow-space `diff`: ingress and egress as source (or destination) address intervals × port intervals per family and protocol, subtracted exactly and classified afterwards. A /32 widened to /24, a swapped trusted address, or new egress is now a change. `--regression-policy broad|strict` (also an Action input).
+- Egress model with Hetzner semantics (no outbound rule = all egress allowed). The summary counts servers that may connect anywhere; `[roles.<role>] internet_egress` in the policy raises `HETZ-EGR-001`.
+- Load balancer IP targets: resolved to Cloud servers or Robot dedicated servers, otherwise kept as explicit endpoints.
+- Typed attack-path hops (FILTER, FORWARD, ROUTE, PIVOT, RUNTIME); `path` reports whether a target is reachable directly or only after compromising another host, and what is known about the host layer.
+- Every finding states whether its rule has been run on a live project or only on fixtures (report and SARIF `ruleMaturity`).
+- `hetzner-audit anonymize` and `scripts/corpus_eval.py` for a real-world validation corpus; the headline metric is the false-confirmed rate.
+- `--verify-public-buckets` makes the anonymous bucket check opt-in; `--allow-insecure-prometheus` for plain-HTTP Prometheus without a token.
+
+### Changed
+
+- "Verified savings" is now "measured savings": `diff` splits the catalog delta into the effect of your resource changes (both snapshots priced at the earlier catalog) and provider price changes. Neither is an invoice reconciliation.
+- Rightsizing evidence names the real observation window instead of "30-day".
+- The recommended skill install pins a release tag (`.../tree/v0.8.0`).
+
+### Fixed
+
+- `anonymize` kept wildcard binds and database ports so findings stay identical (found by its own round-trip test).
+- The Prometheus token is only ever sent over HTTPS.
+- Host bundles, answers files, and snapshots are size-checked before they are read.
+
+### Documentation
+
+- README: no claim that nothing leaves the machine (requests go to the providers you configure), "deterministic verification" in the pipeline diagram, egress and exact diff sections, corpus guide. Architecture, threat model (secrets in CI), and GitHub Action docs updated.
+
 ## [0.7.0] - 2026-09-23
 
 v0.6 and v0.7 of the roadmap ship together as one release.
@@ -262,8 +292,9 @@ v0.6 and v0.7 of the roadmap ship together as one release.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.5.0...HEAD
-[0.5.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.4.0...v0.5.0
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.0...HEAD
+[0.8.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.4.0...v0.7.0
 [0.4.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.2.0...v0.3.0

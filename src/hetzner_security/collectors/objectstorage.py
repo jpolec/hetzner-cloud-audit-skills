@@ -2,8 +2,8 @@
 
 Object Storage keys are created per project in the Cloud Console and are separate from the
 Cloud API token. The client signs GET requests with AWS Signature V4 using the standard
-library only. When a bucket's ACL or policy looks public, one anonymous GET (list one key)
-confirms it. The same normalization reads a saved file (``--object-storage FILE``).
+library only. With ``verify_public`` (``--verify-public-buckets``), a bucket whose ACL or policy
+looks public gets one anonymous GET (list one key) to confirm it. The same normalization reads a saved file (``--object-storage FILE``).
 """
 
 from __future__ import annotations
@@ -96,12 +96,15 @@ def _utc_now() -> dt.datetime:
 class ReadOnlyObjectStorageCollector:
     """GET-only S3 client for Hetzner Object Storage. Keys: HETZNER_S3_ACCESS_KEY / HETZNER_S3_SECRET_KEY."""
 
-    def __init__(self, access_key: str | None = None, secret_key: str | None = None, locations: tuple[str, ...] = LOCATIONS) -> None:
+    def __init__(self, access_key: str | None = None, secret_key: str | None = None, locations: tuple[str, ...] = LOCATIONS,
+                 *, verify_public: bool = False) -> None:
         self._access = access_key or os.environ.get("HETZNER_S3_ACCESS_KEY")
         self._secret = secret_key or os.environ.get("HETZNER_S3_SECRET_KEY")
         if not self._access or not self._secret:
             raise ObjectStorageError("HETZNER_S3_ACCESS_KEY and HETZNER_S3_SECRET_KEY are required")
         self.locations = locations
+        # One unsigned GET per bucket that already looks public; off unless the owner asks for it.
+        self.verify_public = verify_public
         self._urlopen: Any = urllib.request.urlopen
         self._now: Any = _utc_now
 
@@ -158,7 +161,7 @@ class ReadOnlyObjectStorageCollector:
         reads = {"acl": acl_status == 200, "policy": policy_status in {200, 404}, "versioning": versioning_status == 200}
         record: dict[str, Any] = {"name": name, "location": location, "acl": grants if reads["acl"] else None,
                                   "policy": policy, "versioning": versioning, "reads": reads}
-        if _looks_public(record):
+        if self.verify_public and _looks_public(record):
             anonymous_status, _ = self._get(location, path, "max-keys=1", signed=False)
             record["anonymous_list"] = anonymous_status == 200
         return record

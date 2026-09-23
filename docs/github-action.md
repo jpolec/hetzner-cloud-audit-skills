@@ -24,7 +24,7 @@ jobs:
     environment: hetzner-read-only
     steps:
       - uses: actions/checkout@v7
-      - uses: jpolec/hetzner-cloud-audit-skills@v0.7.0
+      - uses: jpolec/hetzner-cloud-audit-skills@v0.8.0
         env:
           HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
         with:
@@ -42,7 +42,7 @@ jobs:
 Store snapshots as protected workflow artifacts or in an access-controlled evidence store. Do not commit real topology snapshots to a public repository.
 
 ```yaml
-- uses: jpolec/hetzner-cloud-audit-skills@v0.7.0
+- uses: jpolec/hetzner-cloud-audit-skills@v0.8.0
   with:
     mode: diff
     baseline: evidence/previous.json
@@ -50,7 +50,10 @@ Store snapshots as protected workflow artifacts or in an access-controlled evide
     format: markdown
     output: infrastructure-diff.md
     fail-on-regression: true
+    regression-policy: broad   # or strict
 ```
+
+`regression-policy: broad` fails on new world or wide Internet exposure. `strict` fails on any growth of the allowed flow space: a wider allow-list, a different trusted source, or new Internet egress. Start with `broad` and move to `strict` once every change goes through review.
 
 For pull requests, prefer offline Terraform/fixture evidence. GitHub does not pass repository secrets to ordinary fork workflows, and the audit must not weaken that boundary.
 

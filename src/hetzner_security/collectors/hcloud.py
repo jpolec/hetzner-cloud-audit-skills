@@ -22,7 +22,7 @@ from ..models import Asset, Edge, Evidence, Fact, Snapshot
 
 API_BASE = "https://api.hetzner.cloud/v1"
 HETZNER_API_BASE = "https://api.hetzner.com/v1"
-COLLECTOR_VERSION = "0.7.0"
+COLLECTOR_VERSION = "0.8.0"
 RESOURCE_ENDPOINTS = {
     "server": "servers",
     "server_type": "server_types",
@@ -253,6 +253,10 @@ class ReadOnlyHCloudCollector:
                     )
                 )
         edges.extend(_derive_edges(normalized))
+        for endpoint in sorted({edge.target for edge in edges if edge.target.startswith("endpoint:ip:")}):
+            address = endpoint.removeprefix("endpoint:ip:")
+            assets.append(Asset(endpoint, "endpoint", address, {"ip": address, "resolved": False,
+                                                               "note": "load balancer target outside this project's servers"}, {}, "hcloud_api"))
         facts = _derive_facts(assets, collected_at, run_id)
         return Snapshot(
             assets=assets,
@@ -488,6 +492,9 @@ def _normalize_resources(
         firewall["inbound"] = [
             _normal_rule(rule) for rule in firewall.get("rules", []) if rule.get("direction") == "in"
         ]
+        firewall["outbound"] = [
+            _normal_rule(rule) for rule in firewall.get("rules", []) if rule.get("direction") == "out"
+        ]
     for key in normalized.get("ssh_key", []):
         key["key_type"], key["key_bits"] = _ssh_key_strength(key.get("public_key"))
     for server in normalized.get("server", []):
@@ -502,6 +509,13 @@ def _normalize_resources(
         server["public_ipv4"] = bool((public_net.get("ipv4") or {}).get("ip"))
         server["public_ipv6"] = bool((public_net.get("ipv6") or {}).get("ip"))
         server["public_ip"] = server["public_ipv4"] or server["public_ipv6"]
+        # Hetzner semantics: without any outbound rule, all egress is allowed; with one, the rest is denied.
+        server["outbound"] = [
+            _normal_rule(rule)
+            for firewall_id in firewall_ids
+            for rule in firewalls.get(firewall_id, {}).get("rules", [])
+            if rule.get("direction") == "out"
+        ]
         server["firewall_attached"] = bool(firewall_ids)
         server["firewall_ids"] = firewall_ids
         server["inbound"] = inbound
@@ -513,6 +527,16 @@ def _normalize_resources(
 
 def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
     edges: list[Edge] = []
+    address_owner: dict[str, Any] = {}
+    for server in raw.get("server", []):
+        public_net = server.get("public_net") or {}
+        for family in ("ipv4", "ipv6"):
+            ip = (public_net.get(family) or {}).get("ip")
+            if ip:
+                address_owner[str(ip).split("/")[0]] = server.get("id")
+        for private_net in server.get("private_net") or []:
+            if private_net.get("ip"):
+                address_owner[str(private_net["ip"])] = server.get("id")
     servers = {server.get("id"): server for server in raw.get("server", [])}
     networks = {network.get("id"): network for network in raw.get("network", [])}
     for server in raw.get("server", []):
@@ -601,7 +625,10 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
         public = bool((lb.get("public_net") or {}).get("enabled", True))
         services = lb.get("services") or []
         target_servers: list[tuple[Any, bool]] = []
+        target_ips: list[str] = []
         for target in lb.get("targets") or []:
+            if target.get("type") == "ip" and (target.get("ip") or {}).get("ip"):
+                target_ips.append(str(target["ip"]["ip"]))
             if target.get("type") == "server" and (target.get("server") or {}).get("id") is not None:
                 target_servers.append((target["server"]["id"], bool(target.get("use_private_ip"))))
             for nested in target.get("targets") or []:  # label_selector targets resolve to servers
@@ -613,6 +640,20 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
             if public and isinstance(listen, int):
                 edges.append(Edge("internet", lid, "allows", "tcp", listen, evidence))
             if isinstance(destination, int):
+                # IP targets: a known Cloud server's address resolves to that server; anything else
+                # (a Robot dedicated server, an external host) stays an explicit endpoint, never dropped.
+                for address in target_ips:
+                    resolved = address_owner.get(address)
+                    edges.append(
+                        Edge(
+                            lid,
+                            f"hcloud:server:{resolved}" if resolved is not None else f"endpoint:ip:{address}",
+                            "allows",
+                            "tcp",
+                            destination,
+                            (Evidence("hcloud_api", "load_balancer_target", lid, {"ip": address, "port": destination}, "properties.targets"),),
+                        )
+                    )
                 for server_id, private in target_servers:
                     edges.append(
                         Edge(

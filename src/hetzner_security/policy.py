@@ -64,5 +64,12 @@ def apply_policy(snapshot: Snapshot, policy: dict[str, Any], *, source: str) -> 
         result.expectations.append(
             {"kind": "service_public", "service": "ssh", "public": False, "path": source}
         )
+    roles = policy.get("roles", {})
+    if isinstance(roles, dict):
+        for role, config in roles.items():
+            if isinstance(config, dict) and "internet_egress" in config:
+                result.expectations.append(
+                    {"kind": "role_egress", "role": str(role), "internet_egress": config["internet_egress"], "path": source}
+                )
     result.metadata["policy_source"] = source
     return result

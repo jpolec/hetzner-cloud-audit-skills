@@ -78,7 +78,7 @@ class MergeAndDiffTest(unittest.TestCase):
         pricing = Asset("hcloud:pricing:current", "pricing", "p", {"currency": "EUR"}, {}, "hcloud_api")
         before = Snapshot(assets=[pricing], metadata={"coverage": {"server": {"status": "collected"}}})
         after = Snapshot(assets=[pricing], metadata={"coverage": {"server": {"status": "failed"}}})
-        self.assertIsNone(diff_snapshots(before, after)["cost"]["verified_monthly_savings"])
+        self.assertIsNone(diff_snapshots(before, after)["cost"]["attributable_monthly_savings"])
 
 
 if __name__ == "__main__":

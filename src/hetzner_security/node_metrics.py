@@ -66,13 +66,26 @@ def apply_node_metrics(snapshot: Snapshot, metrics: dict[str, Any]) -> Snapshot:
     return result
 
 
-def collect_prometheus(url: str, days: int = 30, *, urlopen: Any = urllib.request.urlopen) -> dict[str, Any]:
-    """Run the fixed read-only instant queries and group results by node exporter nodename."""
+def collect_prometheus(
+    url: str, days: int = 30, *, urlopen: Any = urllib.request.urlopen, allow_insecure: bool = False
+) -> dict[str, Any]:
+    """Run the fixed read-only instant queries and group results by node exporter nodename.
+
+    A bearer token is only ever sent over HTTPS. Plain HTTP is allowed for localhost, or anywhere with
+    ``allow_insecure`` (``--allow-insecure-prometheus``), and never carries the token.
+    """
     base = url.rstrip("/")
-    if not base.startswith(("https://", "http://")):
+    parsed = urllib.parse.urlsplit(base)
+    if parsed.scheme not in {"https", "http"}:
         raise ValueError("--prometheus must be an http(s) URL")
-    headers = {"Accept": "application/json"}
     token = os.environ.get("PROMETHEUS_TOKEN")
+    local = parsed.hostname in {"localhost", "127.0.0.1", "::1"}
+    if parsed.scheme == "http":
+        if token:
+            raise ValueError("PROMETHEUS_TOKEN is set: use an https:// Prometheus URL so the token is never sent in clear text")
+        if not local and not allow_insecure:
+            raise ValueError("plain http is allowed only for localhost; pass --allow-insecure-prometheus to accept it")
+    headers = {"Accept": "application/json"}
     if token:
         headers["Authorization"] = f"Bearer {token}"
 

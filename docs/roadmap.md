@@ -89,6 +89,22 @@ Next, in order:
 - firewalld zones and CSF in the host-firewall evaluator (today they stay "unknown").
 - Evidence age and baseline selection for `diff` in CI, and a PR comment.
 
+## v0.8.0 — correctness and validation before breadth
+
+1. ✅ Exact source × port flow-space diff with broad/strict regression policy.
+2. ✅ Egress model and per-role egress policy.
+3. ✅ Load balancer IP targets resolved to Cloud or Robot servers.
+4. ✅ Typed attack-path hops (FILTER, FORWARD, ROUTE, PIVOT, RUNTIME) in `path`.
+5. ✅ Rule maturity (live or fixtures) on every finding; "measured" instead of "verified" savings.
+6. ✅ `anonymize` and a corpus scorer for real-world validation.
+
+Next, in order (no new integrations until the corpus exists):
+
+- **Validation corpus**: 20–50 anonymized real projects across sizes, Docker/Kubernetes/plain VMs, Cloud-only and Robot hybrids, with and without an edge proxy; publish the false-confirmed rate per rule.
+- **Path state machine**: evaluate paths as (node, flow space, attacker capabilities, evidence), so FILTER intersects flow space, FORWARD rewrites ports, and PIVOT requires a validated compromise.
+- **Supply chain**: SBOM, GitHub artifact attestations for release builds, and a reproducible-build check.
+- firewalld zones and CSF in the host-firewall evaluator; egress from host OUTPUT chains.
+
 ## Later
 
 - Cross-domain architecture recommendations that combine cost, exposure, and recovery into one reviewed change.

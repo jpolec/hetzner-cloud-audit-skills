@@ -20,6 +20,8 @@ The tool never connects to your servers. Host evidence comes from a read-only sc
 | Images, server types | OS end of support, deprecated types and replacements | Cloud API | live |
 | Pricing, CPU metrics, traffic | catalog cost, rightsizing candidates, traffic quota | Cloud API | live |
 | Provider actions (30 days) | rescue, console, password reset, rebuild, protection off, firewall removed | Cloud API `/actions` | live |
+| Server egress (outbound rules) | servers that may connect anywhere; per-role egress policy (`HETZ-EGR-001`); new egress in `diff --regression-policy strict` | Cloud API | live |
+| Load balancer IP targets | resolved to Cloud servers or Robot dedicated servers, else shown as an endpoint | Cloud API + Robot | fixture |
 | Load balancers, certificates, DNS zones | plain HTTP, unhealthy or single targets, backends reachable around the LB, expiring or failing certificates, dangling DNS records | Cloud API | fixture |
 | Placement groups | replicas outside a spread group | Cloud API | fixture |
 

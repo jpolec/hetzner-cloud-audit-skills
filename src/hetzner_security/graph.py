@@ -14,6 +14,31 @@ from .text import md
 NON_TRAVERSABLE = {"public_interface", "runs"}
 
 
+# Edge semantics, so a path says how each hop is taken:
+#   FILTER  - a firewall admits traffic from a source (Internet -> server or LB)
+#   FORWARD - a load balancer or node port forwards traffic to a backend
+#   ROUTE   - a network delivers traffic to a member (private networks are unfiltered by Cloud Firewalls)
+#   PIVOT   - the attacker must first compromise this hop's source and start a new flow from it
+#   RUNTIME - a listener or published container port on the target
+TRANSITION_PIVOT = "PIVOT"
+
+
+def transition_kind(edge: Edge, assets: dict[str, Asset]) -> str:
+    source = assets.get(edge.source)
+    source_type = source.type if source else ("internet" if edge.source == "internet" else "")
+    if edge.relation == "attached_to":
+        return TRANSITION_PIVOT
+    if edge.relation == "publishes":
+        return "FORWARD" if source_type == "server" and edge.target.startswith("k8s:") else "RUNTIME"
+    if edge.relation in {"contains"} or source_type in {"network", "vswitch"}:
+        return "ROUTE"
+    if source_type in {"load_balancer"}:
+        return "FORWARD"
+    if edge.source == "internet":
+        return "FILTER"
+    return "ROUTE"
+
+
 class AttackGraph:
     def __init__(self, snapshot: Snapshot) -> None:
         self.assets: dict[str, Asset] = snapshot.asset_map()
@@ -191,7 +216,20 @@ class AttackGraph:
             "Listener/container publication is not observed.",
             "Application authentication policy is not observed.",
         ]
+        transitions = [
+            {"from": edge.source, "to": edge.target, "kind": transition_kind(edge, self.assets), "port": edge.port}
+            for edge in path
+        ]
+        pivots = sum(1 for item in transitions if item["kind"] == TRANSITION_PIVOT)
+        host_known = bool(target_properties.get("host_evidence")) or runtime_complete
         return {
+            "transitions": transitions,
+            "reachability": {
+                "cloud_path": True,
+                "direct": pivots == 0,
+                "pivots_required": pivots,
+                "host_layer": "reachable" if complete else ("refuted or unknown" if host_known else "not observed"),
+            },
             "result": "reachable" if complete else "cloud_path_present",
             "confidence": 0.97 if complete else 0.72,
             "source": resolved_source,
@@ -221,6 +259,19 @@ def render_path_markdown(result: dict[str, Any], names: dict[str, str] | None = 
         f"**Confidence:** {result['confidence']:.2f}",
         "",
     ]
+    reach = result.get("reachability")
+    if reach:
+        lines.extend([
+            "| Layer | Answer |", "|---|---|",
+            "| Cloud path | yes |",
+            f"| Direct (no compromised hop) | {'yes' if reach['direct'] else 'no'} |",
+            f"| Hops the attacker must compromise first | {reach['pivots_required']} |",
+            f"| Host layer (firewall, listener) | {reach['host_layer']} |",
+            "",
+            "Hops: " + " → ".join(f"{label(item['to'])} ({item['kind']}{'/' + str(item['port']) if item.get('port') else ''})"
+                                  for item in result.get("transitions", [])),
+            "",
+        ])
     if result["missing_evidence"]:
         lines.extend(["## Missing evidence", "", *[f"- {item}" for item in result["missing_evidence"]]])
     if result.get("evidence"):

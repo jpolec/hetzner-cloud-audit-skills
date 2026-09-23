@@ -204,7 +204,8 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
                         if row.get("guest_evidence_complete")
                         else ["Collect guest RAM p95 and filesystem occupancy (`--node-metrics`).", "Validate I/O peaks, SLO, and migration path."]
                     ) + (["RAM use is rising: the 7-day p95 is well above the 30-day p95."] if row.get("ram_rising") else []),
-                    [f"30-day CPU p95 uses {cpu_p95_capacity:.2f}% of aggregate vCPU capacity.", *guest_evidence],
+                    [f"CPU p95 over {window.get('days') or '?'} observed days ({requested_days or 'unspecified'} requested) "
+                     f"uses {cpu_p95_capacity:.2f}% of aggregate vCPU capacity.", *guest_evidence],
                 )
             )
             recommendations[-1]["evidence_complete"] = bool(row.get("guest_evidence_complete")) and not row.get("ram_rising")
@@ -365,13 +366,14 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
             "annual_net": round(potential_monthly * 12, 2),
             "theoretical_monthly_net": round(potential_monthly, 2),
             "expected_monthly_net": round(expected_monthly, 2),
-            "verified_monthly_net": 0.0,
+            "measured_monthly_net": 0.0,
             "confirmed_monthly_net": 0.0,
             "basis": "Maximum non-overlapping candidate per asset; all require validation.",
             "definitions": {
                 "theoretical": "every candidate, best one per asset",
                 "expected": "unused resources, plus rightsizing whose CPU, RAM, and disk telemetry cover the window",
-                "verified": "measured after the change: `hetzner-audit diff before.json after.json` reports the cost delta",
+                "measured": "post-change catalog saving: `hetzner-audit diff before.json after.json` prices both snapshots "
+                "at the earlier catalog, so provider price changes are reported separately; not an invoice reconciliation",
             },
         },
         "servers": server_rows,
@@ -705,7 +707,7 @@ def render_cost_markdown(report: dict[str, Any]) -> str:
         f"- Current catalog estimate: **{report['currency']} {current['monthly_net']:.2f}/month** ({report['currency']} {current['annual_net']:.2f}/year)",
         f"- Potential savings identified: **{report['currency']} {potential['monthly_net']:.2f}/month** ({report['currency']} {potential['annual_net']:.2f}/year)",
         f"- Expected savings (unused resources, plus rightsizing with full CPU/RAM/disk telemetry): **{report['currency']} {potential.get('expected_monthly_net', 0):.2f}/month**",
-        f"- Verified savings: **{report['currency']} {potential.get('verified_monthly_net', 0):.2f}/month** (measured with `hetzner-audit diff` after a change)",
+        f"- Measured savings: **{report['currency']} {potential.get('measured_monthly_net', 0):.2f}/month** (post-change catalog delta from `hetzner-audit diff`; not invoice-verified)",
         "- All proposed savings require validation; no infrastructure changes were made.",
         "",
         "## Recommendations",

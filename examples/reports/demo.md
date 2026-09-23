@@ -11,6 +11,7 @@
 | Suppressed by owner labels | 0 |
 | Collection gaps | none |
 | No public ingress | 0 of 7 servers accept nothing from the Internet |
+| Internet egress | 7 of 7 public servers may connect anywhere (no outbound firewall rule) · limit it per role with internet_egress in the policy's roles section |
 
 ### What this audit knows
 
@@ -96,31 +97,31 @@ Provider backups are off.
 
 ### Confirmed
 
-- **CRITICAL** · HETZ-DKR-002 · Container can control the Docker daemon (2 assets) · evidence HIGH
+- **CRITICAL** · HETZ-DKR-002 · Container can control the Docker daemon (2 assets) · evidence HIGH · rule tested on fixtures only
 - **CRITICAL** · HETZ-NET-002 · Docker daemon reachable from the public internet · evidence HIGH
 - **CRITICAL** · HETZ-NET-002 · Kubernetes API reachable from the public internet · evidence HIGH
 - **CRITICAL** · HETZ-NET-004 · Redis reachable from the public internet · evidence HIGH
-- **CRITICAL** · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence HIGH
-- **CRITICAL** · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control · evidence HIGH
-- **HIGH** · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets) · evidence HIGH
-- **HIGH** · HETZ-DKR-003 · Container shares the host PID namespace (2 assets) · evidence HIGH
+- **CRITICAL** · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence HIGH · rule tested on fixtures only
+- **CRITICAL** · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control · evidence HIGH · rule tested on fixtures only
+- **HIGH** · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets) · evidence HIGH · rule tested on fixtures only
+- **HIGH** · HETZ-DKR-003 · Container shares the host PID namespace (2 assets) · evidence HIGH · rule tested on fixtures only
 - **HIGH** · HETZ-NET-003 · PostgreSQL reachable from the public internet · evidence HIGH
-- **HIGH** · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability · evidence HIGH
+- **HIGH** · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability · evidence HIGH · rule tested on fixtures only
 - **HIGH** · HETZ-XLY-001 · staging workload can reach prod postgres · evidence HIGH
 - **HIGH** · HETZ-XLY-001 · dev workload can reach prod redis · evidence HIGH
 - **HIGH** · HETZ-XLY-001 · staging workload can reach prod redis · evidence HIGH
 - **HIGH** · HETZ-XLY-001 · dev workload can reach prod postgres · evidence HIGH
-- **MEDIUM** · HETZ-DKR-004 · Container shares the host network namespace (2 assets) · evidence HIGH
-- **MEDIUM** · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets) · evidence HIGH
-- **MEDIUM** · HETZ-VULN-001 · Vulnerable component in non-public workload (2 assets) · evidence HIGH
+- **MEDIUM** · HETZ-DKR-004 · Container shares the host network namespace (2 assets) · evidence HIGH · rule tested on fixtures only
+- **MEDIUM** · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets) · evidence HIGH · rule tested on fixtures only
+- **MEDIUM** · HETZ-VULN-001 · Vulnerable component in non-public workload (2 assets) · evidence HIGH · rule tested on fixtures only
 
 ### Needs host or runtime validation
 
 - potential MEDIUM · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets) · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
 - potential HIGH · HETZ-NET-001 · SSH reachable from the public internet · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
 - potential MEDIUM · HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets) · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
-- potential CRITICAL · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
-- potential MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
+- potential CRITICAL · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence LOW (absence of evidence; depends on collector coverage and owner intent) · rule tested on fixtures only
+- potential MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload · evidence LOW (absence of evidence; depends on collector coverage and owner intent) · rule tested on fixtures only
 
 ### Collection gaps
 
@@ -140,6 +141,7 @@ Provider backups are off.
 ## HIGH · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets)
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.97
 - **Assets:** demo-ops-agent, demo-stage-worker
 
@@ -160,6 +162,7 @@ Provider backups are off.
 ## CRITICAL · HETZ-DKR-002 · Container can control the Docker daemon (2 assets)
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.97
 - **Assets:** demo-ops-agent, demo-stage-worker
 
@@ -180,6 +183,7 @@ Provider backups are off.
 ## HIGH · HETZ-DKR-003 · Container shares the host PID namespace (2 assets)
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.97
 - **Assets:** demo-ops-agent, demo-stage-worker
 
@@ -200,6 +204,7 @@ Provider backups are off.
 ## MEDIUM · HETZ-DKR-004 · Container shares the host network namespace (2 assets)
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.97
 - **Assets:** demo-ops-agent, demo-stage-worker
 
@@ -220,6 +225,7 @@ Provider backups are off.
 ## MEDIUM · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets)
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.98
 - **Assets:** demo-admin, demo-public-pg
 
@@ -240,6 +246,7 @@ Provider backups are off.
 ## CRITICAL · HETZ-NET-002 · Docker daemon reachable from the public internet
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.88
 - **Assets:** demo-docker-api
 
@@ -260,6 +267,7 @@ Provider backups are off.
 ## CRITICAL · HETZ-NET-002 · Kubernetes API reachable from the public internet
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.88
 - **Assets:** demo-kube-api
 
@@ -280,6 +288,7 @@ Provider backups are off.
 ## HIGH · HETZ-NET-003 · PostgreSQL reachable from the public internet
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.88
 - **Assets:** demo-public-pg
 
@@ -300,6 +309,7 @@ Provider backups are off.
 ## CRITICAL · HETZ-NET-004 · Redis reachable from the public internet
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.88
 - **Assets:** demo-public-redis
 
@@ -320,6 +330,7 @@ Provider backups are off.
 ## CRITICAL · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.99
 - **Assets:** demo-prod-postgres
 
@@ -340,6 +351,7 @@ Provider backups are off.
 ## HIGH · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.93
 - **Assets:** demo-prod-postgres
 
@@ -360,6 +372,7 @@ Provider backups are off.
 ## CRITICAL · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.99
 - **Assets:** demo-prod-redis
 
@@ -380,6 +393,7 @@ Provider backups are off.
 ## MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.84
 - **Assets:** demo-stage-worker
 
@@ -400,6 +414,7 @@ Provider backups are off.
 ## MEDIUM · HETZ-VULN-001 · Vulnerable component in non-public workload
 
 - **Status:** confirmed
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.84
 - **Assets:** demo-ops-agent
 
@@ -420,6 +435,7 @@ Provider backups are off.
 ## HIGH · HETZ-XLY-001 · staging workload can reach prod postgres
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.96
 - **Assets:** demo-stage-worker, demo-prod-postgres
 
@@ -440,6 +456,7 @@ Provider backups are off.
 ## HIGH · HETZ-XLY-001 · dev workload can reach prod redis
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.96
 - **Assets:** demo-ops-agent, demo-prod-redis
 
@@ -460,6 +477,7 @@ Provider backups are off.
 ## HIGH · HETZ-XLY-001 · staging workload can reach prod redis
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.96
 - **Assets:** demo-stage-worker, demo-prod-redis
 
@@ -480,6 +498,7 @@ Provider backups are off.
 ## HIGH · HETZ-XLY-001 · dev workload can reach prod postgres
 
 - **Status:** confirmed
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.96
 - **Assets:** demo-ops-agent, demo-prod-postgres
 
@@ -500,6 +519,7 @@ Provider backups are off.
 ## UNSCORED (potential MEDIUM) · HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets)
 
 - **Status:** needs_validation
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.69
 - **Assets:** demo-analytics-postgres, demo-prod-postgres, demo-prod-redis, demo-public-pg, demo-public-redis
 
@@ -520,6 +540,7 @@ Provider backups are off.
 ## UNSCORED (potential HIGH) · HETZ-NET-001 · SSH reachable from the public internet
 
 - **Status:** needs_validation
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.69
 - **Assets:** demo-admin
 
@@ -540,6 +561,7 @@ Provider backups are off.
 ## UNSCORED (potential MEDIUM) · HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets)
 
 - **Status:** needs_validation
+- **Rule tested:** on a live Hetzner project
 - **Confidence:** 0.69
 - **Assets:** demo-no-firewall-a, demo-no-firewall-b
 
@@ -560,6 +582,7 @@ Provider backups are off.
 ## UNSCORED (potential CRITICAL) · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
 
 - **Status:** needs_validation
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.69
 - **Assets:** demo-analytics-postgres
 
@@ -580,6 +603,7 @@ Provider backups are off.
 ## UNSCORED (potential MEDIUM) · HETZ-VULN-001 · Vulnerable component in non-public workload
 
 - **Status:** needs_validation
+- **Rule tested:** on fixtures only (documented response shapes, synthetic data)
 - **Confidence:** 0.69
 - **Assets:** demo-internal-api
 

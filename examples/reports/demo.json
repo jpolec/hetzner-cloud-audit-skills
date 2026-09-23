@@ -54,6 +54,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -110,6 +111,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -166,6 +168,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -222,6 +225,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -278,6 +282,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -337,7 +342,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-001-8ca594fb25f70b7c",
@@ -395,7 +402,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-002-4819c38217aed79a",
@@ -453,7 +462,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-002-5579d0b035f5c610",
@@ -511,7 +522,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-003-28a17a3edeed3668",
@@ -569,7 +582,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-003-f3f060fc4a73a70f",
@@ -627,7 +642,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-004-298167e4ca1ea1e0",
@@ -685,7 +702,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-DKR-004-37b4b93b17fa9403",
@@ -743,7 +762,9 @@
         "https://docs.docker.com/engine/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-IAC-001-b03c8505ae5144b7",
@@ -817,7 +838,9 @@
         "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-IAC-001-d139425286d699cf",
@@ -891,7 +914,9 @@
         "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-NET-001-537a129e75138d63",
@@ -958,6 +983,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "high"
       }
     },
@@ -1069,7 +1095,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-NET-002-a31a4b22fe48e57d",
@@ -1179,7 +1207,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-NET-003-f346f1a613de18fa",
@@ -1289,7 +1319,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-NET-004-98cdb1370228a50e",
@@ -1399,7 +1431,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-NET-005-22bff27b5830122b",
@@ -1453,6 +1487,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -1508,6 +1543,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "live",
         "potential_severity": "medium"
       }
     },
@@ -1575,7 +1611,9 @@
         "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-PG-001-8c5c845e7a65d727",
@@ -1642,6 +1680,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "fixture",
         "potential_severity": "critical"
       }
     },
@@ -1704,7 +1743,9 @@
         "https://www.postgresql.org/docs/current/role-attributes.html"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-RDS-001-797417d4d7de50f0",
@@ -1770,7 +1811,9 @@
         "https://redis.io/docs/latest/operate/oss_and_stack/management/security/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-VULN-001-64830a860180b16b",
@@ -1847,7 +1890,9 @@
         "https://example.invalid/CVE-DEMO-0002"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-VULN-001-71bfcf71ae61e50c",
@@ -1921,6 +1966,7 @@
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
       "metadata": {
+        "rule_maturity": "fixture",
         "potential_severity": "medium"
       }
     },
@@ -1999,7 +2045,9 @@
         "https://example.invalid/CVE-DEMO-0003"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "fixture"
+      }
     },
     {
       "id": "HETZ-XLY-001-09a76238859a6fc6",
@@ -2109,7 +2157,9 @@
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-XLY-001-6db24525e173f3de",
@@ -2219,7 +2269,9 @@
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-XLY-001-a741e4e012fa739b",
@@ -2329,7 +2381,9 @@
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     },
     {
       "id": "HETZ-XLY-001-c3a123a6f4fcbf68",
@@ -2439,7 +2493,9 @@
         "https://docs.hetzner.com/cloud/networks/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "rule_maturity": "live"
+      }
     }
   ]
 }

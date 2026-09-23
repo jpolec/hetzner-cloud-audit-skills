@@ -31,9 +31,14 @@ Collectors do not assign severity. Analyzers generate candidates. The verifier c
 - `CoverageUnit`: stable asset/layer/attack-class identity and current/prior result fingerprints.
 - `ArchitectureRecommendation`: independently reviewed cost/security/reliability decision with timestamped metrics, price basis, risk, confidence, and rollback criteria.
 
-The attack graph is an in-memory adjacency list with bounded simple-path traversal. A graph database is unnecessary for v0.5 and small-to-medium projects. `reachable`, `cloud_path_present`, and `unknown` remain distinct so provider reachability is not mistaken for an observed application path.
+The attack graph is an in-memory adjacency list with bounded simple-path traversal; a graph database is unnecessary at current project sizes. Every hop is typed (FILTER: a firewall admits the source; FORWARD: a load balancer or node port; ROUTE: a network delivers to a member; PIVOT: the attacker must compromise the hop's source first; RUNTIME: a listener or published port), and `path` reports whether the target is reachable directly or only after pivots. `reachable`, `cloud_path_present`, and `unknown` remain distinct so provider reachability is not mistaken for an observed application path.
 
-Snapshots serialize assets, edges, facts, expectations, signals, endpoint coverage, and run identity. Diff compares stable fact and edge identities and reports coverage regression separately from state removal.
+Snapshots serialize assets, edges, facts, expectations, signals, endpoint coverage, and run identity. `diff` reports two kinds of drift:
+
+- **Structural drift:** fact identities, edge identities, and assets, with coverage regressions kept separate from removals.
+- **Security drift:** the exact allowed-flow difference. Ingress and egress are sets of rectangles (source or destination address interval × port interval) per address family and protocol; `after − before` is computed exactly and classified afterwards (world, wide, edge provider, allow-list). `--regression-policy broad` fails on new world or wide exposure; `strict` on any growth, including a wider allow-list, a different trusted source, or new egress.
+
+Cost drift is reported as a catalog delta split into the effect of resource changes (both snapshots priced at the earlier catalog) and provider price changes; it is not invoice-verified.
 
 ## Trust boundaries
 

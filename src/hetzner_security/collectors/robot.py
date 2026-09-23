@@ -13,6 +13,7 @@ import json
 import os
 import urllib.error
 import urllib.request
+from dataclasses import replace
 from typing import Any
 
 from ..flows import PortSet
@@ -229,5 +230,23 @@ def apply_robot(snapshot: Snapshot, raw: dict[str, Any]) -> Snapshot:
     known = {asset.id for asset in snapshot.assets}
     snapshot.assets.extend(asset for asset in assets if asset.id not in known)
     snapshot.edges.extend(edges)
+    resolve_endpoints(snapshot)
     snapshot.metadata.setdefault("coverage", {}).update(coverage)
     return snapshot
+
+
+def resolve_endpoints(snapshot: Snapshot) -> None:
+    """Retarget load balancer IP targets that are Robot dedicated servers (hybrid LB -> dedicated)."""
+    owners: dict[str, str] = {}
+    for asset in snapshot.assets:
+        if asset.type == "robot_server":
+            for address in asset.properties.get("ip") or []:
+                owners[str(address)] = asset.id
+    moved = False
+    for index, edge in enumerate(snapshot.edges):
+        if edge.target.startswith("endpoint:ip:") and edge.target.removeprefix("endpoint:ip:") in owners:
+            snapshot.edges[index] = replace(edge, target=owners[edge.target.removeprefix("endpoint:ip:")])
+            moved = True
+    if moved:
+        targets = {edge.target for edge in snapshot.edges}
+        snapshot.assets[:] = [asset for asset in snapshot.assets if asset.type != "endpoint" or asset.id in targets]

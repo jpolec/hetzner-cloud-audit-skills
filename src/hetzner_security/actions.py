@@ -409,6 +409,7 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
         "HETZ-XPR-001": (27, "security", "medium"),
         "HETZ-CHG-002": (29, "security", "low"),
         "HETZ-IAC-004": (30, "governance", "low"),
+        "HETZ-EGR-001": (18, "security", "medium"),
         "HETZ-ROB-003": (31, "security", "medium"),
         "HETZ-ATT-003": (32, "security", "low"),
         "HETZ-ATT-002": (33, "security", "low"),

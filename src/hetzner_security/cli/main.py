@@ -11,9 +11,10 @@ from typing import Any
 
 from ..actions import build_actions
 from ..analyzers import hunt
+from ..anonymize import anonymize_snapshot, leftovers
 from ..attestations import apply_attestations, load_attestations, render_checklist_markdown
 from ..attestations import template as attestation_template
-from ..collectors.fixture import load_snapshot
+from ..collectors.fixture import MAX_SNAPSHOT_BYTES, load_snapshot
 from ..collectors.hcloud import HCloudCollectionError, ReadOnlyHCloudCollector
 from ..collectors.objectstorage import (
     ObjectStorageError,
@@ -43,6 +44,7 @@ from ..findings.summary import build_summary, host_rows, other_sources
 from ..findings.suppress import apply_suppressions
 from ..graph import AttackGraph, render_path_markdown
 from ..host import BUNDLE_SCRIPT, apply_host_bundles, parse_bundle
+from ..host.ingest import read_bundle
 from ..iac import apply_terraform
 from ..k8s import apply_k8s, load_k8s
 from ..models import Finding, FindingStatus, Severity, Snapshot
@@ -93,6 +95,8 @@ def _common(cmd: argparse.ArgumentParser, *, formats: tuple[str, ...] = ("json",
     cmd.add_argument("--k8s", type=Path, help="`kubectl get nodes,pods,services -A -o json` output for Kubernetes correlation")
     cmd.add_argument("--k8s-cluster", default="cluster", help="Name for the cluster in the report")
     cmd.add_argument("--attestations", type=Path, help="Owner answers to the console checklist (see `hetzner-audit checklist`)")
+    cmd.add_argument("--verify-public-buckets", action="store_true",
+                     help="With --object-storage: confirm public-looking buckets with one anonymous listing request each")
     cmd.add_argument("--terraform", type=Path, help="`terraform show -json` output (state or saved plan) for drift")
     cmd.add_argument(
         "--host-bundle",
@@ -131,6 +135,10 @@ def build_parser() -> argparse.ArgumentParser:
     path.add_argument("--port", type=int)
     path.add_argument("--max-depth", type=int, default=6)
 
+    anon = subparsers.add_parser("anonymize", help="Anonymize a snapshot for sharing (validation corpus, bug reports)")
+    anon.add_argument("snapshot", type=Path)
+    anon.add_argument("--output", type=Path, required=True)
+
     merge = subparsers.add_parser("merge", help="Combine per-project snapshots into one multi-project snapshot")
     merge.add_argument("snapshots", type=Path, nargs="+")
     merge.add_argument("--output", type=Path)
@@ -141,6 +149,12 @@ def build_parser() -> argparse.ArgumentParser:
     diff.add_argument("--format", choices=("json", "markdown"), default="markdown")
     diff.add_argument("--output", type=Path)
     diff.add_argument("--fail-on-regression", action="store_true")
+    diff.add_argument(
+        "--regression-policy",
+        choices=("broad", "strict"),
+        default="broad",
+        help="broad: new world or wide exposure; strict: any growth of the allowed flow space (wider allow-list, new trusted source)",
+    )
 
     explain = subparsers.add_parser("explain")
     explain.add_argument("finding_id")
@@ -162,6 +176,8 @@ def build_parser() -> argparse.ArgumentParser:
     metrics = subparsers.add_parser("metrics", help="Build the guest RAM/disk telemetry file from Prometheus (read-only queries)")
     metrics.add_argument("--prometheus", help="Prometheus base URL; PROMETHEUS_TOKEN is sent as a bearer token if set")
     metrics.add_argument("--days", type=int, default=30)
+    metrics.add_argument("--allow-insecure-prometheus", action="store_true",
+                         help="Accept plain http for a non-localhost Prometheus (never with PROMETHEUS_TOKEN)")
     metrics.add_argument("--example", action="store_true", help="Print the file format instead of querying")
     metrics.add_argument("--queries", action="store_true", help="Print the PromQL queries instead of running them")
     metrics.add_argument("--output", type=Path)
@@ -186,7 +202,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def _snapshot(args: argparse.Namespace) -> Snapshot:
     if not args.read_only:
-        raise ValueError("v0.3 supports read-only mode only")
+        raise ValueError("Only read-only mode is supported.")
     if args.input:
         snapshot = load_snapshot(args.input)
     elif args.dry_run:
@@ -208,7 +224,8 @@ def _snapshot(args: argparse.Namespace) -> Snapshot:
         snapshot = apply_robot(snapshot, raw)
     if args.object_storage:
         raw_buckets = (
-            ReadOnlyObjectStorageCollector().fetch() if args.object_storage == "live" else load_object_storage_file(Path(args.object_storage))
+            ReadOnlyObjectStorageCollector(verify_public=args.verify_public_buckets).fetch()
+            if args.object_storage == "live" else load_object_storage_file(Path(args.object_storage))
         )
         snapshot = apply_object_storage(snapshot, raw_buckets)
     if args.k8s:
@@ -332,20 +349,31 @@ def run(args: argparse.Namespace) -> int:
         elif args.queries or not args.prometheus:
             _write("\n".join(f"{key}: {query.replace('{days}', str(args.days))}" for key, query in QUERIES.items()), args.output)
         else:
-            _write(json.dumps(collect_prometheus(args.prometheus, args.days), indent=2), args.output)
+            _write(json.dumps(collect_prometheus(args.prometheus, args.days, allow_insecure=args.allow_insecure_prometheus), indent=2), args.output)
         return 0
     if args.command == "host-bundle":
         if args.parse:
-            parsed = parse_bundle(args.parse.read_text(encoding="utf-8", errors="replace"))
+            parsed = parse_bundle(read_bundle(args.parse))
             _write(json.dumps(parsed, indent=2, default=str), args.output)
         else:
             _write(BUNDLE_SCRIPT, args.output)
+        return 0
+    if args.command == "anonymize":
+        if args.snapshot.stat().st_size > MAX_SNAPSHOT_BYTES:
+            raise ValueError(f"snapshot {args.snapshot} exceeds {MAX_SNAPSHOT_BYTES} bytes")
+        raw = json.loads(args.snapshot.read_text(encoding="utf-8"))
+        result = anonymize_snapshot(raw)
+        left = leftovers(raw, result)
+        if left:
+            raise ValueError(f"anonymization left original names in the output: {left[:5]}; please report this")
+        _write(json.dumps(result, indent=1), args.output)
+        print("Anonymized. Review the file before sharing: names, addresses, IDs, and odd ports were replaced.", file=sys.stderr)
         return 0
     if args.command == "merge":
         _write(json.dumps(merge_snapshots(args.snapshots).to_dict(), indent=2), args.output)
         return 0
     if args.command == "diff":
-        diff = diff_snapshots(load_snapshot(args.before), load_snapshot(args.after))
+        diff = diff_snapshots(load_snapshot(args.before), load_snapshot(args.after), args.regression_policy)
         output = json.dumps(diff, indent=2) if args.format == "json" else render_diff_markdown(diff)
         _write(output, args.output)
         return 1 if args.fail_on_regression and diff["security_regression"] else 0

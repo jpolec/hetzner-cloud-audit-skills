@@ -11,6 +11,7 @@ from dataclasses import replace
 from ..flows import PortSet, port_set, public_families
 from ..graph import AttackGraph
 from ..host.parsers import pg_remote_decisions
+from ..maturity import rule_maturity
 from ..models import (
     Asset,
     Edge,
@@ -992,6 +993,7 @@ RULES: tuple[Rule, ...] = (
 def hunt(snapshot: Snapshot) -> list[Finding]:
     from .attestations import ATTESTATION_RULES  # these modules build on helpers in this one
     from .changes import CHANGE_RULES
+    from .egress import EGRESS_RULES
     from .host import HOST_RULES
     from .iac import IAC_RULES
     from .k8s import K8S_RULES
@@ -1001,7 +1003,7 @@ def hunt(snapshot: Snapshot) -> list[Finding]:
     from .robot import ROBOT_RULES
 
     graph = AttackGraph(snapshot)
-    rules = (*RULES, *RESOURCE_RULES, *HOST_RULES, *CHANGE_RULES, *IAC_RULES, *PROJECT_RULES, *ROBOT_RULES, *OBJECT_STORAGE_RULES, *K8S_RULES, *ATTESTATION_RULES)
+    rules = (*RULES, *RESOURCE_RULES, *HOST_RULES, *CHANGE_RULES, *IAC_RULES, *PROJECT_RULES, *ROBOT_RULES, *OBJECT_STORAGE_RULES, *K8S_RULES, *ATTESTATION_RULES, *EGRESS_RULES)
     candidates = [finding for rule in rules for finding in rule(snapshot, graph)]
     collected_at = snapshot.metadata.get("collected_at")
     if isinstance(collected_at, str):
@@ -1013,5 +1015,7 @@ def hunt(snapshot: Snapshot) -> list[Finding]:
                 else replace(evidence, collected_at=collected_at)
                 for evidence in candidate.evidence
             ]
+    for candidate in candidates:
+        candidate.metadata["rule_maturity"] = rule_maturity(candidate.rule_id)
     deduplicated = {finding.id: finding for finding in candidates}
     return sorted(deduplicated.values(), key=lambda finding: finding.id)

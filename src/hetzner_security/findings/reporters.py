@@ -102,6 +102,8 @@ def render_markdown(
                 + (f" ({len(members)} assets)" if len(members) > 1 else ""),
                 "",
                 f"- **Status:** {finding.status.value}",
+                "- **Rule tested:** " + ("on a live Hetzner project" if finding.metadata.get("rule_maturity") == "live"
+                                         else "on fixtures only (documented response shapes, synthetic data)"),
                 f"- **Confidence:** {min(member.confidence for member in members):.2f}",
                 f"- **Assets:** {', '.join(label(asset) for asset in assets)}",
                 "",
@@ -147,6 +149,8 @@ def render_sarif(findings: list[Finding]) -> str:
                     "confidence": finding.confidence,
                     "status": finding.status.value,
                     "assets": finding.assets,
+                    "ruleMaturity": finding.metadata.get("rule_maturity", "fixture"),
+                    "potentialSeverity": finding.metadata.get("potential_severity"),
                 },
             }
         )
@@ -158,7 +162,7 @@ def render_sarif(findings: list[Finding]) -> str:
                 "tool": {
                     "driver": {
                         "name": "hetzner-cloud-audit-skills",
-                        "version": "0.7.0",
+                        "version": "0.8.0",
                         "rules": list(rules.values()),
                     }
                 },

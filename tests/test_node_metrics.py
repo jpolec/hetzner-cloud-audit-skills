@@ -46,7 +46,7 @@ class GuestTelemetryTest(unittest.TestCase):
         savings = report["identified_potential_savings"]
         self.assertGreater(savings["theoretical_monthly_net"], 0)
         self.assertEqual(savings["expected_monthly_net"], 0)
-        self.assertEqual(savings["verified_monthly_net"], 0)
+        self.assertEqual(savings["measured_monthly_net"], 0)
 
     def test_ram_floor_blocks_too_small_candidates(self) -> None:
         # 60% of 16 GB at p95 needs >= 13.7 GB: cx32 (8 GB) must not be proposed.
@@ -73,7 +73,8 @@ class GuestTelemetryTest(unittest.TestCase):
         after = _snapshot(None)
         after.assets[0].properties["server_type"] = SMALL
         cost = diff_snapshots(before, after)["cost"]
-        self.assertEqual(cost["verified_monthly_savings"], 9.0)
+        self.assertEqual(cost["attributable_monthly_savings"], 9.0)
+        self.assertEqual(cost["price_drift_monthly"], 0.0)
 
     def test_prometheus_collection_maps_nodename(self) -> None:
         responses = {
@@ -88,7 +89,7 @@ class GuestTelemetryTest(unittest.TestCase):
             result = responses.get(query, [{"metric": {"instance": "10.0.0.2:9100"}, "value": [0, "42.5"]}])
             return io.BytesIO(json.dumps({"status": "success", "data": {"result": result}}).encode())
 
-        data = collect_prometheus("http://prom:9090", 30, urlopen=_Ctx(fake))
+        data = collect_prometheus("http://prom:9090", 30, urlopen=_Ctx(fake), allow_insecure=True)
         self.assertEqual(data["hosts"]["app-1"]["ram_p95_percent"], 42.5)
 
 
@@ -113,3 +114,37 @@ class _Ctx:
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PriceAttributionTest(unittest.TestCase):
+    def test_price_change_is_not_a_saving(self) -> None:
+        import copy
+
+        before = _snapshot(None)
+        after = copy.deepcopy(before)
+        # Same server, same type; the provider lowered the price from 18.0 to 15.0.
+        after.assets[0].properties["server_type"] = {**BIG, "prices": [{"location": "fsn1", "price_monthly": {"net": "15.0"}}]}
+        cost = diff_snapshots(before, after)["cost"]
+        self.assertEqual(cost["catalog_delta_monthly"], 3.0)
+        self.assertEqual(cost["attributable_monthly_savings"], 0.0)
+        self.assertEqual(cost["price_drift_monthly"], -3.0)
+
+    def test_evidence_text_uses_the_real_window(self) -> None:
+        report = analyze_cost(_snapshot(None))
+        rec = next(rec for rec in report["recommendations"] if rec["rule_id"] == "HETZ-COST-002")
+        text = rec["evidence"][0]["observation"]
+        self.assertIn("observed days (30 requested)", text)
+        self.assertNotIn("30-day", text)
+
+
+class PrometheusTransportTest(unittest.TestCase):
+    def test_token_never_goes_over_http(self) -> None:
+        import os
+        from unittest import mock
+
+        with mock.patch.dict(os.environ, {"PROMETHEUS_TOKEN": "t"}):
+            with self.assertRaises(ValueError):
+                collect_prometheus("http://localhost:9090")
+        with mock.patch.dict(os.environ, {}, clear=True):
+            with self.assertRaises(ValueError):
+                collect_prometheus("http://prom.internal:9090")

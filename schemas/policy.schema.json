@@ -4,17 +4,29 @@
   "title": "Owner-declared infrastructure policy",
   "type": "object",
   "additionalProperties": false,
-  "required": ["version"],
+  "required": [
+    "version"
+  ],
   "properties": {
-    "version": {"const": 1},
+    "version": {
+      "const": 1
+    },
     "environments": {
       "type": "object",
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["may_receive_from"],
+        "required": [
+          "may_receive_from"
+        ],
         "properties": {
-          "may_receive_from": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          "may_receive_from": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
         }
       }
     },
@@ -24,16 +36,51 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "public": {"type": "boolean"},
-          "allowed_sources": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          "public": {
+            "type": "boolean"
+          },
+          "allowed_sources": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
         }
       }
     },
     "ssh": {
       "type": "object",
       "additionalProperties": false,
-      "properties": {"public": {"type": "boolean"}}
+      "properties": {
+        "public": {
+          "type": "boolean"
+        }
+      }
     },
-    "required_controls": {"type": "object"}
+    "required_controls": {
+      "type": "object"
+    },
+    "roles": {
+      "type": "object",
+      "description": "Per server role (the `role` label): what it may do.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "internet_egress": {
+            "description": "false: no direct Internet egress; or a list of allowed 'tcp/443', 'udp/123' entries",
+            "type": [
+              "boolean",
+              "array"
+            ],
+            "items": {
+              "type": "string",
+              "pattern": "^(tcp|udp)/[0-9]+(-[0-9]+)?$"
+            }
+          }
+        }
+      }
+    }
   }
 }

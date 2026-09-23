@@ -58,6 +58,8 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
         return _needs(result, "The state file may be older than the runtime; confirm with `terraform plan -refresh-only` or a saved plan.")
     if candidate.rule_id in {"HETZ-IAC-002", "HETZ-IAC-003"}:
         return _needs(result, "Terraform may manage these resources from another workspace or state file; confirm scope.")
+    if candidate.rule_id == "HETZ-EGR-001":
+        return _needs(result, "The Cloud Firewall allows the egress; a host OUTPUT rule or an egress proxy may still block it.")
     if candidate.rule_id.startswith("HETZ-ATT-"):
         answer = candidate.evidence[0].observed.get("answer") if isinstance(candidate.evidence[0].observed, dict) else None
         if answer is not False:

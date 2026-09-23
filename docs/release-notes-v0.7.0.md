@@ -19,7 +19,7 @@ v0.7.0 ships roadmap items v0.6 (host evidence and drift) and v0.7 (beyond one C
 - Host bundle: fixture-tested, modeled on a real UFW + Docker host, plus adversarial parser cases. It has not yet run live.
 - Provider action history: tested on a live project.
 - Terraform, Robot, Object Storage, Kubernetes, checklist: tested on documented response shapes only. Object Storage signing matches the AWS SigV4 test vectors.
-- An independent adversarial review found about 30 defects before release; all are fixed and covered by regression tests.
+- An independent adversarial review found about 30 defects before release; all identified defects were fixed and regression-tested.
 - Generated benchmark: 18 rules, 150 projects with clean twins, 1.00 precision and recall.
 
 ## Upgrade notes

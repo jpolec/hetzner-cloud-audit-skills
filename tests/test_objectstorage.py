@@ -78,7 +78,7 @@ class CollectorTest(unittest.TestCase):
                 raise urllib.error.HTTPError(request.full_url, status, "err", None, io.BytesIO(body.encode()))  # type: ignore[arg-type]
             return _Response(body.encode())
 
-        collector = ReadOnlyObjectStorageCollector("key", "secret", locations=("fsn1",))  # noqa: S106
+        collector = ReadOnlyObjectStorageCollector("key", "secret", locations=("fsn1",), verify_public=True)  # noqa: S106
         collector._urlopen = fake
         return collector.fetch()
 

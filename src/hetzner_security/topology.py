@@ -303,6 +303,9 @@ def _beyond(snapshot: Snapshot) -> dict[str, Any]:
                 server_id = (item.get("server") or {}).get("id")
                 if server_id is not None:
                     targets.add(names.get(f"hcloud:server:{server_id}", str(server_id)))
+        # IP targets, resolved to Cloud or Robot servers where possible, else shown as the address.
+        targets |= {names.get(edge.target, edge.target) for edge in snapshot.edges
+                    if edge.source == lb.id and edge.relation == "allows" and edge.target.startswith(("robot:", "endpoint:"))}
         load_balancers.append({
             "name": lb.name,
             "public": bool((lb.properties.get("public_net") or {}).get("enabled", True)),

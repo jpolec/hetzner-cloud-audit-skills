@@ -31,6 +31,10 @@ inputs:
     description: Fail diff mode when a new Internet exposure is observed
     required: false
     default: "true"
+  regression-policy:
+    description: "Diff mode: broad (new world or wide exposure) or strict (any growth of the allowed flow space, including wider allow-lists)"
+    required: false
+    default: broad
   fail-on:
     description: "Audit mode: none, confirmed, or confirmed-high. needs_validation findings never fail the job."
     required: false
@@ -50,6 +54,7 @@ runs:
       shell: bash
       env:
         AUDIT_MODE: ${{ inputs.mode }}
+        AUDIT_REGRESSION_POLICY: ${{ inputs.regression-policy }}
         AUDIT_INPUT: ${{ inputs.input }}
         AUDIT_BASELINE: ${{ inputs.baseline }}
         AUDIT_POLICY: ${{ inputs.policy }}
@@ -75,7 +80,7 @@ runs:
             failure=()
             if [ "$AUDIT_FAIL" = "true" ]; then failure+=(--fail-on-regression); fi
             hetzner-audit diff "$AUDIT_BASELINE" "$AUDIT_INPUT" \
-              --format "$AUDIT_FORMAT" --output "$AUDIT_OUTPUT" "${failure[@]}"
+              --format "$AUDIT_FORMAT" --output "$AUDIT_OUTPUT" --regression-policy "$AUDIT_REGRESSION_POLICY" "${failure[@]}"
             ;;
           *)
             echo "unsupported mode: $AUDIT_MODE" >&2

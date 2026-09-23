@@ -6,14 +6,15 @@ Protected assets include `HCLOUD_TOKEN`, the optional Robot webservice password,
 
 ## Material threats and controls
 
-| Threat | Consequence | v0.7 control | Residual risk |
+| Threat | Consequence | v0.8 control | Residual risk |
 |---|---|---|---|
 | Token leakage in logs/reports | cloud compromise | env-only token, no token serialization, defensive key redaction | exceptions from dependencies may include unexpected context |
 | Write-capable provider action | infrastructure change | collector exposes only fixed `GET`; `--read-only` cannot be disabled | token itself may still be write-capable; use a read-only token |
 | SSH credential leakage | host compromise | the tool never connects to hosts; the owner reviews and runs the host-bundle script with their own access | the owner runs the script as root; it must be reviewed before use |
 | Host bundle leaks secrets | credential disclosure in reports | fixed read-only command list; Docker inspection through an explicit template (no environment); Redis passwords printed only as `<set>`/`<empty>`; ACL hashes redacted; no sshd user lists | `pg_hba.conf` lines and container names are copied as-is |
 | Crafted host bundle | false assurance or false findings | size cap (8 MiB); header check; unknown or unparsed firewall constructs make the answer unknown, never "blocked" | a forged bundle from a compromised host can still lie |
-| Robot / Object Storage / Prometheus credentials | account access | environment only, never printed; GET-only clients; `doctor` warns about `.env` files | Robot webservice users may have broader rights than needed |
+| Robot / Object Storage / Prometheus credentials | account access | environment only, never printed; GET-only clients; `doctor` warns about `.env` files; the Prometheus token is sent only over HTTPS | Robot webservice users may have broader rights than needed |
+| Wider secrets in CI (Terraform state, S3 keys, Robot password, kubeconfig) | far beyond a read-only Cloud token: state files can hold database passwords and provider keys | the tool reads only the JSON the owner passes and never needs a kubeconfig; docs recommend passing `terraform show -json` output and `kubectl` JSON produced in a separate, trusted job, and Read-only S3/Robot credentials scoped to the audit | a CI job that holds all of these at once is a high-value target; keep them in separate jobs and protected environments |
 | Crafted S3 XML or kubectl / Terraform JSON | parser abuse | XML capped at 2 MiB and rejected with a DTD or entity; JSON inputs size-capped and shape-checked, errors reported cleanly | a malicious endpoint the owner configured can still return false data |
 | Prompt injection in repo/docs/labels | unsafe agent action | all target text declared untrusted; skills prohibit instruction adoption | agent runtimes vary in enforcement |
 | Command injection through names | local code execution | no shell execution from metadata; suggested `hcloud` commands reduce names to `[A-Za-z0-9._/:-]` and are never run | a human may still paste a reviewed command |

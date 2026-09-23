@@ -70,7 +70,12 @@ def render_checklist_markdown() -> str:
     return "\n".join(lines)
 
 
+MAX_ATTESTATION_BYTES = 256 * 1024
+
+
 def load_attestations(path: Path) -> dict[str, Any]:
+    if path.stat().st_size > MAX_ATTESTATION_BYTES:
+        raise ValueError(f"answers file {path} exceeds {MAX_ATTESTATION_BYTES} bytes")
     raw = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or not isinstance(raw.get("answers"), dict):
         raise ValueError(f"{path} must contain an 'answers' object (see `hetzner-audit checklist --template`)")
