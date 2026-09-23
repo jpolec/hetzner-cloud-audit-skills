@@ -2,7 +2,13 @@ from __future__ import annotations
 
 import unittest
 
-from hetzner_security.collectors.hcloud import ReadOnlyHCloudCollector, _sanitize_resource
+from hetzner_security.collectors.hcloud import (
+    ReadOnlyHCloudCollector,
+    _derive_edges,
+    _sanitize_resource,
+)
+from hetzner_security.graph import AttackGraph
+from hetzner_security.models import Asset, Snapshot
 
 
 class CollectorSafetyTest(unittest.TestCase):
@@ -10,6 +16,22 @@ class CollectorSafetyTest(unittest.TestCase):
         value = _sanitize_resource({"name": "x", "token": "secret", "nested": {"user_data": "bad"}})
         self.assertEqual(value["token"], "[REDACTED]")
         self.assertEqual(value["nested"]["user_data"], "[REDACTED]")
+
+    def test_private_network_is_unfiltered_by_cloud_firewalls(self) -> None:
+        # Hetzner Cloud Firewalls do not filter private network traffic: a member with no
+        # private-source rule is still reachable from the network on any port.
+        raw = {
+            "server": [
+                {"id": 1, "public_net": {}, "private_net": [{"network": 9, "ip": "10.0.1.2"}], "inbound": []},
+                {"id": 2, "public_net": {}, "private_net": [{"network": 9, "ip": "10.0.1.3"}], "inbound": []},
+            ],
+            "network": [{"id": 9, "ip_range": "10.0.0.0/16"}],
+        }
+        edges = [edge for edge in _derive_edges(raw) if edge.source == "hcloud:network:9" and edge.relation == "allows"]
+        self.assertEqual({edge.target for edge in edges}, {"hcloud:server:1", "hcloud:server:2"})
+        self.assertEqual(edges[0].evidence[0].kind, "private_network_unfiltered")
+        snapshot = Snapshot(assets=[Asset("hcloud:server:1", "server", "a"), Asset("hcloud:server:2", "server", "b")], edges=_derive_edges(raw))
+        self.assertTrue(AttackGraph(snapshot).reachable("hcloud:server:1", "hcloud:server:2", protocol="tcp", port=6379))
 
     def test_personal_data_is_redacted(self) -> None:
         value = _sanitize_resource(

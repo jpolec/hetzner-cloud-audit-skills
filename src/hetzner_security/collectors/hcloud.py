@@ -6,7 +6,6 @@ The module intentionally implements only HTTP GET and exposes no generic request
 from __future__ import annotations
 
 import hashlib
-import ipaddress
 import json
 import os
 import re
@@ -339,25 +338,6 @@ def _normalize_resources(
     return normalized
 
 
-def _network_contains(cidr: object, source: object) -> bool:
-    if not isinstance(cidr, str) or not isinstance(source, str):
-        return False
-    try:
-        source_network = ipaddress.ip_network(source, strict=False)
-        target_network = ipaddress.ip_network(cidr, strict=False)
-        if isinstance(source_network, ipaddress.IPv4Network) and isinstance(
-            target_network, ipaddress.IPv4Network
-        ):
-            return source_network.subnet_of(target_network)
-        if isinstance(source_network, ipaddress.IPv6Network) and isinstance(
-            target_network, ipaddress.IPv6Network
-        ):
-            return source_network.subnet_of(target_network)
-        return False
-    except ValueError:
-        return False
-
-
 def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
     edges: list[Edge] = []
     servers = {server.get("id"): server for server in raw.get("server", [])}
@@ -402,7 +382,6 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
                 edges.append(Edge(fid, f"hcloud:server:{server}", "protects"))
     for server_id, server in servers.items():
         sid = f"hcloud:server:{server_id}"
-        network_ids = [item.get("network") for item in server.get("private_net", [])]
         for rule in server.get("inbound", []):
             protocol = str(rule.get("protocol", "tcp"))
             port = rule.get("port") if isinstance(rule.get("port"), int) else None
@@ -411,14 +390,35 @@ def _derive_edges(raw: dict[str, list[dict[str, Any]]]) -> list[Edge]:
             )
             if set(rule.get("sources", [])) & {"0.0.0.0/0", "::/0"}:
                 edges.append(Edge("internet", sid, "allows", protocol, port, evidence))
-            for network_id, network in networks.items():
-                if network_id not in network_ids:
-                    continue
-                cidr = network.get("ip_range")
-                if any(_network_contains(cidr, source) for source in rule.get("sources", [])):
-                    edges.append(
-                        Edge(f"hcloud:network:{network_id}", sid, "allows", protocol, port, evidence)
-                    )
+        # Hetzner Cloud Firewalls do not filter private network traffic, so every attached
+        # server accepts every port from the network until a host firewall says otherwise.
+        # https://docs.hetzner.com/cloud/firewalls/faq/
+        for private_net in server.get("private_net", []):
+            network_id = private_net.get("network")
+            if network_id not in networks:
+                continue
+            edges.append(
+                Edge(
+                    f"hcloud:network:{network_id}",
+                    sid,
+                    "allows",
+                    None,
+                    None,
+                    (
+                        Evidence(
+                            "hcloud_api",
+                            "private_network_unfiltered",
+                            sid,
+                            {
+                                "network": network_id,
+                                "ip": private_net.get("ip"),
+                                "cloud_firewall_applies": False,
+                            },
+                            "properties.private_net",
+                        ),
+                    ),
+                )
+            )
     return edges
 
 

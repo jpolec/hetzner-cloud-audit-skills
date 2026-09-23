@@ -501,13 +501,13 @@ def broad_private_data_path(snapshot: Snapshot, graph: AttackGraph) -> list[Find
                 [source.id, target.id],
                 f"{len(candidate_paths)} unrelated server(s) have a cloud-network path to {target.name}.",
                 "Sensitive production hosts admit only explicitly required workload identities and ports.",
-                "A shared private network and broad inbound rule permit TCP before host/runtime controls are evaluated.",
+                "The servers share a private network. Hetzner Cloud Firewalls do not filter private network traffic, so every port is open at the cloud layer; only host firewalls and service authentication can restrict it.",
                 evidence,
                 [source.id, *[edge.target for edge in path]],
                 ["A target service listens on the private interface.", "Host/runtime authentication does not block the source."],
                 "Compromise of an unrelated workload can become lateral access to a database, identity, or secrets boundary.",
-                "Restrict private ingress to explicit workload sources and service ports, then verify host and application controls.",
-                ["https://docs.hetzner.com/cloud/networks/overview/"],
+                "Move sensitive hosts to a dedicated private network, or enforce a host firewall (nftables or UFW) on the private interface that admits only required sources and ports; then verify application authentication.",
+                ["https://docs.hetzner.com/cloud/firewalls/faq/", "https://docs.hetzner.com/cloud/networks/overview/"],
                 target.id,
             )
         )
