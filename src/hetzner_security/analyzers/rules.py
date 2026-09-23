@@ -19,7 +19,7 @@ from ..models import (
     Snapshot,
     Verification,
 )
-from ..topology import classify_source
+from ..topology import CLOUDFLARE_RANGES_AS_OF, classify_source
 
 Rule = Callable[[Snapshot, AttackGraph], list[Finding]]
 CGNAT_RANGE = ipaddress.IPv4Network("100.64.0.0/10")
@@ -768,7 +768,8 @@ def cloudflare_origin_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Fin
                 "Origins behind Cloudflare accept web traffic only from Cloudflare ranges.",
                 "tcp/80 or tcp/443 is open to 0.0.0.0/0 or ::/0.",
                 [_evidence(asset, "firewall_rule", rule, "properties.inbound") for rule in rules]
-                + [_evidence(peer, "cloudflare_only_peer", sorted(web_sources(peer)), "properties.inbound") for peer in fronted[:3]],
+                + [_evidence(peer, "cloudflare_only_peer", sorted(web_sources(peer)), "properties.inbound") for peer in fronted[:3]]
+                + [_evidence(asset, "cloudflare_ranges_as_of", CLOUDFLARE_RANGES_AS_OF, "topology.CLOUDFLARE_RANGES")],
                 ["internet", asset.id],
                 ["The origin is meant to be served through Cloudflare."],
                 "Direct origin access bypasses Cloudflare WAF, rate limiting, and DDoS protection, and can expose the origin IP.",
