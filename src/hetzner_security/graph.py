@@ -23,8 +23,12 @@ class AttackGraph:
         protocol: str | None = None,
         port: int | None = None,
         max_depth: int = 6,
+        max_paths: int = 50,
     ) -> list[list[Edge]]:
-        """Return bounded simple paths matching service constraints on the final edge."""
+        """Return bounded simple paths matching service constraints on the final edge.
+
+        Stops after ``max_paths`` matches so dense networks cannot blow up memory or runtime.
+        """
         found: list[list[Edge]] = []
         queue: deque[tuple[str, list[Edge], frozenset[str]]] = deque(
             [(source, [], frozenset({source}))]
@@ -50,6 +54,8 @@ class AttackGraph:
                     if port and edge.port not in (None, port):
                         continue
                     found.append(next_path)
+                    if len(found) >= max_paths:
+                        return found
                     continue
                 queue.append((edge.target, next_path, visited | {edge.target}))
         return found

@@ -8,7 +8,9 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import random
 import re
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -44,6 +46,21 @@ HETZNER_RESOURCE_ENDPOINTS = {
 }
 
 
+MAX_ATTEMPTS = 4
+MAX_PAGES = 1000  # 50 per page: far above any real project, but bounded
+RETRY_STATUSES = {429, 500, 502, 503, 504}
+
+
+def _retry_delay(attempt: int, retry_after: str | None) -> float:
+    """Honor Retry-After (capped at 30 s); otherwise exponential backoff with jitter."""
+    if retry_after:
+        try:
+            return min(max(float(retry_after), 0.0), 30.0)
+        except ValueError:
+            pass
+    return float(2 ** (attempt - 1)) * (0.5 + random.random() / 2)  # noqa: S311 -- jitter, not crypto
+
+
 class HCloudCollectionError(RuntimeError):
     def __init__(self, message: str, status: int | None = None) -> None:
         super().__init__(message)
@@ -60,6 +77,8 @@ class ReadOnlyHCloudCollector:
         metrics_days: int = 30,
     ) -> None:
         self._token = token or os.environ.get("HCLOUD_TOKEN")
+        self._urlopen: Any = urllib.request.urlopen  # injectable for tests
+        self._sleep: Any = time.sleep
         self.base_url = base_url.rstrip("/")
         self.include_metrics = include_metrics
         self.metrics_days = metrics_days
@@ -91,20 +110,28 @@ class ReadOnlyHCloudCollector:
             },
             method="GET",
         )
-        try:
-            with urllib.request.urlopen(request, timeout=30) as response:  # noqa: S310
-                payload: Any = json.loads(response.read())
-                if not isinstance(payload, dict):
-                    raise HCloudCollectionError(f"unexpected response shape for {endpoint}")
-                return {str(key): value for key, value in payload.items()}
-        except urllib.error.HTTPError as exc:
-            raise HCloudCollectionError(
-                f"read-only GET failed for {endpoint}: HTTP {exc.code}", status=exc.code
-            ) from exc
-        except HCloudCollectionError:
-            raise
-        except Exception as exc:
-            raise HCloudCollectionError(f"read-only GET failed for {endpoint}: {exc}") from exc
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            try:
+                with self._urlopen(request, timeout=30) as response:
+                    payload: Any = json.loads(response.read())
+                    if not isinstance(payload, dict):
+                        raise HCloudCollectionError(f"unexpected response shape for {endpoint}")
+                    return {str(key): value for key, value in payload.items()}
+            except urllib.error.HTTPError as exc:
+                if exc.code not in RETRY_STATUSES or attempt == MAX_ATTEMPTS:
+                    raise HCloudCollectionError(
+                        f"read-only GET failed for {endpoint}: HTTP {exc.code}", status=exc.code
+                    ) from exc
+                self._sleep(_retry_delay(attempt, exc.headers.get("Retry-After") if exc.headers else None))
+            except HCloudCollectionError:
+                raise
+            except (urllib.error.URLError, TimeoutError, ConnectionError) as exc:
+                if attempt == MAX_ATTEMPTS:
+                    raise HCloudCollectionError(f"read-only GET failed for {endpoint}: {exc}") from exc
+                self._sleep(_retry_delay(attempt, None))
+            except Exception as exc:
+                raise HCloudCollectionError(f"read-only GET failed for {endpoint}: {exc}") from exc
+        raise HCloudCollectionError(f"read-only GET failed for {endpoint}: retries exhausted")
 
     def _list(self, endpoint: str, response_key: str | None = None) -> list[dict[str, Any]]:
         output: list[dict[str, Any]] = []
@@ -117,6 +144,8 @@ class ReadOnlyHCloudCollector:
             if not pagination.get("next_page"):
                 break
             page = int(pagination["next_page"])
+            if page > MAX_PAGES:
+                raise HCloudCollectionError(f"pagination for {endpoint} exceeded {MAX_PAGES} pages")
         return output
 
     def collect(self) -> Snapshot:

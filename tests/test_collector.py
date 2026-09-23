@@ -17,6 +17,58 @@ class CollectorSafetyTest(unittest.TestCase):
         self.assertEqual(value["token"], "[REDACTED]")
         self.assertEqual(value["nested"]["user_data"], "[REDACTED]")
 
+    def test_get_retries_429_and_5xx_then_succeeds(self) -> None:
+        import email.message
+        import io
+        import urllib.error
+
+        calls: list[int] = []
+        sleeps: list[float] = []
+
+        class Response(io.BytesIO):
+            def __enter__(self):  # type: ignore[no-untyped-def]
+                return self
+
+            def __exit__(self, *args):  # type: ignore[no-untyped-def]
+                return False
+
+        def fake_urlopen(request, timeout):  # type: ignore[no-untyped-def]
+            calls.append(1)
+            if len(calls) == 1:
+                headers = email.message.Message()
+                headers["Retry-After"] = "2"
+                raise urllib.error.HTTPError(request.full_url, 429, "Too Many Requests", headers, None)
+            if len(calls) == 2:
+                raise urllib.error.HTTPError(request.full_url, 503, "Unavailable", email.message.Message(), None)
+            return Response(b'{"servers": []}')
+
+        collector = ReadOnlyHCloudCollector(token="fixture")  # noqa: S106
+        collector._urlopen = fake_urlopen
+        collector._sleep = sleeps.append
+        self.assertEqual(collector._get_json("servers"), {"servers": []})
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(sleeps[0], 2.0)  # Retry-After honored
+
+    def test_get_does_not_retry_auth_errors(self) -> None:
+        import email.message
+        import urllib.error
+
+        from hetzner_security.collectors.hcloud import HCloudCollectionError
+
+        calls: list[int] = []
+
+        def fake_urlopen(request, timeout):  # type: ignore[no-untyped-def]
+            calls.append(1)
+            raise urllib.error.HTTPError(request.full_url, 401, "Unauthorized", email.message.Message(), None)
+
+        collector = ReadOnlyHCloudCollector(token="fixture")  # noqa: S106
+        collector._urlopen = fake_urlopen
+        collector._sleep = lambda _: None
+        with self.assertRaises(HCloudCollectionError) as raised:
+            collector._get_json("servers")
+        self.assertEqual(raised.exception.status, 401)
+        self.assertEqual(len(calls), 1)
+
     def test_private_network_is_unfiltered_by_cloud_firewalls(self) -> None:
         # Hetzner Cloud Firewalls do not filter private network traffic: a member with no
         # private-source rule is still reachable from the network on any port.
