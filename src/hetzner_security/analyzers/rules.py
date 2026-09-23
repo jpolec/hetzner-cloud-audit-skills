@@ -464,7 +464,7 @@ def backup_and_protection(snapshot: Snapshot, graph: AttackGraph) -> list[Findin
 def broad_private_data_path(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     """Find cloud-level paths to sensitive production servers from unrelated projects."""
     output: list[Finding] = []
-    sensitive_tokens = {"db", "database", "postgres", "redis", "vault", "auth"}
+    sensitive_tokens = {"db", "database", "postgres", "redis", "vault", "auth", "identity", "secrets"}
     servers = [asset for asset in snapshot.assets if asset.type == "server"]
     for target in servers:
         role = target.labels.get("role", "").lower()

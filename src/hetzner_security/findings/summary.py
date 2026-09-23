@@ -5,6 +5,15 @@ from __future__ import annotations
 from collections.abc import Callable
 from typing import Any
 
+from ..actions import (
+    build_actions,
+    cost_insights,
+    evidence_level,
+    provenance,
+    render_actions_markdown,
+    render_coverage_markdown,
+)
+from ..actions import coverage as coverage_rows
 from ..cost import analyze_cost
 from ..models import Asset, Finding, FindingStatus, Snapshot
 
@@ -38,6 +47,7 @@ def _grouped(findings: list[Finding]) -> list[dict[str, Any]]:
                 "severity": finding.severity.value if finding.severity else None,
                 "assets": 0,
                 "findings": 0,
+                "evidence": evidence_level(finding),
             },
         )
         entry["assets"] += len(finding.assets)
@@ -61,6 +71,7 @@ def build_summary(snapshot: Snapshot, findings: list[Finding]) -> dict[str, Any]
     )
     missing_layers = [name for name, present in RUNTIME_LAYERS if not any(present(asset) for asset in snapshot.assets)]
     cost: dict[str, Any] | None = None
+    report: dict[str, Any] | None = None
     if any(asset.type == "pricing" for asset in snapshot.assets):
         report = analyze_cost(snapshot)
         servers = report.get("servers", [])
@@ -71,8 +82,12 @@ def build_summary(snapshot: Snapshot, findings: list[Finding]) -> dict[str, Any]
             "potential_annual": report["identified_potential_savings"]["annual_net"],
             "confirmed_monthly": report["identified_potential_savings"]["confirmed_monthly_net"],
             "metrics_collected": any(item.get("cpu_samples") for item in servers),
+            **{key: value for key, value in cost_insights(report).items() if key not in {"waste", "storage_heavy"}},
         }
     return {
+        "actions": build_actions(snapshot, findings, report),
+        "coverage": coverage_rows(snapshot, report),
+        "provenance": provenance(snapshot, report),
         "scope": {kind: count for kind, count in counts.items() if count},
         "locations": sorted(locations),
         "confirmed": _grouped([item for item in findings if item.status == FindingStatus.CONFIRMED]),
@@ -122,20 +137,32 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
     if cost:
         currency = cost["currency"]
         rows += [
-            ("Estimated catalog cost", f"{currency} {cost['monthly']:,.2f}/month"),
-            ("Potential savings", f"{currency} {cost['potential_monthly']:,.2f}/month · {currency} {cost['potential_annual']:,.0f}/year"),
-            ("Confirmed savings", f"{currency} {cost['confirmed_monthly']:,.2f}/month"),
+            ("Estimated catalog cost", f"{currency} {cost['monthly']:,.2f}/month · top 3 VMs = {cost.get('top3_share', 0):.0%}, top 5 = {cost.get('top5_share', 0):.0%}"),
+            ("Immediately identifiable waste", f"{currency} {cost.get('waste_monthly', 0):,.2f}/month (unused resources, no telemetry needed)"),
+            (
+                "Optimization opportunities",
+                (
+                    f"{_count(cost.get('opportunities', 0), 'candidate', 'candidates')} need RAM/disk telemetry"
+                    + (f" (up to {currency} {cost.get('opportunities_monthly', 0):,.2f}/month)" if cost.get("opportunities") else "")
+                )
+                if cost["metrics_collected"]
+                else "not evaluated: CPU metrics not collected (run `hetzner-audit cost --metrics-days 30`)",
+            ),
+            ("Confirmed savings", f"{currency} {cost['confirmed_monthly']:,.2f}/month (confirmation needs RAM, disk, owner intent, rollback)"),
         ]
     lines = ["## At a glance", "", "| | |", "|---|---|", *(f"| {name} | {value} |" for name, value in rows), ""]
-    lines += ["### Confirmed", ""]
+    lines += render_coverage_markdown(summary.get("coverage", []), summary.get("provenance", []))
+    lines += render_actions_markdown(summary.get("actions", []), cost["currency"] if cost else "EUR")
+    lines += ["## Findings by status", "", "### Confirmed", ""]
     lines += [
         f"- **{(item['severity'] or 'unscored').upper()}** · {item['rule_id']} · {item['title']}"
         + _affected(item)
+        + f" · evidence {item['evidence'][0]}"
         for item in confirmed
     ] or ["- None."]
     lines += ["", "### Needs host or runtime validation", ""]
     lines += [
-        f"- {item['rule_id']} · {item['title']}" + _affected(item)
+        f"- {item['rule_id']} · {item['title']}" + _affected(item) + f" · evidence {item['evidence'][0]} ({item['evidence'][1]})"
         for item in pending
     ] or ["- None."]
     lines += ["", "### Collection gaps", ""]

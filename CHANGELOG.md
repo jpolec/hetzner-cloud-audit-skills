@@ -30,6 +30,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 - `map --view connectivity`: a per-VM bus diagram of the private network, highlighting sensitive hosts and each VM's ingress per trust class.
 - `map --view cost`: a per-VM cost diagram showing catalog cost per VM, component bars, CPU p95, the best candidate saving, cost split by role, and resources outside servers.
+- **Recommended actions**: ranked next steps with saving, evidence level (HIGH, MEDIUM, or LOW, with a reason), risk of acting, and next step. They cover:
+  - public exposure and Cloudflare bypass;
+  - blast radius on a shared private network;
+  - the identity-plane access path;
+  - deprecated types, with a replacement candidate, cost delta, same-family availability, and an ARM alternative;
+  - unused resources, deletion protection, and backups;
+  - storage-heavy servers and telemetry-bound optimizations.
+- The report and diagrams show coverage (cost, utilization, ownership, backups, host evidence) and provenance (snapshot time, pricing basis, VAT and traffic excluded, no invoice reconciliation).
+- Cost is shown as immediately identifiable waste vs optimization candidates that need telemetry, with top-3 and top-5 spend concentration and a storage-heavy heuristic (volumes above half the compute cost and at least EUR 10/month).
+- The cost view gives each VM a status (REVIEW, DEPRECATED, COST, or OK). The connectivity view now shows entry points → network → high-value hosts, with a blast-radius statement, instead of a line per member.
 - A `hetzner-audit` brand line on every diagram and README image, which now share one visual style.
 
 ### Fixed

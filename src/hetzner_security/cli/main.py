@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from ..actions import build_actions
 from ..analyzers import hunt
 from ..collectors.fixture import load_snapshot
 from ..collectors.hcloud import HCloudCollectionError, ReadOnlyHCloudCollector
@@ -136,11 +137,13 @@ def _render_map_svg(snapshot: Snapshot, topology: dict[str, Any], args: argparse
         "cost": "Per-VM monthly cost",
     }
     title = args.title if args.title != "Hetzner Cloud architecture" else titles[args.view]
+    cost = analyze_cost(snapshot) if any(asset.type == "pricing" for asset in snapshot.assets) else None
+    actions = build_actions(snapshot, _findings(snapshot), cost)
     if args.view == "connectivity":
-        return render_connectivity_svg(topology, title, args.theme)
+        return render_connectivity_svg(topology, title, args.theme, actions)
     if args.view == "cost":
-        return render_cost_svg(topology, analyze_cost(snapshot), title, args.theme)
-    return render_svg(topology, title, args.theme)
+        return render_cost_svg(topology, cost or analyze_cost(snapshot), title, args.theme, actions)
+    return render_svg(topology, title, args.theme, actions)
 
 
 def _findings(snapshot: Snapshot, *, verify: bool = True) -> list[Finding]:

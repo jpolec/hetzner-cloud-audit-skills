@@ -10,33 +10,114 @@
 | Rejected by the verifier | 0 |
 | Collection gaps | none |
 
+### What this audit knows
+
+| Coverage | | Basis |
+|---|---|---|
+| Cost | 0% | catalog price found per server |
+| CPU utilization | 0% | provider CPU metrics (RAM/disk never) |
+| Ownership | 0% | owner or project label |
+| Provider backups | 0% | of 2 stateful servers |
+| Host/runtime evidence | 57% | host firewall, listeners, service config |
+
+- Snapshot: 2026-09-22 00:00 UTC · collector fixture
+- Scope: Hetzner Cloud control plane only (API, GET requests). No SSH, no host or application evidence.
+
+## Recommended actions
+
+### 1. Close public exposure: SSH reachable from the public internet
+
+**Saving:** TBD · **Evidence:** MEDIUM (cloud path observed; host firewall, listener, and auth not observed) · **Risk of acting:** low
+
+An inbound rule admits a public source to TCP/22.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 2. Close public exposure: Docker daemon reachable from the public internet
+
+**Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
+
+An inbound rule admits a public source to TCP/2375.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 3. Close public exposure: Kubernetes API reachable from the public internet
+
+**Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
+
+An inbound rule admits a public source to TCP/6443.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 4. Close public exposure: PostgreSQL reachable from the public internet
+
+**Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
+
+An inbound rule admits a public source to TCP/5432.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 5. Close public exposure: Redis reachable from the public internet
+
+**Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
+
+An inbound rule admits a public source to TCP/6379.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 6. Close public exposure: Internet-facing server has no observed firewall control
+
+**Saving:** TBD · **Evidence:** MEDIUM (cloud path observed; host firewall, listener, and auth not observed) · **Risk of acting:** low
+
+A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 7. Close public exposure: Internet-facing server has no observed firewall control
+
+**Saving:** TBD · **Evidence:** MEDIUM (cloud path observed; host firewall, listener, and auth not observed) · **Risk of acting:** low
+
+A public interface exists, but neither an attached Hetzner firewall nor an observed host firewall is present.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 8. Define and test backups for 5 stateful servers
+
+**Saving:** TBD · **Evidence:** LOW (absence of evidence; depends on collector coverage and owner intent) · **Risk of acting:** low
+
+Provider backups are off.
+
+**Next step:** Record which mechanism protects each volume and run one restore test; enable provider backups (+20% of the server price) where none exists.
+
+## Findings by status
+
 ### Confirmed
 
-- **CRITICAL** · HETZ-DKR-002 · Container can control the Docker daemon (2 assets)
-- **CRITICAL** · HETZ-NET-002 · Docker daemon reachable from the public internet
-- **CRITICAL** · HETZ-NET-002 · Kubernetes API reachable from the public internet
-- **CRITICAL** · HETZ-NET-004 · Redis reachable from the public internet
-- **CRITICAL** · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
-- **CRITICAL** · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control
-- **HIGH** · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets)
-- **HIGH** · HETZ-DKR-003 · Container shares the host PID namespace (2 assets)
-- **HIGH** · HETZ-NET-003 · PostgreSQL reachable from the public internet
-- **HIGH** · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability
-- **HIGH** · HETZ-XLY-001 · staging workload can reach prod postgres
-- **HIGH** · HETZ-XLY-001 · dev workload can reach prod redis
-- **HIGH** · HETZ-XLY-001 · staging workload can reach prod redis
-- **HIGH** · HETZ-XLY-001 · dev workload can reach prod postgres
-- **MEDIUM** · HETZ-DKR-004 · Container shares the host network namespace (2 assets)
-- **MEDIUM** · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets)
-- **MEDIUM** · HETZ-VULN-001 · Vulnerable component in non-public workload (2 assets)
+- **CRITICAL** · HETZ-DKR-002 · Container can control the Docker daemon (2 assets) · evidence HIGH
+- **CRITICAL** · HETZ-NET-002 · Docker daemon reachable from the public internet · evidence HIGH
+- **CRITICAL** · HETZ-NET-002 · Kubernetes API reachable from the public internet · evidence HIGH
+- **CRITICAL** · HETZ-NET-004 · Redis reachable from the public internet · evidence HIGH
+- **CRITICAL** · HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence HIGH
+- **CRITICAL** · HETZ-RDS-001 · Redis accepts non-local clients without an authentication control · evidence HIGH
+- **HIGH** · HETZ-DKR-001 · Privileged container crosses the host isolation boundary (2 assets) · evidence HIGH
+- **HIGH** · HETZ-DKR-003 · Container shares the host PID namespace (2 assets) · evidence HIGH
+- **HIGH** · HETZ-NET-003 · PostgreSQL reachable from the public internet · evidence HIGH
+- **HIGH** · HETZ-PG-002 · Unexpected PostgreSQL roles hold superuser capability · evidence HIGH
+- **HIGH** · HETZ-XLY-001 · staging workload can reach prod postgres · evidence HIGH
+- **HIGH** · HETZ-XLY-001 · dev workload can reach prod redis · evidence HIGH
+- **HIGH** · HETZ-XLY-001 · staging workload can reach prod redis · evidence HIGH
+- **HIGH** · HETZ-XLY-001 · dev workload can reach prod postgres · evidence HIGH
+- **MEDIUM** · HETZ-DKR-004 · Container shares the host network namespace (2 assets) · evidence HIGH
+- **MEDIUM** · HETZ-IAC-001 · Runtime network access diverges from declared infrastructure (2 assets) · evidence HIGH
+- **MEDIUM** · HETZ-VULN-001 · Vulnerable component in non-public workload (2 assets) · evidence HIGH
 
 ### Needs host or runtime validation
 
-- HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets)
-- HETZ-NET-001 · SSH reachable from the public internet
-- HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets)
-- HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials
-- HETZ-VULN-001 · Vulnerable component in non-public workload
+- HETZ-BCP-001 · Production stateful asset lacks observed backup coverage (5 assets) · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
+- HETZ-NET-001 · SSH reachable from the public internet · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
+- HETZ-NET-005 · Internet-facing server has no observed firewall control (2 assets) · evidence MEDIUM (cloud path observed; host firewall, listener, and auth not observed)
+- HETZ-PG-001 · Broad PostgreSQL trust authentication bypasses credentials · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
+- HETZ-VULN-001 · Vulnerable component in non-public workload · evidence LOW (absence of evidence; depends on collector coverage and owner intent)
 
 ### Collection gaps
 

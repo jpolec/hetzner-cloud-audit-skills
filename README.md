@@ -122,7 +122,15 @@ The [synthetic benchmark report](https://github.com/jpolec/hetzner-cloud-audit-s
 
 ## What the report contains
 
-The report opens with an **At a glance** page. It shows the scope, the confirmed findings, the hypotheses that still need host or runtime evidence, collection gaps, and the catalog cost with potential and confirmed savings. The detail follows:
+The report opens with an **At a glance** page, followed by **Recommended actions**:
+
+- **At a glance:** scope, confirmed findings, hypotheses that still need host or runtime evidence, and collection gaps. Cost is split into immediately identifiable waste (no telemetry needed), optimization candidates that need RAM and disk data, and confirmed savings, plus spend concentration.
+- **What this audit knows:** coverage for cost, utilization, ownership, backups, and host evidence, and the provenance (snapshot time, pricing basis, VAT and traffic excluded).
+- **Recommended actions**, ranked. Each one has a saving, an evidence level (HIGH, MEDIUM, or LOW, with the reason), the risk of acting, and the concrete next step. The same actions appear at the bottom of the architecture, connectivity, and cost diagrams.
+
+Confirmed savings stay at zero until RAM, disk, owner intent, and rollback are evidenced. The tool reports missing proof instead of inflating the number.
+
+The detail follows:
 
 - **Facts** confirmed by the Hetzner API.
 - **Findings** with a complete evidence chain, impact, and remediation.
