@@ -296,24 +296,46 @@ def render_topology_markdown(topology: dict[str, Any]) -> str:
 
 # ---------------------------------------------------------------- SVG rendering
 
-_SVG_COLORS = {
-    "bg": "#0b1220",
-    "panel": "#0f1a2e",
-    "panel_stroke": "#23324d",
-    "text": "#e5edf7",
-    "muted": "#8aa0bd",
-    "critical": "#f87171",
-    "public": "#fde047",
-    "proxied": "#34d399",
-    "private": "#60a5fa",
-    "world": "#fde047",
-    "cloudflare": "#fb923c",
-    "tailscale": "#a78bfa",
-    "allowlist": "#94a3b8",
+SVG_THEMES: dict[str, dict[str, str]] = {
+    # Light theme: neutral console look (grey canvas, white cards, red accent).
+    "light": {
+        "bg": "#f4f4f4",
+        "panel": "#ffffff",
+        "panel_stroke": "#e3e3e3",
+        "card": "#ffffff",
+        "text": "#1f1f1f",
+        "muted": "#6b6b6b",
+        "accent": "#d50c2d",
+        "critical": "#d50c2d",
+        "public": "#d98e04",
+        "proxied": "#1f9d55",
+        "private": "#2f6fdb",
+        "world": "#d50c2d",
+        "cloudflare": "#f38020",
+        "tailscale": "#6d4fc2",
+        "allowlist": "#7a7a7a",
+    },
+    "dark": {
+        "bg": "#0b1220",
+        "panel": "#0f1a2e",
+        "panel_stroke": "#23324d",
+        "card": "#111f36",
+        "text": "#e5edf7",
+        "muted": "#8aa0bd",
+        "accent": "#f87171",
+        "critical": "#f87171",
+        "public": "#fde047",
+        "proxied": "#34d399",
+        "private": "#60a5fa",
+        "world": "#fde047",
+        "cloudflare": "#fb923c",
+        "tailscale": "#a78bfa",
+        "allowlist": "#94a3b8",
+    },
 }
 
 
-def render_svg(topology: dict[str, Any], title: str = "Hetzner network map") -> str:
+def render_svg(topology: dict[str, Any], title: str = "Hetzner network map", theme: str = "light") -> str:
     """Render a dependency-free SVG: trust sources on the left, servers grouped by role."""
     card_w, card_h, gap_x, gap_y, lane_h = 214, 64, 18, 16, 16
     left_w, margin, per_row = 230, 32, 5
@@ -362,12 +384,15 @@ def render_svg(topology: dict[str, Any], title: str = "Hetzner network map") -> 
         y += 24
     width = x0 + per_row * (card_w + gap_x) + margin
     height = y + margin - 8
-    colors = _SVG_COLORS
+    colors = SVG_THEMES[theme]
     out: list[str] = []
     add = out.append
     add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">')
     add(f'<rect width="100%" height="100%" rx="16" fill="{colors["bg"]}"/>')
-    add('<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker></defs>')
+    add(
+        '<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker>'
+        '<filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>'
+    )
     add(f'<text x="{margin}" y="{margin + 16}" font-size="22" font-weight="700" fill="{colors["text"]}">{escape(title)}</text>')
     counts: dict[str, int] = {}
     for server in servers:
@@ -419,7 +444,12 @@ def render_svg(topology: dict[str, Any], title: str = "Hetzner network map") -> 
     for server in servers:
         card_x, card_y = positions[server["name"]]
         stroke = colors[server["exposure"]]
-        add(f'<rect x="{card_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="10" fill="#111f36" stroke="{stroke}" stroke-width="1.6"/>')
+        # Light cards use a neutral border and shadow; exposure is carried by the left stripe.
+        border, border_w, shadow = (
+            (stroke, 1.6, "") if theme == "dark" else (colors["panel_stroke"], 1, ' filter="url(#shadow)"')
+        )
+        add(f'<rect x="{card_x}" y="{card_y}" width="{card_w}" height="{card_h}" rx="10" fill="{colors["card"]}" stroke="{border}" stroke-width="{border_w}"{shadow}/>')
+        add(f'<rect x="{card_x}" y="{card_y + 8}" width="4" height="{card_h - 16}" rx="2" fill="{stroke}"/>')
         add(f'<text x="{card_x + 12}" y="{card_y + 22}" font-size="14" font-weight="700" fill="{colors["text"]}">{escape(server["name"])}</text>')
         detail = " · ".join(item for item in (server["role"], server["type"], server["location"]) if item)
         add(f'<text x="{card_x + 12}" y="{card_y + 40}" font-size="11.5" fill="{colors["muted"]}">{escape(detail[:34])}</text>')

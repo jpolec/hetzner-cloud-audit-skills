@@ -3,25 +3,72 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Read-only Hetzner token setup</title>
+<!-- Illustration of the Hetzner Console token flow with fictional data. Not a real screenshot. -->
 <style>
-  *{box-sizing:border-box} body{margin:0;background:#071018;color:#dbe8f5;font-family:Inter,ui-sans-serif,system-ui;padding:52px}
-  .shell{max-width:1320px;margin:auto;border:1px solid #29445b;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0009;background:#0b1722}
-  .bar{height:54px;background:#112333;border-bottom:1px solid #29445b;display:flex;align-items:center;padding:0 22px}.title{margin:auto;color:#8da9bf;font:600 14px ui-monospace,SFMono-Regular,monospace}
-  .content{padding:34px}.path{display:flex;align-items:center;justify-content:center;gap:13px;font:700 21px ui-monospace,SFMono-Regular,monospace}.box{border:1px solid #31516a;background:#102434;padding:14px 20px;border-radius:10px}.arrow{color:#7894aa}
-  .panel{margin:30px auto 22px;max-width:820px;border:1px solid #31516a;background:#0e1e2b;border-radius:14px;padding:26px}.label{color:#91abc0;font-size:14px;text-transform:uppercase;letter-spacing:.08em}.input{margin:10px 0 24px;border:1px solid #34546d;border-radius:8px;padding:13px 15px;color:#b9cada;font:16px ui-monospace,SFMono-Regular,monospace}.option{display:flex;align-items:center;gap:13px;border:1px solid #31516a;padding:15px;border-radius:9px;margin-top:10px}.selected{border:2px solid #54d69d;background:#102b2b}.radio{width:19px;height:19px;border:2px solid #66879e;border-radius:50%}.selected .radio{border:5px solid #54d69d}.name{font-weight:800;font-size:18px}.detail{margin-left:auto;color:#8ca5b8;font:14px ui-monospace,SFMono-Regular,monospace}.good{color:#54d69d}.bad{color:#ff7f88}.footer{text-align:center;color:#9bb2c4;font:16px/1.6 ui-monospace,SFMono-Regular,monospace}.strong{color:#e7f1fb;font-weight:800}
+  *{box-sizing:border-box}
+  body{margin:0;width:1440px;height:900px;background:#f4f4f4;color:#1f1f1f;font:15px/1.4 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;overflow:hidden;position:relative}
+  .top{height:64px;background:#fff;border-bottom:1px solid #e3e3e3;display:flex;align-items:center;padding:0 22px;gap:18px}
+  .brand{font-weight:800;letter-spacing:.06em;color:#d50c2d;font-size:24px}.brand small{color:#1f1f1f;font-weight:600;letter-spacing:0;font-size:18px;margin-left:8px}
+  .sep{width:1px;height:30px;background:#e3e3e3}
+  .project{font-weight:500}.project:after{content:" ⌄";color:#6b6b6b}
+  .search{margin-left:190px;width:520px;height:34px;border-radius:6px;background:#efefef;color:#9a9a9a;display:flex;align-items:center;padding:0 12px}
+  .side{position:absolute;top:65px;left:0;bottom:0;width:210px;background:#fff;border-right:1px solid #e3e3e3;padding:16px 8px}
+  .side h6{margin:18px 8px 6px;font-size:11px;color:#8a8a8a;font-weight:600;letter-spacing:.04em}
+  .side div{padding:8px 12px;border-radius:6px;color:#2b2b2b}
+  .side .active{background:#f1f1f1;border-left:3px solid #d50c2d;font-weight:600}
+  .main{position:absolute;top:65px;left:210px;right:0;bottom:0;padding:28px 60px}
+  .tabs{display:flex;gap:22px;border-bottom:1px solid #e3e3e3;padding-bottom:10px}
+  .tabs .on{color:#d50c2d;border-bottom:2px solid #d50c2d;padding-bottom:9px;margin-bottom:-11px}
+  .btn{background:#d50c2d;color:#fff;font-weight:600;border-radius:6px;padding:10px 16px;display:inline-block}
+  .gen{position:absolute;right:60px;top:20px}
+  .row{background:#fff;border-radius:8px;box-shadow:0 1px 3px #0000000f;margin-top:14px;padding:18px 22px;display:flex;gap:40px;color:#9a9a9a}
+  .veil{position:absolute;inset:0;background:#1f1f1f59}
+  .modal{position:absolute;left:470px;top:170px;width:560px;background:#fff;border-radius:10px;box-shadow:0 20px 50px #0003;padding:26px 28px}
+  .modal h3{margin:0 0 18px;font-size:20px}
+  label{display:block;font-size:12px;color:#6b6b6b;font-weight:600;letter-spacing:.03em;margin:14px 0 6px}
+  .input{border:1px solid #d6d6d6;border-radius:6px;padding:10px 12px;font-family:ui-monospace,Menlo,monospace}
+  .opt{display:flex;align-items:center;gap:12px;border:1px solid #d6d6d6;border-radius:6px;padding:12px 14px;margin-top:8px}
+  .opt.sel{border:2px solid #d50c2d;background:#fff5f6}
+  .radio{width:18px;height:18px;border-radius:50%;border:2px solid #b5b5b5}.sel .radio{border:5px solid #d50c2d}
+  .hint{margin-left:auto;font-size:12px;color:#6b6b6b;font-family:ui-monospace,Menlo,monospace}
+  .bad{color:#9a9a9a}
+  .foot{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}.ghost{border:1px solid #d6d6d6;border-radius:6px;padding:10px 16px}
+  .step{position:absolute;width:28px;height:28px;border-radius:50%;background:#1f1f1f;color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 4px #fff}
+  .note{position:absolute;right:26px;bottom:18px;font-size:12px;color:#6b6b6b;background:#fff;border:1px solid #e3e3e3;border-radius:6px;padding:6px 10px}
+  .callout{position:absolute;left:1060px;top:300px;width:340px;background:#fff;border-radius:10px;border:1px solid #e3e3e3;padding:18px 20px;font-size:14px;box-shadow:0 10px 30px #0002}
+  .callout b{color:#d50c2d}
 </style>
-<div class="shell">
-  <div class="bar"><span class="title">illustrated setup · verify the permission before generating the token</span></div>
-  <div class="content">
-    <div class="path"><span class="box">Project</span><span class="arrow">→</span><span class="box">Security</span><span class="arrow">→</span><span class="box">API tokens</span><span class="arrow">→</span><span class="box">Generate API token</span></div>
-    <div class="panel">
-      <div class="label">Description</div>
-      <div class="input">cloud-audit-2026-09-22</div>
-      <div class="label">Permissions</div>
-      <div class="option selected"><span class="radio"></span><span class="name good">Read</span><span class="detail">GET only · choose this</span></div>
-      <div class="option"><span class="radio"></span><span class="name bad">Read &amp; Write</span><span class="detail">GET + POST + PUT + DELETE · do not choose</span></div>
-    </div>
-    <div class="footer"><span class="strong">Copy once → password manager → HCLOUD_TOKEN → audit → unset → revoke</span><br>Never paste the token into chat, a command argument, .env, repository, screenshot, or report.</div>
-  </div>
+<div class="top"><span class="brand">HETZNER<small>Console</small></span><span class="sep"></span><span class="project">acme-production</span><span class="search">Search…</span></div>
+<div class="side">
+  <div>Dashboard</div>
+  <h6>CLOUD</h6><div>Servers</div><div>Volumes</div><div>Firewalls</div>
+  <h6>NETWORKING</h6><div>Load Balancers</div><div>Networks</div><div>IPs</div>
+  <h6>STORAGE</h6><div>Storage Boxes</div>
+  <div class="active" style="margin-top:14px">Security</div>
 </div>
+<div class="main">
+  <div class="tabs"><span>SSH keys</span><span>S3 credentials</span><span class="on">API tokens</span><span>Certificates</span><span>Members</span></div>
+  <span class="btn gen">Generate API token</span>
+  <div class="row"><span>terraform-ci</span><span>••••••••••••</span><span>Read &amp; Write</span></div>
+</div>
+<div class="veil"></div>
+<div class="modal">
+  <h3>Generate API token</h3>
+  <label>DESCRIPTION</label>
+  <div class="input">cloud-audit-2026-09-23</div>
+  <label>PERMISSIONS</label>
+  <div class="opt sel"><span class="radio"></span><b>Read</b><span class="hint">GET only · choose this</span></div>
+  <div class="opt"><span class="radio"></span><span class="bad">Read &amp; Write</span><span class="hint">GET + POST + PUT + DELETE · not needed</span></div>
+  <div class="foot"><span class="ghost">Cancel</span><span class="btn">Generate API token</span></div>
+</div>
+<span class="step" style="left:176px;top:512px">1</span>
+<span class="step" style="left:497px;top:122px">2</span>
+<span class="step" style="left:1166px;top:91px">3</span>
+<span class="step" style="left:440px;top:356px">4</span>
+<div class="callout">
+  <b>1</b> Security &nbsp;→&nbsp; <b>2</b> API tokens &nbsp;→&nbsp; <b>3</b> Generate API token &nbsp;→&nbsp; <b>4</b> Read<br><br>
+  Copy the token once into a password manager, load it as <code>HCLOUD_TOKEN</code>, run the audit, then <code>unset</code> and revoke it.<br><br>
+  Never paste it into chat, a command argument, <code>.env</code>, a screenshot, or a report.
+</div>
+<div class="note">Illustration with fictional data · not a screenshot of the live Console</div>
 </html>

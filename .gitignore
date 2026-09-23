@@ -17,3 +17,6 @@ venv/
 /reports/
 _gtm/
 .DS_Store
+
+# Local audit output from real projects; never publish
+_output/

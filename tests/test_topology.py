@@ -68,6 +68,8 @@ class TopologyTest(unittest.TestCase):
             self.assertNotIn("173.245.48.0", output)
         self.assertIn("flowchart LR", render_mermaid(topology))
         self.assertTrue(render_svg(topology).startswith("<svg"))
+        self.assertIn("#f4f4f4", render_svg(topology))
+        self.assertIn("#0b1220", render_svg(topology, theme="dark"))
 
 
 if __name__ == "__main__":

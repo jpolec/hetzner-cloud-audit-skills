@@ -75,6 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     topology = subparsers.add_parser("map", help="Network map as Markdown/Mermaid, SVG, or JSON")
     _common(topology, formats=("markdown", "mermaid", "svg", "json"))
     topology.add_argument("--title", default="Hetzner network map")
+    topology.add_argument("--theme", choices=("light", "dark"), default="light", help="SVG color theme")
     return parser
 
 
@@ -154,7 +155,7 @@ def run(args: argparse.Namespace) -> int:
         output = {
             "json": lambda: json.dumps(topology, indent=2),
             "mermaid": lambda: render_mermaid(topology),
-            "svg": lambda: render_svg(topology, args.title),
+            "svg": lambda: render_svg(topology, args.title, args.theme),
             "markdown": lambda: render_topology_markdown(topology),
         }[args.format]()
     elif args.command == "ask":

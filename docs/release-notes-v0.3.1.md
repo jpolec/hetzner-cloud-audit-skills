@@ -7,6 +7,7 @@ v0.3.1 comes from the first audit of a real 18-server Hetzner project. It adds a
 - `hetzner-audit map` renders the network as Markdown with a Mermaid diagram, a dependency-free SVG, or JSON. Firewall sources are grouped into Internet, Cloudflare, Tailscale, private-network, and allow-listed classes, and each server is colored by exposure. Public IP addresses are never printed.
 - `HETZ-GOV-003` reports servers that run a deprecated Hetzner server type.
 - Markdown audit and `path` output now show asset names instead of numeric provider IDs.
+- The SVG map uses a light theme by default (`--theme dark` is available), and all README images share that style.
 - The README leads with a map and an audit summary from the real project, with identifiers replaced.
 
 ## Fixed

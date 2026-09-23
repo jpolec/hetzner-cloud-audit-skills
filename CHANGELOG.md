@@ -19,6 +19,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ### Changed
 
+- `hetzner-audit map --format svg` defaults to a light theme (grey canvas, white cards, exposure stripe); `--theme dark` keeps the previous look.
+- README images use the same light style, and the token guide shows a console-style illustration with fictional data.
 - README is restructured around a quick start, a no-token demo, and a safety model.
 
 ## [0.3.0] - 2026-09-22
