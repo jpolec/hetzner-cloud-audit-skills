@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-23
+
 ### Added
 
 - `hetzner-audit map` renders the network topology as Markdown with Mermaid, a dependency-free SVG, or JSON. Firewall sources are grouped into Internet, Cloudflare, Tailscale, private-network, and allow-listed classes, and public IP addresses are never printed.
@@ -81,7 +83,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.1.0...v0.1.1

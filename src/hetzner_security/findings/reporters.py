@@ -127,7 +127,7 @@ def render_sarif(findings: list[Finding]) -> str:
                 "tool": {
                     "driver": {
                         "name": "hetzner-cloud-audit-skills",
-                        "version": "0.3.0",
+                        "version": "0.3.1",
                         "rules": list(rules.values()),
                     }
                 },

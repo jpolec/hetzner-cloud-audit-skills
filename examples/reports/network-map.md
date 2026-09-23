@@ -66,22 +66,22 @@ Exposure: **critical** = sensitive port or all ports open to any address, or no 
 | Server | Group | Type | Exposure | Public ingress | Private / admin ingress |
 |---|---|---|---|---|---|
 | acme-agents-1 | Applications | cax11 | private | none (ICMP only) | Tailscale tailnet: udp/41641 (WireGuard) |
-| acme-api-app-1 | Applications | cpx22 | private | none (ICMP only) | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
-| acme-api-db-1 | Data | cx23 | private | none (ICMP only) | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
+| acme-api-app-1 | Applications | cpx22 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
+| acme-api-db-1 | Data | cx23 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
 | acme-auth-1 | Identity & secrets | cx23 | private | none (ICMP only) | Tailscale tailnet: udp/41641 (WireGuard) |
 | acme-batch-1 | Edge & web | cx33 | proxied | Cloudflare only: tcp/80, tcp/443 | Tailscale tailnet: udp/41641 (WireGuard) |
 | acme-bus | Applications | cpx22 | private | none (ICMP only) | Tailscale tailnet: udp/41641 (WireGuard) |
-| acme-catalog | Other | cax11 | private | none (ICMP only) | Tailscale tailnet: tcp/4000, tcp/22003, udp/41641 (WireGuard); Private network: tcp/4000, tcp/all, udp/all |
-| acme-data | Data | cx23 | proxied | Cloudflare only: tcp/80, tcp/443 | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard); Private network: tcp/all, udp/all |
-| acme-edge-1 | Edge & web | cx23 | proxied | Cloudflare only: tcp/80, tcp/443 | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
+| acme-catalog | Other | cax11 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, tcp/8000, udp/41641 (WireGuard); Private network: tcp/8000, tcp/all, udp/all |
+| acme-data | Data | cx23 | proxied | Cloudflare only: tcp/80, tcp/443 | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard); Private network: tcp/all, udp/all |
+| acme-edge-1 | Edge & web | cx23 | proxied | Cloudflare only: tcp/80, tcp/443 | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
 | acme-ingest-1 | Other | cpx32 | private | none (ICMP only) | Tailscale tailnet: udp/41641 (WireGuard), tcp/all |
-| acme-ingest-2 | Other | cx33 | private | none (ICMP only) | Tailscale tailnet: tcp/4267, tcp/22003, udp/41641 (WireGuard); Private network: tcp/4267, tcp/all, udp/all |
-| acme-orchestrator-1 | Identity & secrets | cx23 | private | none (ICMP only) | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
-| acme-replica | Data | cax31 | private | none (ICMP only) | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
-| acme-sim | Other | cpx32 | public | Internet (any address): tcp/80, tcp/443 | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard); Private network: tcp/all, udp/all |
+| acme-ingest-2 | Other | cx33 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, tcp/9101, udp/41641 (WireGuard); Private network: tcp/9101, tcp/all, udp/all |
+| acme-orchestrator-1 | Identity & secrets | cx23 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
+| acme-replica | Data | cax31 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
+| acme-sim | Other | cpx32 | public | Internet (any address): tcp/80, tcp/443 | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard); Private network: tcp/all, udp/all |
 | acme-vault-1 | Identity & secrets | cx23 | private | none (ICMP only) | Tailscale tailnet: udp/41641 (WireGuard) |
-| acme-warehouse | Data | cpx32 | private | none (ICMP only) | Tailscale tailnet: tcp/4268, tcp/22003, udp/41641 (WireGuard); Private network: tcp/4268, tcp/all, udp/all |
-| acme-web-1 | Edge & web | cx23 | private | none (ICMP only) | Tailscale tailnet: tcp/22003, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
+| acme-warehouse | Data | cpx32 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, tcp/9102, udp/41641 (WireGuard); Private network: tcp/9102, tcp/all, udp/all |
+| acme-web-1 | Edge & web | cx23 | private | none (ICMP only) | Tailscale tailnet: tcp/2222, udp/41641 (WireGuard), tcp/all, udp/all; Private network: tcp/all, udp/all |
 | acme-worker-1 | Applications | cx22 (deprecated) | private | none (ICMP only) | Tailscale tailnet: udp/41641 (WireGuard) |
 
 Unattached volumes: acme-batch-data

@@ -89,7 +89,7 @@ Works with Claude Code, OpenAI Codex, and other SKILL.md-compatible agents. The 
 ### Option B: CLI
 
 ```sh
-uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.3.0' \
+uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.3.1' \
   hetzner-audit audit --read-only --no-ssh --format markdown --output audit.md
 ```
 
@@ -240,7 +240,7 @@ The cost audit is deliberately conservative:
 ## GitHub Action and SARIF
 
 ```yaml
-- uses: jpolec/hetzner-cloud-audit-skills@v0.3.0
+- uses: jpolec/hetzner-cloud-audit-skills@v0.3.1
   env:
     HCLOUD_TOKEN: ${{ secrets.HCLOUD_TOKEN }}
   with:
