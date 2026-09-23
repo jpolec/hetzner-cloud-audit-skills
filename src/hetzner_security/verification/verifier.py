@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 
+from ..flows import port_set
 from ..graph import AttackGraph
 from ..models import Evidence, Finding, FindingStatus, Snapshot, Verification
 
@@ -45,6 +46,26 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
             result,
             "The address may live at another provider or in another project; confirm before calling it dangling.",
         )
+    if candidate.rule_id in {"HETZ-OBJ-001", "HETZ-OBJ-002"}:
+        anonymous = assets[candidate.assets[0]].properties.get("anonymous_list")
+        if anonymous is False and candidate.rule_id == "HETZ-OBJ-002":
+            return _needs(result, "The policy names a wildcard principal, but an anonymous listing was refused; check which objects it covers.")
+    if candidate.rule_id == "HETZ-K8S-002" and assets[candidate.assets[0]].properties.get("system"):
+        return _needs(result, "System namespaces (CNI, CSI, monitoring) often need node access; confirm this one does.")
+    if candidate.rule_id in {"HETZ-ROB-001", "HETZ-ROB-002"}:
+        return _needs(result, "The Robot firewall admits the traffic; a host firewall and listener evidence decide reachability.")
+    if candidate.rule_id in {"HETZ-IAC-001", "HETZ-IAC-004"} and (snapshot.metadata.get("terraform") or {}).get("kind") == "state":
+        return _needs(result, "The state file may be older than the runtime; confirm with `terraform plan -refresh-only` or a saved plan.")
+    if candidate.rule_id in {"HETZ-IAC-002", "HETZ-IAC-003"}:
+        return _needs(result, "Terraform may manage these resources from another workspace or state file; confirm scope.")
+    if candidate.rule_id.startswith("HETZ-ATT-"):
+        answer = candidate.evidence[0].observed.get("answer") if isinstance(candidate.evidence[0].observed, dict) else None
+        if answer is not False:
+            return _needs(result, "The owner has not verified this control yet.")
+        return _set(result, FindingStatus.CONFIRMED, "owner attestation", candidate.evidence,
+                    "The owner stated that the control is not in place.", confidence=0.9)
+    if candidate.rule_id.startswith("HETZ-CHG-"):
+        return _needs(result, "Action history shows the change happened; confirm with the owner that it was intended.")
     if candidate.rule_id == "HETZ-LB-006":
         return _needs(result, "Direct backend access may be intended; confirm with the owner and check the host firewall.")
     if candidate.rule_id == "HETZ-IMG-001":
@@ -71,6 +92,17 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 "firewall-attachment challenge",
                 firewall_evidence,
                 "The broad rule is not attached to the cited asset.",
+                confidence=0.1,
+            )
+        intersection = next((e.observed for e in candidate.evidence if e.kind == "host_flow_intersection"), None)
+        if isinstance(intersection, dict) and intersection.get("reachable") == "none":
+            return _set(
+                result,
+                FindingStatus.REJECTED,
+                "host flow intersection",
+                candidate.evidence,
+                "The Cloud Firewall admits the port, but host evidence shows no port that is both admitted by the host "
+                f"firewall ({intersection.get('host_firewall')}) and listening ({intersection.get('listening')}).",
                 confidence=0.1,
             )
         port = _candidate_port(candidate)
@@ -112,21 +144,29 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 confidence=0.05,
             )
         target_properties = assets[target].properties
-        listening = _int_values(target_properties.get("listening_ports"))
-        host_allowed = _int_values(target_properties.get("host_firewall_allow_ports"))
+        # Private-network paths use the private view of the host when a bundle provides it.
+        listening = port_set(target_properties.get("private_listening_ports", target_properties.get("listening_ports")))
+        host_allowed = port_set(
+            target_properties.get("host_firewall_private_allow_ports", target_properties.get("host_firewall_allow_ports"))
+        )
         if not listening or not host_allowed:
             return _needs(
                 result,
                 "The cloud path is observed, but host firewall, listener/container publication, and application authorization remain decisive.",
             )
-        if not listening & host_allowed:
+        if not listening.intersection(host_allowed) and target_properties.get("host_firewall_private_partial"):
+            return _needs(
+                result,
+                "The host firewall admits only some sources inside the private network; whether this peer is one of them needs checking.",
+            )
+        if not listening.intersection(host_allowed):
             # Both layers are evidenced, but no port is both open in the host firewall and listening.
             return _set(
                 result,
                 FindingStatus.REJECTED,
                 "listener and host-firewall intersection",
                 candidate.evidence,
-                f"No listening port {sorted(listening)} is admitted by the host firewall {sorted(host_allowed)}.",
+                f"No listening port ({listening.describe()}) is admitted by the host firewall ({host_allowed.describe()}).",
                 confidence=0.1,
             )
         if assets[target].properties.get("host_firewall_allows_source") is False:
@@ -139,7 +179,10 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 confidence=0.1,
             )
 
-    if candidate.rule_id == "HETZ-PG-001":
+    if candidate.rule_id == "HETZ-DKR-005" and any(e.kind == "docker_user_chain" for e in candidate.evidence):
+        return _needs(result, "DOCKER-USER rules exist and may already restrict the published ports; review them.")
+
+    if candidate.rule_id in {"HETZ-PG-001", "HETZ-PG-003"}:
         target = candidate.assets[0]
         if not any(
             graph.reachable(source, target, protocol="tcp", port=5432)
@@ -207,18 +250,6 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
     )
 
 
-def _int_values(value: object) -> set[int]:
-    if not isinstance(value, (list, tuple, set)):
-        return set()
-    output = set()
-    for item in value:
-        try:
-            output.add(int(item))
-        except (TypeError, ValueError):
-            continue
-    return output
-
-
 def _needs(finding: Finding, note: str) -> Finding:
     return _set(
         finding,
@@ -242,6 +273,9 @@ def _set(
     finding.status = status
     finding.confidence = confidence
     if status != FindingStatus.CONFIRMED:
+        if finding.severity is not None:
+            # Hypotheses are unscored; keep what the rule proposed so views can place them.
+            finding.metadata["candidate_severity"] = finding.severity.value
         finding.severity = None
     finding.verification = Verification(method=method, result=status, evidence=evidence, notes=notes)
     return finding

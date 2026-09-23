@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="928" viewBox="0 0 1500 928" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" rx="16" fill="#f4f4f4"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker><filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>
+<rect x="28" y="28" width="22" height="22" rx="5" fill="#d50c2d"/>
+<g transform="translate(32 32) scale(0.58)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
+<text x="58" y="44" font-size="14" font-weight="800" fill="#1f1f1f">hetzner-audit</text>
+<text x="160" y="44" font-size="12.5" fill="#6b6b6b">read-only Hetzner Cloud audit · github.com/jpolec/hetzner-cloud-audit-skills</text>
+<text x="28" y="78" font-size="22" font-weight="700" fill="#1f1f1f">Per-VM host layers</text>
+<text x="28" y="102" font-size="13" fill="#6b6b6b">cloud firewall ∩ host firewall ∩ listener = reachable · Docker-published ports skip UFW/nftables input rules · from owner-run host bundles</text>
+<rect x="28.0" y="124" width="279.2" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="42.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">HOSTS WITH EVIDENCE</text>
+<text x="42.0" y="178" font-size="28" font-weight="800" fill="#1f1f1f">2</text>
+<text x="42.0" y="198" font-size="11.5" fill="#6b6b6b">12 server(s) without a bundle</text>
+<rect x="319.2" y="124" width="279.2" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="333.2" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">REACHABLE END TO END</text>
+<text x="333.2" y="178" font-size="28" font-weight="800" fill="#1f9d55">0</text>
+<text x="333.2" y="198" font-size="11.5" fill="#6b6b6b">servers with a port open through every layer</text>
+<rect x="610.4" y="124" width="279.2" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="624.4" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">DOCKER BYPASS</text>
+<text x="624.4" y="178" font-size="28" font-weight="800" fill="#d50c2d">1</text>
+<text x="624.4" y="198" font-size="11.5" fill="#6b6b6b">servers publishing past the host firewall</text>
+<rect x="901.6" y="124" width="279.2" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="915.6" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">NO HOST FIREWALL</text>
+<text x="915.6" y="178" font-size="28" font-weight="800" fill="#d98e04">1</text>
+<text x="915.6" y="198" font-size="11.5" fill="#6b6b6b">cloud firewall is the only layer</text>
+<rect x="1192.8" y="124" width="279.2" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="1206.8" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">CONTAINERS</text>
+<text x="1206.8" y="178" font-size="28" font-weight="800" fill="#1f1f1f">6</text>
+<text x="1206.8" y="198" font-size="11.5" fill="#6b6b6b">seen in docker inspect</text>
+<rect x="28" y="254.0" width="1444" height="244" rx="12" fill="#ffffff" stroke="#e3e3e3" stroke-width="1" filter="url(#shadow)"/>
+<rect x="44" y="268.0" width="34" height="34" rx="7" fill="#e8710a"/>
+<g transform="translate(49 273.0) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="88" y="284.0" font-size="15" font-weight="800" fill="#1f1f1f">api-1</text>
+<text x="88" y="302.0" font-size="11.5" fill="#6b6b6b">ubuntu 24.04 · ssh keys only · bundle 2026-09-23T08:00:00Z</text>
+<rect x="44.0" y="318.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="56.0" y="338.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">CLOUD FIREWALL</text>
+<text x="56.0" y="358.0" font-size="12.5" font-weight="700" fill="#1f1f1f">admits nothing</text>
+<path d="M 303.2 357.0 L 327.2 357.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="315.2" y="350.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="333.2" y="318.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="345.2" y="338.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">HOST FIREWALL · UFW</text>
+<text x="345.2" y="358.0" font-size="12.5" font-weight="700" fill="#1f1f1f">admits nothing</text>
+<path d="M 592.4 357.0 L 616.4 357.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="604.4" y="350.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="622.4" y="318.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="634.4" y="338.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">PUBLIC LISTENERS</text>
+<text x="634.4" y="358.0" font-size="12.5" font-weight="700" fill="#1f1f1f">2222, 9001-9003</text>
+<path d="M 881.6 357.0 L 905.6 357.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="893.6" y="350.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="911.6" y="318.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="923.6" y="338.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">DOCKER PUBLISHED</text>
+<text x="923.6" y="358.0" font-size="12.5" font-weight="700" fill="#d50c2d">bypass 9001, 9002, 9003</text>
+<path d="M 1170.8 357.0 L 1194.8 357.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="1182.8" y="350.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="1200.8" y="318.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#1f9d55" stroke-width="1.6"/>
+<text x="1212.8" y="338.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">REACHABLE FROM INTERNET</text>
+<text x="1212.8" y="358.0" font-size="12.5" font-weight="700" fill="#1f9d55">none</text>
+<text x="1212.8" y="384.0" font-size="11" font-weight="700" fill="#d98e04">private network: 9001-9003</text>
+<text x="44" y="422.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">CONTAINERS</text>
+<rect x="44" y="432.0" width="228" height="40" rx="8" fill="#ffffff" stroke="#d50c2d"/>
+<text x="54" y="448.0" font-size="11.5" font-weight="700" fill="#1f1f1f">cadvisor</text>
+<text x="54" y="463.0" font-size="10.5" fill="#d50c2d">privileged, docker.sock, mount /</text>
+<rect x="282" y="432.0" width="228" height="40" rx="8" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="292" y="448.0" font-size="11.5" font-weight="700" fill="#1f1f1f">api-app</text>
+<text x="292" y="463.0" font-size="10.5" fill="#d50c2d">9001 on all interfaces</text>
+<rect x="520" y="432.0" width="228" height="40" rx="8" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="530" y="448.0" font-size="11.5" font-weight="700" fill="#1f1f1f">monitor-api</text>
+<text x="530" y="463.0" font-size="10.5" fill="#d50c2d">9003 on all interfaces</text>
+<rect x="758" y="432.0" width="228" height="40" rx="8" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="768" y="448.0" font-size="11.5" font-weight="700" fill="#1f1f1f">worker-app</text>
+<text x="768" y="463.0" font-size="10.5" fill="#d50c2d">9002 on all interfaces</text>
+<rect x="996" y="432.0" width="228" height="40" rx="8" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="1006" y="448.0" font-size="11.5" font-weight="700" fill="#1f1f1f">app-postgres</text>
+<text x="1006" y="463.0" font-size="10.5" fill="#6b6b6b">5432 on loopback</text>
+<rect x="1234" y="432.0" width="228" height="40" rx="8" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="1244" y="448.0" font-size="11.5" font-weight="700" fill="#1f1f1f">scheduler</text>
+<text x="1244" y="463.0" font-size="10.5" fill="#6b6b6b">4100 on internal, 4100 on loopback</text>
+<rect x="28" y="512.0" width="1444" height="170" rx="12" fill="#ffffff" stroke="#e3e3e3" stroke-width="1" filter="url(#shadow)"/>
+<rect x="44" y="526.0" width="34" height="34" rx="7" fill="#e8710a"/>
+<g transform="translate(49 531.0) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="88" y="542.0" font-size="15" font-weight="800" fill="#1f1f1f">pg-main</text>
+<text x="88" y="560.0" font-size="11.5" fill="#6b6b6b">debian 12 · ssh password login ON · bundle 2026-09-23T08:05:00Z</text>
+<rect x="44.0" y="576.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="56.0" y="596.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">CLOUD FIREWALL</text>
+<text x="56.0" y="616.0" font-size="12.5" font-weight="700" fill="#1f1f1f">admits nothing</text>
+<path d="M 303.2 615.0 L 327.2 615.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="315.2" y="608.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="333.2" y="576.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="345.2" y="596.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">HOST FIREWALL · NFTABLES</text>
+<text x="345.2" y="616.0" font-size="12.5" font-weight="700" fill="#d98e04">admits all (filters nothing)</text>
+<path d="M 592.4 615.0 L 616.4 615.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="604.4" y="608.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="622.4" y="576.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="634.4" y="596.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">PUBLIC LISTENERS</text>
+<text x="634.4" y="616.0" font-size="12.5" font-weight="700" fill="#1f1f1f">22, 5432, 6379</text>
+<path d="M 881.6 615.0 L 905.6 615.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="893.6" y="608.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="911.6" y="576.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#e3e3e3" stroke-width="1"/>
+<text x="923.6" y="596.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">DOCKER PUBLISHED</text>
+<text x="923.6" y="616.0" font-size="12.5" font-weight="700" fill="#1f9d55">no bypass</text>
+<path d="M 1170.8 615.0 L 1194.8 615.0" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#arrow)"/>
+<text x="1182.8" y="608.0" text-anchor="middle" font-size="12" font-weight="800" fill="#6b6b6b">∩</text>
+<rect x="1200.8" y="576.0" width="255.2" height="78" rx="9" fill="#fafafa" stroke="#1f9d55" stroke-width="1.6"/>
+<text x="1212.8" y="596.0" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="#6b6b6b">REACHABLE FROM INTERNET</text>
+<text x="1212.8" y="616.0" font-size="12.5" font-weight="700" fill="#1f9d55">none</text>
+<text x="1212.8" y="642.0" font-size="11" font-weight="700" fill="#d98e04">private network: 22, 5432, 6379</text>
+<rect x="28" y="706" width="1444" height="182" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="44" y="730" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">HOST AND SECURITY ACTIONS</text>
+<text x="1456" y="730" text-anchor="end" font-size="11" fill="#6b6b6b">plans for a human · the tool changes nothing</text>
+<circle cx="56" cy="760" r="11" fill="#1f1f1f"/>
+<text x="56" y="764" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">2</text>
+<text x="76" y="758" font-size="12.5" font-weight="700" fill="#1f1f1f">Docker-published ports bypass the host firewall; only the Cloud Firewall protects them</text>
+<text x="76" y="775" font-size="11" fill="#6b6b6b">Bind published ports to 127.0.0.1 or the private/VPN address (for example `127.0.0.1:8080:8080`), or add DOCKER-USER rules; keep the Cloud Firewall r…</text>
+<text x="1456" y="758" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
+<rect x="1346" y="764" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1366.0" y="775" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
+<text x="1456" y="775" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<circle cx="56" cy="806" r="11" fill="#1f1f1f"/>
+<text x="56" y="810" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">6</text>
+<text x="76" y="804" font-size="12.5" font-weight="700" fill="#1f1f1f">sshd accepts password logins</text>
+<text x="76" y="821" font-size="11" fill="#6b6b6b">Set PasswordAuthentication no and KbdInteractiveAuthentication no; use keys (ed25519) only.</text>
+<text x="1456" y="804" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
+<rect x="1346" y="810" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1366.0" y="821" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
+<text x="1456" y="821" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<circle cx="56" cy="852" r="11" fill="#1f1f1f"/>
+<text x="56" y="856" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">7</text>
+<text x="76" y="850" font-size="12.5" font-weight="700" fill="#1f1f1f">sshd allows root to log in with a password</text>
+<text x="76" y="867" font-size="11" fill="#6b6b6b">Set PermitRootLogin prohibit-password (or no) and log in as a named user.</text>
+<text x="1456" y="850" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
+<rect x="1346" y="856" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1366.0" y="867" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
+<text x="1456" y="867" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+</svg>

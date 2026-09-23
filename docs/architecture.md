@@ -53,3 +53,21 @@ Deferred. A read-only MCP facade could expose asset lists, topology, findings, a
 
 A path in the attack graph is a pivot chain: each hop is its own flow, so an attacker may enter host A on one port and then reach host B on another. Only the final hop is filtered by the requested protocol and port. Load-balancer hops are forwarding, not pivots: the LB's listen port and the target's destination port are separate edges, and `ask` treats such paths as direct exposure. Internet exposure itself is computed separately in `flows.py` as sets of allowed flows per asset, keyed by (address family, protocol, source class). The snapshot diff compares those sets, so a range that widens counts as a regression, and a new public IP behind a deny-all firewall does not.
 
+
+## Evidence beyond the Cloud API (v0.7)
+
+Optional sources feed the same snapshot, facts, and rules:
+
+| Source | Module | Enters the snapshot as |
+|---|---|---|
+| Host bundle (owner-run script) | `host/` | server properties (host firewall per family, listeners, Docker publications, sshd), `container`/`postgres`/`redis` assets, `runs` edges (never traversed), Internet and private-network edges only where every layer admits the port |
+| Terraform JSON | `iac.py` | `metadata.terraform` and network-access expectations |
+| Provider `/actions` | `collectors/hcloud.py` | `signals` of type `provider_action` |
+| Node exporter via Prometheus | `node_metrics.py` | `guest_metrics` on servers |
+| Robot webservice | `collectors/robot.py` | `robot_server`, `vswitch`, `ssh_key` assets and edges |
+| Object Storage (S3) | `collectors/objectstorage.py` | `bucket` assets with per-setting read status |
+| kubectl listing | `k8s.py` | `k8s_*` assets, `k8s` on node servers, `publishes` edges for NodePorts |
+| Owner checklist | `attestations.py` | `metadata.attestations` |
+| Several projects | `projects.py` | merged snapshot, `project` on every asset |
+
+Host firewalls (UFW, nftables, iptables) are normalized to ordered rules and evaluated by one first-match function per address family. A rule the parser does not fully model makes the answer `None` (unknown); unknown layers never produce `rejected` or `confirmed`.

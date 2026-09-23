@@ -95,6 +95,24 @@ class PortSet:
         return ", ".join(str(a) if a == b else f"{a}-{b}" for a, b in self.ranges)
 
 
+def port_set(value: object) -> PortSet:
+    """Read ports stored either as a list of ints or as [first, last] ranges (host evidence)."""
+    spans: list[tuple[int, int]] = []
+    if isinstance(value, (list, tuple, set)):
+        for item in value:
+            if isinstance(item, (list, tuple)) and len(item) == 2:
+                try:
+                    spans.append((int(item[0]), int(item[1])))
+                except (TypeError, ValueError):
+                    continue
+            else:
+                try:
+                    spans.append((int(item), int(item)))
+                except (TypeError, ValueError):
+                    continue
+    return PortSet.of(spans)
+
+
 def rule_ports(rule: dict[str, Any]) -> PortSet:
     """Ports a normalized firewall rule admits; ICMP and port-less protocols map to port 0."""
     protocol = str(rule.get("protocol", "tcp"))

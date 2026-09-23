@@ -19,7 +19,8 @@ Allowed by default:
 
 - Hetzner API `GET` requests; local file reads inside the authorized repository; parsing operator-provided fixtures and scanner JSON.
 - Local analysis, graph construction, schema validation, and report generation.
-- SSH only when the operator explicitly configures it; run the exact read-only command allowlist in `skills/linux-host/SKILL.md`.
+- Host evidence through the owner-run bundle (`hetzner-audit host-bundle`): the owner reviews the script and runs it; you pass the output with `--host-bundle`. SSH from the agent only when the operator explicitly asks; run the exact read-only command allowlist in `skills/linux-host/SKILL.md`.
+- Optional read-only sources the owner enables: `--robot` (HROBOT_USER/HROBOT_PASSWORD), `--object-storage` (HETZNER_S3_ACCESS_KEY/HETZNER_S3_SECRET_KEY), `--k8s` (a saved `kubectl get nodes,pods,services -A -o json`), `--terraform` (a saved `terraform show -json`), `--node-metrics` (from `hetzner-audit metrics --prometheus URL`), and `--attestations` (answers to `hetzner-audit checklist`). Never ask for any credential in chat; they are read from the environment.
 
 Prohibited without a separate, explicit operator approval:
 
@@ -34,9 +35,9 @@ The default CLI flags are `--read-only --no-ssh`. The tool exposes no Hetzner mu
 Prefer an existing `hetzner-audit` executable; `hetzner-sec` is a legacy compatibility alias. In a checked-out project, use `PYTHONPATH=src python3 -m hetzner_security.cli.main`. Otherwise, explain that installing the skill does not install an executable and request approval before downloading or executing the pinned release:
 
 ```sh
-uvx hetzner-audit==0.5.0 --help
+uvx hetzner-audit==0.7.0 --help
 # or, from the tagged source:
-uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.5.0' hetzner-audit --help
+uvx --from 'git+https://github.com/jpolec/hetzner-cloud-audit-skills@v0.7.0' hetzner-audit --help
 ```
 
 Never silently install from `main` or an unpinned branch. If `uvx` is unavailable, give the operator the tagged `uv tool install` or virtual-environment installation command from the project README.
@@ -80,7 +81,16 @@ hetzner-audit map --input audit/snapshot.json --format svg --view connectivity -
 hetzner-audit map --input audit/snapshot.json --format svg --view cost --output audit/cost.svg
 ```
 
-Pick the view that matches the question: `architecture` for "what does my project look like", `connectivity` for "what can reach what" (the blast radius on shared private networks), and `cost` for "where am I overpaying". Lead the conversation with the report's **Recommended actions**. For each action, state the evidence level and what evidence would upgrade it; never present a `needs_validation` item as fact.
+Pick the view that matches the question: `architecture` for "what does my project look like", `connectivity` for "what can reach what" (the blast radius on shared private networks), `cost` for "where am I overpaying", `host` for "is it really open on the server" (needs `--host-bundle`), and `posture` for "how bad is it overall, and how sure are we".
+
+Offer the evidence that would upgrade hypotheses, in this order, and only what the owner agrees to:
+
+1. Host bundles for Internet-facing servers and database hosts (`hetzner-audit host-bundle`). Docker-published ports bypass UFW; only a bundle shows it.
+2. `hetzner-audit checklist`: walk the owner through the console items (2FA, members, tokens) and record answers for `--attestations`.
+3. Terraform JSON if they manage the project with Terraform; `kubectl` JSON if they run Kubernetes; Robot or Object Storage credentials if they use them.
+4. For cost questions: node exporter telemetry via `hetzner-audit metrics`, so rightsizing can move from theoretical to expected savings.
+
+For several projects, snapshot each with its own token (`--project NAME --token-env VAR`) and `merge` them. Lead the conversation with the report's **Recommended actions**. For each action, state the evidence level and what evidence would upgrade it; never present a `needs_validation` item as fact.
 
 For repeated audits, compare timestamped facts before hunting again:
 

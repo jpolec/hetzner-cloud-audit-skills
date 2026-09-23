@@ -219,7 +219,8 @@ def load_balancer_hygiene(snapshot: Snapshot, graph: AttackGraph) -> list[Findin
             )
         unhealthy = [
             {"target": target.get("server", {}).get("id") or target.get("type"), "port": status.get("listen_port")}
-            for target in targets
+            # label_selector targets carry per-server health in their nested "targets".
+            for target in [*targets, *(nested for item in targets for nested in item.get("targets") or [])]
             for status in (target.get("health_status") or [])
             if status.get("status") == "unhealthy"
         ]

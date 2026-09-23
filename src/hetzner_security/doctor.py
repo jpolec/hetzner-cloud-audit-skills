@@ -28,9 +28,17 @@ from .collectors.hcloud import (
 Probe = Callable[[str, str | None], dict[str, Any]]
 OPTIONAL_TOOLS = {
     "uvx": "runs the pinned CLI without installing it",
-    "terraform": "needed later for Terraform ↔ runtime drift",
+    "terraform": "`terraform show -json` feeds `--terraform` drift checks",
+    "kubectl": "`kubectl get nodes,pods,services -A -o json` feeds `--k8s` correlation",
     "trivy": "optional vulnerability signals (`--no-external-tools` disables them)",
 }
+# Optional read-only sources and the environment variables they read (values never printed).
+OPTIONAL_SOURCES = {
+    "Hetzner Robot (--robot)": ("HROBOT_USER", "HROBOT_PASSWORD"),
+    "Object Storage (--object-storage)": ("HETZNER_S3_ACCESS_KEY", "HETZNER_S3_SECRET_KEY"),
+    "Prometheus (hetzner-audit metrics)": ("PROMETHEUS_TOKEN",),
+}
+SECRET_NAMES = ("HCLOUD_TOKEN", "HROBOT_PASSWORD", "HETZNER_S3_SECRET_KEY", "PROMETHEUS_TOKEN")
 SCOPE_KINDS = ("server", "firewall", "network", "volume", "load_balancer", "primary_ip")
 
 
@@ -73,11 +81,13 @@ def _report_location(report_dir: Path) -> dict[str, str]:
 def _dotenv_leak(report_dir: Path) -> dict[str, str] | None:
     env_file = report_dir / ".env"
     try:
-        if env_file.is_file() and "HCLOUD_TOKEN" in env_file.read_text(errors="ignore"):
+        text = env_file.read_text(errors="ignore") if env_file.is_file() else ""
+        found = [name for name in SECRET_NAMES if name in text]
+        if found:
             return _check(
                 "Token storage",
                 "warn",
-                f"{env_file} mentions HCLOUD_TOKEN. Keep the token in a password manager or keychain, not in a file.",
+                f"{env_file} mentions {', '.join(found)}. Keep credentials in a password manager or keychain, not in a file.",
             )
     except OSError:
         return None
@@ -175,6 +185,17 @@ def run_doctor(
     for tool, purpose in OPTIONAL_TOOLS.items():
         found = which(tool)
         checks.append(_check(f"Tool: {tool}", "ok" if found else "info", f"{'found' if found else 'not found'}; {purpose}."))
+    for source, names in OPTIONAL_SOURCES.items():
+        present = [name for name in names if env.get(name)]
+        checks.append(_check(
+            f"Source: {source}", "ok" if len(present) == len(names) else "info",
+            "credentials set (values not shown)" if len(present) == len(names)
+            else f"not configured ({', '.join(names)}); optional, read-only, or pass a saved file",
+        ))
+    checks.append(_check(
+        "Host evidence (--host-bundle)", "info",
+        "optional: `hetzner-audit host-bundle > host-bundle.sh`, review it, run it on each server, pass the output",
+    ))
     checks.append(_report_location(report_dir))
     leak = _dotenv_leak(report_dir)
     if leak:

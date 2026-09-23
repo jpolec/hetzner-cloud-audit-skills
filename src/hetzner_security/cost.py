@@ -72,6 +72,10 @@ def _available(server_type: Asset, location: str) -> bool:
     )
 
 
+# Savings that need no utilization telemetry: the resource is billed and unused as observed.
+EXPECTED_WITHOUT_TELEMETRY = {"HETZ-COST-001", "HETZ-COST-004", "HETZ-COST-005", "HETZ-COST-006", "HETZ-COST-007"}
+
+
 def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
     assets = snapshot.assets
     servers = [asset for asset in assets if asset.type == "server"]
@@ -140,6 +144,7 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
             "metrics_start": props.get("metrics", {}).get("start") if isinstance(props.get("metrics"), dict) else None,
             "metrics_end": props.get("metrics", {}).get("end") if isinstance(props.get("metrics"), dict) else None,
             **_traffic(props, current_type, location),
+            **_guest(props, requested_days),
         }
         server_rows.append(row)
         if (row.get("traffic_used_percent") or 0) >= TRAFFIC_WARN_PERCENT:
@@ -172,12 +177,17 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
                 f"{server.name}: CPU data covers {window.get('days') or 0} of {requested_days} requested days; no rightsizing candidate"
             )
             continue
+        floors = _guest_floors(row, current_type)
         same_arch = _best_resize_candidate(
-            server, server_types, cpu_p95_raw, cpu_max_raw, location, base
+            server, server_types, cpu_p95_raw, cpu_max_raw, location, base, **floors
         )
         if same_arch is not None:
             candidate, candidate_price = same_arch
             saving = base - candidate_price
+            guest_evidence = [
+                f"Guest RAM p95 {row['ram_p95_percent']:.0f}% and root filesystem peak {row['disk_used_max_percent']:.0f}% "
+                f"over {row['guest_coverage_days']:.0f} days fit the candidate with headroom."
+            ] if row.get("guest_evidence_complete") else []
             recommendations.append(
                 _recommendation(
                     "HETZ-COST-002",
@@ -189,10 +199,17 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
                     observed_at,
                     "medium",
                     0.72,
-                    ["Collect guest RAM p95.", "Validate root filesystem usage, I/O peaks, SLO, and migration path."],
-                    [f"30-day CPU p95 uses {cpu_p95_capacity:.2f}% of aggregate vCPU capacity."],
+                    (
+                        ["Validate I/O peaks, SLO, and the migration path (a smaller disk needs a new server, not a resize)."]
+                        if row.get("guest_evidence_complete")
+                        else ["Collect guest RAM p95 and filesystem occupancy (`--node-metrics`).", "Validate I/O peaks, SLO, and migration path."]
+                    ) + (["RAM use is rising: the 7-day p95 is well above the 30-day p95."] if row.get("ram_rising") else []),
+                    [f"30-day CPU p95 uses {cpu_p95_capacity:.2f}% of aggregate vCPU capacity.", *guest_evidence],
                 )
             )
+            recommendations[-1]["evidence_complete"] = bool(row.get("guest_evidence_complete")) and not row.get("ram_rising")
+            if row.get("guest_evidence_complete"):
+                recommendations[-1]["data_gaps"] = ["workload SLO and seasonality beyond the window"]
         if current_type.get("architecture") == "x86":
             arm = _best_arm_candidate(server, server_types, location, base)
             if arm is not None:
@@ -327,6 +344,12 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
         asset_id = recommendation["assets"][0]
         selected[asset_id] = max(selected.get(asset_id, 0.0), recommendation["estimated_savings"]["monthly"])
     potential_monthly = sum(selected.values())
+    expected: dict[str, float] = {}
+    for recommendation in recommendations:
+        if recommendation["rule_id"] in EXPECTED_WITHOUT_TELEMETRY or recommendation.get("evidence_complete"):
+            asset_id = recommendation["assets"][0]
+            expected[asset_id] = max(expected.get(asset_id, 0.0), recommendation["estimated_savings"]["monthly"])
+    expected_monthly = sum(expected.values())
     return {
         "schema_version": "1.0.0",
         "status": "needs_validation" if recommendations else "confirmed",
@@ -340,8 +363,16 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
         "identified_potential_savings": {
             "monthly_net": round(potential_monthly, 2),
             "annual_net": round(potential_monthly * 12, 2),
+            "theoretical_monthly_net": round(potential_monthly, 2),
+            "expected_monthly_net": round(expected_monthly, 2),
+            "verified_monthly_net": 0.0,
             "confirmed_monthly_net": 0.0,
             "basis": "Maximum non-overlapping candidate per asset; all require validation.",
+            "definitions": {
+                "theoretical": "every candidate, best one per asset",
+                "expected": "unused resources, plus rightsizing whose CPU, RAM, and disk telemetry cover the window",
+                "verified": "measured after the change: `hetzner-audit diff before.json after.json` reports the cost delta",
+            },
         },
         "servers": server_rows,
         "resource_components_net": {
@@ -354,7 +385,8 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
         },
         "recommendations": recommendations,
         "data_gaps": [
-            "Hetzner does not expose guest RAM utilization.",
+            *(["Hetzner does not expose guest RAM utilization; add `--node-metrics` (see `hetzner-audit metrics`)."]
+              if not any(row.get("guest_evidence_complete") for row in server_rows) else []),
             "Filesystem occupancy, workload SLOs, and application architecture constraints are not provider metrics.",
             "Catalog prices can differ from invoices, credits, taxes, and legacy contracts.",
             *telemetry_gaps,
@@ -425,6 +457,45 @@ def _type_price(asset: Asset, location: str) -> float | None:
     return _price(asset.properties.get("prices"), location)
 
 
+def _guest(props: dict[str, Any], requested_days: object) -> dict[str, Any]:
+    """Guest RAM and root filesystem telemetry (node exporter), when supplied."""
+    guest = props.get("guest_metrics")
+    if not isinstance(guest, dict):
+        return {}
+    requested = requested_days if isinstance(requested_days, (int, float)) else None
+    # Coverage is judged against the longer of the guest window and the audit window (30 days by default).
+    window = max(float(guest.get("window_days") or 0), float(requested or 30))
+    def number(key: str) -> float | None:
+        try:
+            return float(guest[key]) if guest.get(key) is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    coverage = number("coverage_days") or 0.0
+    ram, ram_7d, disk = number("ram_p95_percent"), number("ram_p95_7d_percent"), number("disk_used_max_percent")
+    return {
+        "ram_p95_percent": ram,
+        "ram_max_percent": number("ram_max_percent"),
+        "disk_used_max_percent": disk,
+        "disk_size_gb": number("disk_size_gb"),
+        "guest_coverage_days": round(coverage, 1),
+        "guest_evidence_complete": ram is not None and disk is not None and coverage >= 0.8 * window,
+        "ram_rising": bool(ram is not None and ram_7d is not None and ram_7d > ram * 1.2),
+    }
+
+
+def _guest_floors(row: dict[str, Any], current_type: dict[str, Any]) -> dict[str, float]:
+    """Smallest memory and disk a candidate needs: p95 RAM at <=70%, peak RAM at <=90%, disk at <=80%."""
+    if not row.get("guest_evidence_complete"):
+        return {}
+    memory = float(current_type.get("memory", 0) or 0)
+    ram_p95_gb = memory * float(row["ram_p95_percent"]) / 100
+    ram_max_gb = memory * float(row.get("ram_max_percent") or row["ram_p95_percent"]) / 100
+    disk_size = float(row.get("disk_size_gb") or current_type.get("disk", 0) or 0)
+    disk_used_gb = disk_size * float(row["disk_used_max_percent"]) / 100
+    return {"min_memory_gb": max(ram_p95_gb / 0.7, ram_max_gb / 0.9), "min_disk_gb": disk_used_gb / 0.8}
+
+
 def _best_resize_candidate(
     server: Asset,
     server_types: list[Asset],
@@ -432,6 +503,9 @@ def _best_resize_candidate(
     cpu_max_raw: float | None,
     location: str,
     current_price: float,
+    *,
+    min_memory_gb: float = 0.0,
+    min_disk_gb: float = 0.0,
 ) -> tuple[Asset, float] | None:
     current = server.properties.get("server_type", {})
     if not isinstance(current, dict):
@@ -450,7 +524,8 @@ def _best_resize_candidate(
             or props.get("architecture") != current.get("architecture")
             or props.get("cpu_type") != current.get("cpu_type")
             or item_cores < max(1, math.ceil(cores / 2))
-            or float(props.get("memory", 0) or 0) < memory / 2
+            or float(props.get("memory", 0) or 0) < max(memory / 2, min_memory_gb)
+            or float(props.get("disk", 0) or 0) < min_disk_gb
             or not _available(item, location)
         ):
             continue
@@ -629,7 +704,8 @@ def render_cost_markdown(report: dict[str, Any]) -> str:
         "",
         f"- Current catalog estimate: **{report['currency']} {current['monthly_net']:.2f}/month** ({report['currency']} {current['annual_net']:.2f}/year)",
         f"- Potential savings identified: **{report['currency']} {potential['monthly_net']:.2f}/month** ({report['currency']} {potential['annual_net']:.2f}/year)",
-        f"- Confirmed savings: **{report['currency']} {potential['confirmed_monthly_net']:.2f}/month**",
+        f"- Expected savings (unused resources, plus rightsizing with full CPU/RAM/disk telemetry): **{report['currency']} {potential.get('expected_monthly_net', 0):.2f}/month**",
+        f"- Verified savings: **{report['currency']} {potential.get('verified_monthly_net', 0):.2f}/month** (measured with `hetzner-audit diff` after a change)",
         "- All proposed savings require validation; no infrastructure changes were made.",
         "",
         "## Recommendations",

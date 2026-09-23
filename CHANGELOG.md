@@ -4,6 +4,58 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-23
+
+v0.6 and v0.7 of the roadmap ship together as one release.
+
+### Added — host evidence and drift
+
+- `hetzner-audit host-bundle`: a reviewed, read-only shell script the owner runs on each server (UFW, nftables, iptables, `ss`, `sshd -T`, Docker inspection through an explicit template, `pg_hba.conf`, Redis bind/ACL). `--host-bundle FILE` (repeatable) merges the output. The tool itself still never connects to a host.
+- Flow intersection: public exposure is `confirmed` when the Cloud Firewall, host firewall, and a listener all admit the port, and `rejected` when host evidence refutes it. Private-network reachability is evaluated per server, and Tailscale or Docker-bridge binds do not count as the Hetzner network.
+- Host rules:
+  - `HETZ-DKR-005`: Docker-published ports that bypass the host firewall;
+  - `HETZ-DKR-006`: dangerous capabilities or sensitive host mounts;
+  - `HETZ-SSH-001/002/003`: password login, root password login, empty passwords;
+  - `HETZ-HOST-001`: no active host firewall;
+  - `HETZ-HOST-002`: data services on all interfaces;
+  - `HETZ-PG-003`: remote PostgreSQL authentication without TLS, in first-match order.
+- Provider action history (last 30 days of `/actions`): `HETZ-CHG-001` protection switched off, `HETZ-CHG-002` firewall removed, `HETZ-CHG-003` reverse DNS changed, `HETZ-CHG-004` rescue, console, password reset, ISO, rebuild. Routine changes are counted in the summary only.
+- Terraform drift (`--terraform`, from `terraform show -json` state or saved plan): `HETZ-IAC-002` unmanaged resources, `HETZ-IAC-003` deleted outside Terraform, `HETZ-IAC-004` drifted protection/backups/firewalls/labels, `HETZ-IAC-005` security-relevant pending plan changes. Firewall sources feed `HETZ-IAC-001`.
+- Guest telemetry (`hetzner-audit metrics --prometheus URL`, `--node-metrics FILE`): RAM p95, RAM peak, and root filesystem peak gate rightsizing candidates. Savings are reported as theoretical, expected, and verified; `diff` measures verified savings.
+- An end-to-end collector test on API-reference-shaped load balancer, certificate, and DNS responses.
+
+### Added — beyond one project
+
+- Multi-project: `snapshot --project NAME --token-env VAR`, then `merge`. `HETZ-XPR-001` flags a firewall that trusts another project's public address; `HETZ-XPR-002` flags production mixed with other environments.
+- Hetzner Robot (`--robot`, GET-only webservice client or saved file): `HETZ-ROB-001` no active Robot firewall, `HETZ-ROB-002` sensitive ports admitted (first match, SYN-only, IPv4 and filtered IPv6, TCP and UDP), `HETZ-ROB-003` vSwitch coupled to a Cloud network, `HETZ-ROB-005` IPv6 not filtered. Robot keys go through the SSH key rules.
+- Object Storage (`--object-storage`, stdlib SigV4 GET client verified against the AWS test vectors, or saved file): `HETZ-OBJ-001` public ACL, `HETZ-OBJ-002` wildcard bucket policy, `HETZ-OBJ-003` versioning off. One anonymous listing confirms public access.
+- Kubernetes correlation (`--k8s`, from `kubectl get nodes,pods,services -A -o json`): `HETZ-K8S-001` NodePorts open to the Internet on nodes, `HETZ-K8S-002` workloads with node-level access; CCM/CSI detection.
+- Console checklist (`hetzner-audit checklist`, `--attestations FILE`): `HETZ-ATT-001..007` for 2FA, member roles, Read & Write tokens, Robot login, S3 keys, Storage Box sub-accounts, and recovery contacts.
+- Views: the architecture map shows load balancers, Kubernetes, Robot servers, vSwitches, buckets, and host flags. New `--view host` (per-VM layers) and `--view posture` (domain × severity matrix with coverage and evidence sources).
+- The audit summary lists every evidence source, a per-server host table (reachable from the Internet and from the private network), and one line per optional source.
+- `doctor` reports optional sources and credentials (values never printed) and warns when any secret sits in `.env`.
+- The generated benchmark now scores 18 rules, all at 1.00 precision and recall.
+
+### Fixed
+
+- An adversarial review found about 30 defects before release; each has a regression test. The most important:
+  - unreadable or missing host evidence (UFW without root, firewalld jump chains, no `ss`, nft errors, iptables-legacy hosts) could turn findings into `rejected`; unknown now stays `needs_validation`;
+  - nftables comments, `ct state new`, interface matches, and protocol matches were misread; UFW IPv6 rules applied to IPv4; custom UFW app profiles were dropped;
+  - a `pg_hba` reject line hid later lines it did not cover;
+  - a host firewall rule for one private peer rejected lateral-path findings for the whole network;
+  - Robot discard rules with flags or narrower matches hid later accepts; ACK-only accepts counted as open;
+  - Object Storage settings that could not be read were reported as insecure;
+  - merge failed on shared system images and dropped host, Terraform, and checklist evidence;
+  - `diff` reported collection failures as verified savings.
+- `HETZ-LB-004` reads the health of label-selector targets.
+- Uploaded certificate PEMs are no longer stored in snapshots.
+- Hypotheses keep the rule's proposed severity in metadata for views; they stay unscored.
+
+### Security
+
+- The host script prints no environment variables, no sshd user lists, and no Redis passwords or ACL hashes.
+- Object Storage XML is size-capped and rejected when it carries a DTD.
+
 ## [0.5.0] - 2026-09-23
 
 ### Added

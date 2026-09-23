@@ -27,9 +27,25 @@ def evidence_level(finding: Finding) -> tuple[str, str]:
     if finding.status == FindingStatus.CONFIRMED:
         if kinds & {"listening_socket", "host_firewall_allow", "service_bind", "application_policy"}:
             return "HIGH", "provider and host/runtime evidence agree"
+        if "owner_attestation" in kinds:
+            return "MEDIUM", "owner attestation (console checklist)"
+        if any(item.source == "host_bundle" or item.asset_id.startswith("host:") for item in finding.evidence) or kinds & {
+            "docker_published", "sshd_effective_config", "host_firewall_decision", "container_runtime", "pg_hba_rule"
+        }:
+            return "HIGH", "host evidence bundle"
         return "HIGH", "explicit provider state"
     if finding.status == FindingStatus.REJECTED:
         return "LOW", "refuted by an observed control"
+    if "owner_attestation" in kinds:
+        return "LOW", "not yet verified by the owner"
+    if any(item.source == "host_bundle" or item.asset_id.startswith("host:") for item in finding.evidence):
+        return "MEDIUM", "host configuration observed; no network path to it was evidenced"
+    if any(item.source in {"robot_api", "object_storage_api", "kubernetes", "terraform"} for item in finding.evidence):
+        return "MEDIUM", "explicit provider state; owner or host confirmation needed"
+    if "provider_action" in kinds:
+        return "MEDIUM", "provider action history shows the change; intent not known"
+    if "docker_user_chain" in kinds:
+        return "MEDIUM", "host evidence observed; DOCKER-USER rules need review"
     if kinds & {"firewall_rule", "private_network", "private_network_unfiltered", "public_interface"}:
         return "MEDIUM", "cloud path observed; host firewall, listener, and auth not observed"
     return "LOW", "absence of evidence; depends on collector coverage and owner intent"
@@ -159,12 +175,14 @@ def coverage(snapshot: Snapshot, cost: dict[str, Any] | None) -> list[tuple[str,
         for item in servers
         if "host_firewall" in item.properties or "listening_ports" in item.properties
     )
+    guest = sum(1 for item in cost_rows if item.get("guest_evidence_complete"))
     return [
         ("Cost", round(100 * priced / count), "catalog price found per server"),
         ("CPU utilization", round(100 * utilization / count), "provider CPU metrics (RAM/disk never)"),
         ("Ownership", round(100 * owned / count), "owner or project label"),
         ("Provider backups", round(100 * backed / (len(stateful) or 1)), f"of {len(stateful)} stateful servers"),
-        ("Host/runtime evidence", round(100 * runtime / count), "host firewall, listeners, service config"),
+        ("RAM and disk telemetry", round(100 * guest / count), "node exporter via `--node-metrics`, full window"),
+        ("Host/runtime evidence", round(100 * runtime / count), "host firewall, listeners, service config (`--host-bundle`)"),
     ]
 
 
@@ -172,8 +190,30 @@ def provenance(snapshot: Snapshot, cost: dict[str, Any] | None) -> list[str]:
     collected = str(snapshot.metadata.get("collected_at", "unknown"))[:16].replace("T", " ")
     lines = [
         f"Snapshot: {collected} UTC · collector {snapshot.metadata.get('collector', 'fixture')} {snapshot.metadata.get('collector_version', '')}".rstrip(),
-        "Scope: Hetzner Cloud control plane only (API, GET requests). No SSH, no host or application evidence.",
     ]
+    meta = snapshot.metadata
+    sources = ["Hetzner Cloud API (GET requests)"]
+    bundles = [item for item in meta.get("host_bundles") or [] if item.get("status") == "merged"]
+    host_facts = [asset for asset in snapshot.assets if asset.type == "server"
+                  and ("host_firewall" in asset.properties or "listening_ports" in asset.properties)]
+    if bundles:
+        sources.append(f"host bundles for {len(bundles)} server(s), run by the owner")
+    elif host_facts:
+        sources.append(f"host facts supplied in the snapshot for {len(host_facts)} server(s)")
+    for key, label in (("terraform", "Terraform JSON"), ("node_metrics", "node exporter telemetry"),
+                       ("kubernetes", "kubectl listing"), ("attestations", "owner checklist answers")):
+        if meta.get(key):
+            sources.append(label)
+    coverage_keys = meta.get("coverage") or {}
+    if "robot_server" in coverage_keys:
+        sources.append("Hetzner Robot API")
+    if "bucket" in coverage_keys:
+        sources.append("Object Storage S3 API")
+    if meta.get("projects"):
+        sources.append(f"{len(meta['projects'])} merged project snapshot(s)")
+    lines.append("Evidence sources: " + "; ".join(sources) + ".")
+    if not bundles and not host_facts:
+        lines.append("No host evidence: host firewall, listeners, and service configuration were not observed (add `--host-bundle`).")
     if cost:
         lines.append(
             f"Pricing: current Hetzner catalog, net ({cost.get('currency', 'EUR')}), VAT excluded; traffic overage from current-period usage only; invoice reconciliation not performed."
@@ -345,6 +385,41 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
         "HETZ-DNS-002": (90, "hygiene", "low"),
         "HETZ-CERT-002": (96, "hygiene", "low"),
         "HETZ-FW-004": (97, "hygiene", "low"),
+        # Host evidence (--host-bundle)
+        "HETZ-SSH-003": (2, "security", "low"),
+        "HETZ-OBJ-001": (3, "security", "low"),
+        "HETZ-OBJ-002": (4, "security", "low"),
+        "HETZ-DKR-005": (6, "security", "low"),
+        "HETZ-K8S-001": (7, "security", "medium"),
+        "HETZ-ROB-001": (8, "security", "medium"),
+        "HETZ-ROB-002": (9, "security", "low"),
+        "HETZ-SSH-001": (13, "security", "low"),
+        "HETZ-SSH-002": (14, "security", "low"),
+        "HETZ-PG-003": (15, "security", "low"),
+        "HETZ-HOST-002": (17, "security", "low"),
+        "HETZ-ATT-001": (19, "security", "low"),
+        "HETZ-ATT-004": (20, "security", "low"),
+        "HETZ-DKR-006": (21, "security", "medium"),
+        "HETZ-K8S-002": (22, "security", "medium"),
+        "HETZ-ROB-005": (23, "security", "low"),
+        "HETZ-CHG-004": (24, "security", "low"),
+        "HETZ-HOST-001": (26, "security", "low"),
+        "HETZ-XPR-001": (27, "security", "medium"),
+        "HETZ-CHG-002": (29, "security", "low"),
+        "HETZ-IAC-004": (30, "governance", "low"),
+        "HETZ-ROB-003": (31, "security", "medium"),
+        "HETZ-ATT-003": (32, "security", "low"),
+        "HETZ-ATT-002": (33, "security", "low"),
+        "HETZ-CHG-001": (34, "resilience", "low"),
+        "HETZ-OBJ-003": (36, "resilience", "low"),
+        "HETZ-ATT-005": (37, "security", "low"),
+        "HETZ-ATT-007": (39, "resilience", "low"),
+        "HETZ-IAC-002": (86, "governance", "low"),
+        "HETZ-IAC-003": (87, "governance", "low"),
+        "HETZ-XPR-002": (89, "governance", "medium"),
+        "HETZ-ATT-006": (91, "hygiene", "low"),
+        "HETZ-CHG-003": (95, "hygiene", "low"),
+        "HETZ-IAC-005": (98, "governance", "low"),
     }
     for rule_id, (priority, category, risk) in generic.items():
         group = by_rule.get(rule_id, [])
@@ -371,9 +446,13 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
         if len(group) == 1:
             add(priority, first.title, first.observation, first, None, risk, None, first.remediation, [rule_id], category, commands=fw_commands)
         else:  # one action per rule, not one per resource
-            names = ", ".join(_names(snapshot, [item.assets[0] for item in group[:5]])) + (" …" if len(group) > 5 else "")
+            names = ", ".join(
+                _names(snapshot, [item.assets[0] for item in group[:5] if item.assets]) or [item.title for item in group[:5]]
+            ) + (" …" if len(group) > 5 else "")
             add(priority, f"{first.title} ({len(group)} resources)", f"Affected: {names}. {first.observation}", first, None, risk, None, first.remediation, [rule_id], category, commands=fw_commands)
-    actions.sort(key=lambda item: item["priority"])
+    # Within the same priority band, stronger evidence first; a hypothesis never outranks a confirmed peer.
+    strength = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+    actions.sort(key=lambda item: (item["priority"] // 10, strength.get(item["evidence_level"], 3), item["priority"]))
     for index, item in enumerate(actions, 1):
         item["rank"] = index
     return actions

@@ -1,0 +1,928 @@
+{
+ "_note": "Hetzner Cloud API reference-shaped responses with documentation IP ranges; not captured from a real project.",
+ "responses": {
+  "servers": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 2
+    }
+   },
+   "servers": [
+    {
+     "id": 101,
+     "name": "web-a",
+     "status": "running",
+     "created": "2026-01-10T09:00:00+00:00",
+     "public_net": {
+      "ipv4": {
+       "id": 1010,
+       "ip": "203.0.113.10",
+       "blocked": false,
+       "dns_ptr": "static.203.0.113.10.clients.example"
+      },
+      "ipv6": {
+       "id": 1011,
+       "ip": "2001:db8:65::/64",
+       "blocked": false,
+       "dns_ptr": []
+      },
+      "floating_ips": [],
+      "firewalls": [
+       {
+        "id": 7,
+        "status": "applied"
+       }
+      ]
+     },
+     "private_net": [
+      {
+       "network": 4711,
+       "ip": "10.0.1.101",
+       "alias_ips": [],
+       "mac_address": "86:00:00:00:00:65"
+      }
+     ],
+     "server_type": {
+      "id": 22,
+      "name": "cx22",
+      "description": "CX22",
+      "cores": 2,
+      "memory": 4.0,
+      "disk": 40,
+      "deprecated": false,
+      "prices": [
+       {
+        "location": "fsn1",
+        "price_hourly": {
+         "net": "0.0072",
+         "gross": "0.0086"
+        },
+        "price_monthly": {
+         "net": "4.5100",
+         "gross": "5.3669"
+        },
+        "included_traffic": 21990232555520,
+        "price_per_tb_traffic": {
+         "net": "1.0000",
+         "gross": "1.1900"
+        }
+       }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "category": "cost_optimized",
+      "architecture": "x86",
+      "deprecation": null,
+      "locations": [
+       {
+        "id": 1,
+        "name": "fsn1",
+        "deprecation": null
+       }
+      ]
+     },
+     "datacenter": {
+      "id": 4,
+      "name": "fsn1-dc14",
+      "description": "Falkenstein 1 virtual DC 14",
+      "location": {
+       "id": 1,
+       "name": "fsn1",
+       "description": "Falkenstein DC Park 1",
+       "country": "DE",
+       "city": "Falkenstein",
+       "latitude": 50.47612,
+       "longitude": 12.370071,
+       "network_zone": "eu-central"
+      }
+     },
+     "image": {
+      "id": 161547269,
+      "type": "system",
+      "status": "available",
+      "name": "ubuntu-24.04",
+      "description": "Ubuntu 24.04",
+      "os_flavor": "ubuntu",
+      "os_version": "24.04",
+      "architecture": "x86",
+      "labels": {},
+      "protection": {
+       "delete": false
+      },
+      "created": "2024-04-25T10:00:00+00:00",
+      "deprecated": null,
+      "rapid_deploy": true
+     },
+     "iso": null,
+     "rescue_enabled": false,
+     "locked": false,
+     "backup_window": "22-02",
+     "outgoing_traffic": 123456789,
+     "ingoing_traffic": 987654321,
+     "included_traffic": 21990232555520,
+     "protection": {
+      "delete": true,
+      "rebuild": true
+     },
+     "labels": {
+      "environment": "production",
+      "role": "web",
+      "owner": "platform",
+      "project": "shop"
+     },
+     "volumes": [],
+     "load_balancers": [
+      80
+     ],
+     "primary_disk_size": 40,
+     "placement_group": null
+    },
+    {
+     "id": 102,
+     "name": "web-b",
+     "status": "running",
+     "created": "2026-01-10T09:00:00+00:00",
+     "public_net": {
+      "ipv4": {
+       "id": 1020,
+       "ip": "203.0.113.11",
+       "blocked": false,
+       "dns_ptr": "static.203.0.113.11.clients.example"
+      },
+      "ipv6": {
+       "id": 1021,
+       "ip": "2001:db8:66::/64",
+       "blocked": false,
+       "dns_ptr": []
+      },
+      "floating_ips": [],
+      "firewalls": [
+       {
+        "id": 7,
+        "status": "applied"
+       }
+      ]
+     },
+     "private_net": [
+      {
+       "network": 4711,
+       "ip": "10.0.1.102",
+       "alias_ips": [],
+       "mac_address": "86:00:00:00:00:66"
+      }
+     ],
+     "server_type": {
+      "id": 22,
+      "name": "cx22",
+      "description": "CX22",
+      "cores": 2,
+      "memory": 4.0,
+      "disk": 40,
+      "deprecated": false,
+      "prices": [
+       {
+        "location": "fsn1",
+        "price_hourly": {
+         "net": "0.0072",
+         "gross": "0.0086"
+        },
+        "price_monthly": {
+         "net": "4.5100",
+         "gross": "5.3669"
+        },
+        "included_traffic": 21990232555520,
+        "price_per_tb_traffic": {
+         "net": "1.0000",
+         "gross": "1.1900"
+        }
+       }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "category": "cost_optimized",
+      "architecture": "x86",
+      "deprecation": null,
+      "locations": [
+       {
+        "id": 1,
+        "name": "fsn1",
+        "deprecation": null
+       }
+      ]
+     },
+     "datacenter": {
+      "id": 4,
+      "name": "fsn1-dc14",
+      "description": "Falkenstein 1 virtual DC 14",
+      "location": {
+       "id": 1,
+       "name": "fsn1",
+       "description": "Falkenstein DC Park 1",
+       "country": "DE",
+       "city": "Falkenstein",
+       "latitude": 50.47612,
+       "longitude": 12.370071,
+       "network_zone": "eu-central"
+      }
+     },
+     "image": {
+      "id": 161547269,
+      "type": "system",
+      "status": "available",
+      "name": "ubuntu-24.04",
+      "description": "Ubuntu 24.04",
+      "os_flavor": "ubuntu",
+      "os_version": "24.04",
+      "architecture": "x86",
+      "labels": {},
+      "protection": {
+       "delete": false
+      },
+      "created": "2024-04-25T10:00:00+00:00",
+      "deprecated": null,
+      "rapid_deploy": true
+     },
+     "iso": null,
+     "rescue_enabled": false,
+     "locked": false,
+     "backup_window": "22-02",
+     "outgoing_traffic": 123456789,
+     "ingoing_traffic": 987654321,
+     "included_traffic": 21990232555520,
+     "protection": {
+      "delete": true,
+      "rebuild": true
+     },
+     "labels": {
+      "environment": "production",
+      "role": "web",
+      "owner": "platform",
+      "project": "shop"
+     },
+     "volumes": [],
+     "load_balancers": [
+      80
+     ],
+     "primary_disk_size": 40,
+     "placement_group": null
+    }
+   ]
+  },
+  "server_types": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "server_types": [
+    {
+     "id": 22,
+     "name": "cx22",
+     "description": "CX22",
+     "cores": 2,
+     "memory": 4.0,
+     "disk": 40,
+     "deprecated": false,
+     "prices": [
+      {
+       "location": "fsn1",
+       "price_hourly": {
+        "net": "0.0072",
+        "gross": "0.0086"
+       },
+       "price_monthly": {
+        "net": "4.5100",
+        "gross": "5.3669"
+       },
+       "included_traffic": 21990232555520,
+       "price_per_tb_traffic": {
+        "net": "1.0000",
+        "gross": "1.1900"
+       }
+      }
+     ],
+     "storage_type": "local",
+     "cpu_type": "shared",
+     "category": "cost_optimized",
+     "architecture": "x86",
+     "deprecation": null,
+     "locations": [
+      {
+       "id": 1,
+       "name": "fsn1",
+       "deprecation": null
+      }
+     ]
+    }
+   ]
+  },
+  "images": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "images": [
+    {
+     "id": 161547269,
+     "type": "system",
+     "status": "available",
+     "name": "ubuntu-24.04",
+     "description": "Ubuntu 24.04",
+     "os_flavor": "ubuntu",
+     "os_version": "24.04",
+     "architecture": "x86",
+     "labels": {},
+     "protection": {
+      "delete": false
+     },
+     "created": "2024-04-25T10:00:00+00:00",
+     "deprecated": null,
+     "rapid_deploy": true
+    }
+   ]
+  },
+  "locations": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "locations": [
+    {
+     "id": 1,
+     "name": "fsn1",
+     "description": "Falkenstein DC Park 1",
+     "country": "DE",
+     "city": "Falkenstein",
+     "latitude": 50.47612,
+     "longitude": 12.370071,
+     "network_zone": "eu-central"
+    }
+   ]
+  },
+  "datacenters": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 0
+    }
+   },
+   "datacenters": []
+  },
+  "networks": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "networks": [
+    {
+     "id": 4711,
+     "name": "shop-net",
+     "ip_range": "10.0.0.0/16",
+     "subnets": [
+      {
+       "type": "cloud",
+       "ip_range": "10.0.1.0/24",
+       "network_zone": "eu-central",
+       "gateway": "10.0.0.1"
+      }
+     ],
+     "routes": [],
+     "servers": [
+      101,
+      102
+     ],
+     "load_balancers": [
+      80
+     ],
+     "protection": {
+      "delete": false
+     },
+     "labels": {},
+     "created": "2026-01-10T09:00:00+00:00",
+     "expose_routes_to_vswitch": false
+    }
+   ]
+  },
+  "firewalls": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "firewalls": [
+    {
+     "id": 7,
+     "name": "web-backends",
+     "labels": {},
+     "created": "2026-01-10T09:00:00+00:00",
+     "rules": [
+      {
+       "description": "https",
+       "direction": "in",
+       "protocol": "tcp",
+       "port": "443",
+       "source_ips": [
+        "0.0.0.0/0",
+        "::/0"
+       ],
+       "destination_ips": []
+      },
+      {
+       "description": "app port, meant for the LB only",
+       "direction": "in",
+       "protocol": "tcp",
+       "port": "8080",
+       "source_ips": [
+        "0.0.0.0/0",
+        "::/0"
+       ],
+       "destination_ips": []
+      }
+     ],
+     "applied_to": [
+      {
+       "type": "server",
+       "server": {
+        "id": 101
+       }
+      },
+      {
+       "type": "server",
+       "server": {
+        "id": 102
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "primary_ips": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 0
+    }
+   },
+   "primary_ips": []
+  },
+  "floating_ips": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 0
+    }
+   },
+   "floating_ips": []
+  },
+  "load_balancers": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "load_balancers": [
+    {
+     "id": 80,
+     "name": "shop-lb",
+     "public_net": {
+      "enabled": true,
+      "ipv4": {
+       "ip": "198.51.100.20",
+       "dns_ptr": "lb.example.com"
+      },
+      "ipv6": {
+       "ip": "2001:db8:ff::1",
+       "dns_ptr": "lb.example.com"
+      }
+     },
+     "private_net": [
+      {
+       "network": 4711,
+       "ip": "10.0.1.200"
+      }
+     ],
+     "location": {
+      "id": 1,
+      "name": "fsn1",
+      "description": "Falkenstein DC Park 1",
+      "country": "DE",
+      "city": "Falkenstein",
+      "latitude": 50.47612,
+      "longitude": 12.370071,
+      "network_zone": "eu-central"
+     },
+     "load_balancer_type": {
+      "id": 1,
+      "name": "lb11",
+      "description": "LB11",
+      "max_connections": 10000,
+      "max_services": 5,
+      "max_targets": 25,
+      "max_assigned_certificates": 10,
+      "deprecated": null,
+      "prices": [
+       {
+        "location": "fsn1",
+        "price_hourly": {
+         "net": "0.0080",
+         "gross": "0.0095"
+        },
+        "price_monthly": {
+         "net": "5.3900",
+         "gross": "6.4141"
+        },
+        "included_traffic": 21990232555520,
+        "price_per_tb_traffic": {
+         "net": "1.0000",
+         "gross": "1.1900"
+        }
+       }
+      ]
+     },
+     "protection": {
+      "delete": false
+     },
+     "labels": {
+      "environment": "production"
+     },
+     "created": "2026-01-10T09:00:00+00:00",
+     "services": [
+      {
+       "protocol": "https",
+       "listen_port": 443,
+       "destination_port": 8080,
+       "proxyprotocol": false,
+       "health_check": {
+        "protocol": "http",
+        "port": 8080,
+        "interval": 15,
+        "timeout": 10,
+        "retries": 3,
+        "http": {
+         "domain": null,
+         "path": "/healthz",
+         "response": null,
+         "status_codes": [
+          "2??",
+          "3??"
+         ],
+         "tls": false
+        }
+       },
+       "http": {
+        "cookie_name": "HCLBSTICKY",
+        "cookie_lifetime": 300,
+        "certificates": [
+         900
+        ],
+        "redirect_http": false,
+        "sticky_sessions": false
+       }
+      }
+     ],
+     "targets": [
+      {
+       "type": "label_selector",
+       "label_selector": {
+        "selector": "role=web"
+       },
+       "use_private_ip": true,
+       "targets": [
+        {
+         "type": "server",
+         "server": {
+          "id": 101
+         },
+         "use_private_ip": true,
+         "health_status": [
+          {
+           "listen_port": 443,
+           "status": "healthy"
+          }
+         ]
+        },
+        {
+         "type": "server",
+         "server": {
+          "id": 102
+         },
+         "use_private_ip": true,
+         "health_status": [
+          {
+           "listen_port": 443,
+           "status": "unhealthy"
+          }
+         ]
+        }
+       ]
+      }
+     ],
+     "algorithm": {
+      "type": "round_robin"
+     },
+     "outgoing_traffic": 0,
+     "ingoing_traffic": 0,
+     "included_traffic": 21990232555520
+    }
+   ]
+  },
+  "load_balancer_types": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "load_balancer_types": [
+    {
+     "id": 1,
+     "name": "lb11",
+     "description": "LB11",
+     "max_connections": 10000,
+     "max_services": 5,
+     "max_targets": 25,
+     "max_assigned_certificates": 10,
+     "deprecated": null,
+     "prices": [
+      {
+       "location": "fsn1",
+       "price_hourly": {
+        "net": "0.0080",
+        "gross": "0.0095"
+       },
+       "price_monthly": {
+        "net": "5.3900",
+        "gross": "6.4141"
+       },
+       "included_traffic": 21990232555520,
+       "price_per_tb_traffic": {
+        "net": "1.0000",
+        "gross": "1.1900"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "volumes": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 0
+    }
+   },
+   "volumes": []
+  },
+  "ssh_keys": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 0
+    }
+   },
+   "ssh_keys": []
+  },
+  "placement_groups": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 0
+    }
+   },
+   "placement_groups": []
+  },
+  "certificates": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 2
+    }
+   },
+   "certificates": [
+    {
+     "id": 900,
+     "name": "shop-cert",
+     "labels": {},
+     "type": "managed",
+     "certificate": null,
+     "created": "2026-06-25T09:00:00+00:00",
+     "not_valid_before": "2026-06-25T09:00:00+00:00",
+     "not_valid_after": "2026-09-30T09:00:00+00:00",
+     "domain_names": [
+      "shop.example.com"
+     ],
+     "fingerprint": "03:c7:55:9b:2a:d1:04:17:5a:e3:ab:ad:bb:ab:41:de",
+     "status": {
+      "issuance": "completed",
+      "renewal": "failed",
+      "error": {
+       "code": "dns_zone_not_found",
+       "message": "DNS zone not found"
+      }
+     },
+     "used_by": [
+      {
+       "id": 80,
+       "type": "load_balancer"
+      }
+     ]
+    },
+    {
+     "id": 901,
+     "name": "old-cert",
+     "labels": {},
+     "type": "uploaded",
+     "certificate": "-----BEGIN CERTIFICATE-----\nMIIB...\n-----END CERTIFICATE-----",
+     "created": "2025-01-01T00:00:00+00:00",
+     "not_valid_before": "2025-01-01T00:00:00+00:00",
+     "not_valid_after": "2027-01-01T00:00:00+00:00",
+     "domain_names": [
+      "old.example.com"
+     ],
+     "fingerprint": "aa:bb",
+     "status": null,
+     "used_by": []
+    }
+   ]
+  },
+  "zones": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 1
+    }
+   },
+   "zones": [
+    {
+     "id": 55,
+     "name": "example.com",
+     "mode": "primary",
+     "ttl": 3600,
+     "labels": {},
+     "protection": {
+      "delete": false
+     },
+     "status": "ok",
+     "record_count": 3,
+     "created": "2026-01-01T00:00:00+00:00"
+    }
+   ]
+  },
+  "zones/55/rrsets": {
+   "meta": {
+    "pagination": {
+     "page": 1,
+     "per_page": 50,
+     "previous_page": null,
+     "next_page": null,
+     "last_page": 1,
+     "total_entries": 3
+    }
+   },
+   "rrsets": [
+    {
+     "id": "shop/A",
+     "name": "shop",
+     "type": "A",
+     "ttl": null,
+     "labels": {},
+     "protection": {
+      "change": false
+     },
+     "records": [
+      {
+       "value": "198.51.100.20",
+       "comment": "load balancer"
+      }
+     ],
+     "zone": 55
+    },
+    {
+     "id": "legacy/A",
+     "name": "legacy",
+     "type": "A",
+     "ttl": null,
+     "labels": {},
+     "protection": {
+      "change": false
+     },
+     "records": [
+      {
+       "value": "192.0.2.77",
+       "comment": "old VM, deleted"
+      }
+     ],
+     "zone": 55
+    },
+    {
+     "id": "@/MX",
+     "name": "@",
+     "type": "MX",
+     "ttl": null,
+     "labels": {},
+     "protection": {
+      "change": false
+     },
+     "records": [
+      {
+       "value": "10 mail.example.net.",
+       "comment": ""
+      }
+     ],
+     "zone": 55
+    }
+   ]
+  },
+  "pricing": {
+   "pricing": {
+    "currency": "EUR",
+    "vat_rate": "19.00",
+    "volume": {
+     "price_per_gb_month": {
+      "net": "0.0440",
+      "gross": "0.0524"
+     }
+    },
+    "server_backup": {
+     "percentage": "20.0000"
+    },
+    "primary_ips": [],
+    "floating_ips": []
+   }
+  }
+ }
+}

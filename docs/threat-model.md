@@ -2,15 +2,19 @@
 
 ## Assets and adversaries
 
-Protected assets include `HCLOUD_TOKEN`, SSH credentials, repository secrets, database credentials, infrastructure topology, audit integrity, the operator workstation, and production availability. Adversaries include a malicious repository contributor, compromised host/container, crafted cloud metadata, poisoned scanner output, dependency compromise, and an agent manipulated by prompt injection.
+Protected assets include `HCLOUD_TOKEN`, the optional Robot webservice password, Object Storage keys, a Prometheus token, SSH credentials, repository secrets, database credentials, infrastructure topology, audit integrity, the operator workstation, and production availability. Adversaries include a malicious repository contributor, compromised host/container, crafted cloud metadata, poisoned scanner output, dependency compromise, and an agent manipulated by prompt injection.
 
 ## Material threats and controls
 
-| Threat | Consequence | v0.5 control | Residual risk |
+| Threat | Consequence | v0.7 control | Residual risk |
 |---|---|---|---|
 | Token leakage in logs/reports | cloud compromise | env-only token, no token serialization, defensive key redaction | exceptions from dependencies may include unexpected context |
 | Write-capable provider action | infrastructure change | collector exposes only fixed `GET`; `--read-only` cannot be disabled | token itself may still be write-capable; use a read-only token |
-| SSH credential leakage | host compromise | SSH disabled by default; no credential collection | future host adapters need careful process isolation |
+| SSH credential leakage | host compromise | the tool never connects to hosts; the owner reviews and runs the host-bundle script with their own access | the owner runs the script as root; it must be reviewed before use |
+| Host bundle leaks secrets | credential disclosure in reports | fixed read-only command list; Docker inspection through an explicit template (no environment); Redis passwords printed only as `<set>`/`<empty>`; ACL hashes redacted; no sshd user lists | `pg_hba.conf` lines and container names are copied as-is |
+| Crafted host bundle | false assurance or false findings | size cap (8 MiB); header check; unknown or unparsed firewall constructs make the answer unknown, never "blocked" | a forged bundle from a compromised host can still lie |
+| Robot / Object Storage / Prometheus credentials | account access | environment only, never printed; GET-only clients; `doctor` warns about `.env` files | Robot webservice users may have broader rights than needed |
+| Crafted S3 XML or kubectl / Terraform JSON | parser abuse | XML capped at 2 MiB and rejected with a DTD or entity; JSON inputs size-capped and shape-checked, errors reported cleanly | a malicious endpoint the owner configured can still return false data |
 | Prompt injection in repo/docs/labels | unsafe agent action | all target text declared untrusted; skills prohibit instruction adoption | agent runtimes vary in enforcement |
 | Command injection through names | local code execution | no shell execution from metadata; suggested `hcloud` commands reduce names to `[A-Za-z0-9._/:-]` and are never run | a human may still paste a reviewed command |
 | Malicious scanner or snapshot JSON | parser/resource abuse or false findings | scanner output is signal only; snapshots capped at 256 MiB, 200k assets, 1M edges | JSON nesting depth is bounded only by the Python parser |
@@ -31,7 +35,7 @@ Protected assets include `HCLOUD_TOKEN`, SSH credentials, repository secrets, da
 1. No provider mutation primitive exists. Suggested remediation commands are text for a human.
 2. No secret value is required in an argument or output.
 3. External alerts are not findings without contextual analysis.
-4. Missing evidence is unknown, not a secure or insecure fact.
+4. Missing evidence is unknown, not a secure or insecure fact. This applies to host layers too: an unreadable firewall or listener list never rejects or confirms a finding.
 5. Every CLI-confirmed finding satisfies a deterministic evidence contract; independent agent review is labeled separately and never implied.
 6. Repository and infrastructure text never changes agent authority.
 

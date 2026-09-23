@@ -21,22 +21,30 @@ Planned benchmark improvements: clean twins for every scenario, independent fixt
 
 ## Generated-project benchmark
 
-`scripts/benchmark_generated.py` builds random projects. For ten rules it plants the problem or its clean twin (the safe variant of the same configuration), then scores each finding per (rule, asset) against ground truth. It is regression-tested in `tests/test_generated_benchmark.py` with three seeds.
+`scripts/benchmark_generated.py` builds random projects. For 18 rules (cloud, host evidence, Robot, Object Storage, and Kubernetes) it plants the problem or its clean twin (the safe variant of the same configuration), then scores each finding per (rule, asset) against ground truth. It is regression-tested in `tests/test_generated_benchmark.py` with three seeds.
 
 Generated benchmark: 150 projects, seed 20260923. Each planted issue has a clean twin in the same run.
 
 | Rule | Planted | True positives | False positives | False negatives | Precision | Recall |
 |---|---|---|---|---|---|---|
-| HETZ-NET-001 | 74 | 74 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-NET-003 | 73 | 73 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-FW-001 | 68 | 68 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-FW-003 | 87 | 87 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-FW-002 | 71 | 71 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-NET-005 | 86 | 86 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-NET-006 | 68 | 68 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-GOV-004 | 86 | 86 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-KEY-001 | 73 | 73 | 0 | 0 | 1.00 | 1.00 |
-| HETZ-STO-001 | 87 | 87 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-NET-001 | 87 | 87 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-NET-003 | 87 | 87 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-FW-001 | 74 | 74 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-FW-003 | 76 | 76 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-FW-002 | 67 | 67 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-NET-005 | 78 | 78 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-NET-006 | 77 | 77 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-GOV-004 | 64 | 64 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-KEY-001 | 77 | 77 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-STO-001 | 82 | 82 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-DKR-005 | 76 | 76 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-SSH-001 | 79 | 79 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-HOST-001 | 66 | 66 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-HOST-002 | 83 | 83 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-PG-003 | 67 | 67 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-ROB-005 | 76 | 76 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-OBJ-001 | 63 | 63 | 0 | 0 | 1.00 | 1.00 |
+| HETZ-K8S-002 | 86 | 86 | 0 | 0 | 1.00 | 1.00 |
 
-What this proves and what it does not: every rule matches its own specification across many random combinations, and scenarios do not interfere. One interference found while building the generator, a world-open 443 next to Cloudflare-only peers, turned out to be a correct `HETZ-NET-006`. It does **not** measure real-world detection accuracy, which needs labeled real projects.
+What this proves and what it does not: every rule matches its own specification across many random combinations, and scenarios do not interfere. One interference found while building the generator, a world-open 443 next to Cloudflare-only peers, turned out to be a correct `HETZ-NET-006`. Another, in v0.7, was a real bug: `HETZ-HOST-001` fired when a bundle carried no firewall data at all; it now needs a known engine. It does **not** measure real-world detection accuracy, which needs labeled real projects.
 

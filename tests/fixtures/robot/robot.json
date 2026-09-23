@@ -1,0 +1,39 @@
+{
+  "_note": "Hetzner Robot webservice response shapes (robot.hetzner.com/doc/webservice) with documentation addresses; not from a real account.",
+  "server": [
+    {"server": {"server_ip": "203.0.113.50", "server_ipv6_net": "2001:db8:50::", "server_number": 321, "server_name": "db-dedi",
+                "product": "AX52", "dc": "FSN1-DC18", "traffic": "unlimited", "status": "ready", "cancelled": false, "paid_until": "2026-10-31",
+                "ip": ["203.0.113.50"], "subnet": [{"ip": "2001:db8:50::", "mask": "64"}]}},
+    {"server": {"server_ip": "203.0.113.51", "server_ipv6_net": "2001:db8:51::", "server_number": 322, "server_name": "build-dedi",
+                "product": "EX44", "dc": "FSN1-DC18", "traffic": "unlimited", "status": "ready", "cancelled": false, "paid_until": "2026-10-31",
+                "ip": ["203.0.113.51"], "subnet": []}},
+    {"server": {"server_ip": "203.0.113.52", "server_ipv6_net": "2001:db8:52::", "server_number": 323, "server_name": "edge-dedi",
+                "product": "EX44", "dc": "HEL1-DC7", "traffic": "unlimited", "status": "ready", "cancelled": false, "paid_until": "2026-10-31",
+                "ip": ["203.0.113.52"], "subnet": []}}
+  ],
+  "firewall": {
+    "321": {"firewall": {"server_ip": "203.0.113.50", "server_number": 321, "status": "active", "filter_ipv6": false, "whitelist_hos": true, "port": "main",
+            "rules": {"input": [
+              {"ip_version": "ipv4", "name": "ssh", "dst_ip": null, "src_ip": null, "dst_port": "22", "src_port": null, "protocol": "tcp", "tcp_flags": null, "action": "accept"},
+              {"ip_version": "ipv4", "name": "pg office", "dst_ip": null, "src_ip": "198.51.100.0/24", "dst_port": "5432", "src_port": null, "protocol": "tcp", "tcp_flags": null, "action": "accept"},
+              {"ip_version": "ipv4", "name": "block pg", "dst_ip": null, "src_ip": null, "dst_port": "5432", "src_port": null, "protocol": "tcp", "tcp_flags": null, "action": "discard"},
+              {"ip_version": "ipv4", "name": "late pg", "dst_ip": null, "src_ip": null, "dst_port": "5432", "src_port": null, "protocol": "tcp", "tcp_flags": null, "action": "accept"},
+              {"ip_version": "ipv4", "name": "ephemeral", "dst_ip": null, "src_ip": null, "dst_port": "32768-65535", "src_port": null, "protocol": "tcp", "tcp_flags": "ack", "action": "accept"}
+            ], "output": []}}},
+    "322": {"firewall": {"server_ip": "203.0.113.51", "server_number": 322, "status": "disabled", "filter_ipv6": false, "whitelist_hos": true, "port": "main", "rules": {"input": [], "output": []}}},
+    "323": {"firewall": {"server_ip": "203.0.113.52", "server_number": 323, "status": "active", "filter_ipv6": true, "whitelist_hos": true, "port": "main",
+            "rules": {"input": [
+              {"ip_version": "ipv4", "name": "https", "dst_ip": null, "src_ip": null, "dst_port": "443", "src_port": null, "protocol": "tcp", "tcp_flags": null, "action": "accept"},
+              {"ip_version": "ipv4", "name": "ssh vpn", "dst_ip": null, "src_ip": "100.64.0.0/10", "dst_port": "22", "src_port": null, "protocol": "tcp", "tcp_flags": null, "action": "accept"}
+            ], "output": []}}}
+  },
+  "vswitch": [
+    {"id": 4321, "name": "hybrid", "vlan": 4000, "cancelled": false,
+     "server": [{"server_ip": "203.0.113.50", "server_ipv6_net": "2001:db8:50::", "server_number": 321, "status": "ready"}],
+     "subnet": [], "cloud_network": [{"id": 4711, "ip": "10.0.2.0", "mask": 24, "gateway": "10.0.2.1"}]}
+  ],
+  "key": [
+    {"key": {"name": "old laptop", "fingerprint": "56:29:99:a4:5d:ed:ac:95:c1:f5:88:82:90:5d:dd:10", "type": "RSA", "size": 2048, "data": "", "created_at": "2019-02-01 10:00:00"}},
+    {"key": {"name": "ops", "fingerprint": "15:28:b0:03:95:f0:77:b3:10:56:15:6b:77:22:a5:bb", "type": "ED25519", "size": 256, "data": "", "created_at": "2026-01-05 10:00:00"}}
+  ]
+}

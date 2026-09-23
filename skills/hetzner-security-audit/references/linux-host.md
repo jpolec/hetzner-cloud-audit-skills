@@ -6,3 +6,5 @@ Allowed bounded reads include `ss -lntup`, `sshd -T`, `uname -a`, update status/
 
 Collect effective sshd settings, sockets/binds, firewall policy, kernel/packages, update automation, AppArmor/SELinux, auditd, scheduled services, world-writable executable paths, mounts, and Docker socket permissions. Correlate sockets with Hetzner reachability and return facts/candidates only.
 
+
+Prefer the owner-run bundle: `hetzner-audit host-bundle > host-bundle.sh`, show it to the owner, let them run it (`ssh HOST 'sudo HETZNER_AUDIT_SERVER=<server name> sh -s' < host-bundle.sh > HOST.bundle`), and pass the output with `--host-bundle`. Firewall layers the parser cannot read stay unknown, so related findings stay `needs_validation`.

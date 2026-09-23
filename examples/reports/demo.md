@@ -19,22 +19,15 @@
 | CPU utilization | 0% | provider CPU metrics (RAM/disk never) |
 | Ownership | 0% | owner or project label |
 | Provider backups | 0% | of 2 stateful servers |
-| Host/runtime evidence | 57% | host firewall, listeners, service config |
+| RAM and disk telemetry | 0% | node exporter via `--node-metrics`, full window |
+| Host/runtime evidence | 57% | host firewall, listeners, service config (`--host-bundle`) |
 
 - Snapshot: 2026-09-22 00:00 UTC · collector fixture
-- Scope: Hetzner Cloud control plane only (API, GET requests). No SSH, no host or application evidence.
+- Evidence sources: Hetzner Cloud API (GET requests); host facts supplied in the snapshot for 4 server(s).
 
 ## Recommended actions
 
-### 1. Close public exposure: SSH reachable from the public internet
-
-**Saving:** TBD · **Evidence:** MEDIUM (cloud path observed; host firewall, listener, and auth not observed) · **Risk of acting:** low
-
-An inbound rule admits a public source to TCP/22.
-
-**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
-
-### 2. Close public exposure: Docker daemon reachable from the public internet
+### 1. Close public exposure: Docker daemon reachable from the public internet
 
 **Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
 
@@ -42,7 +35,7 @@ An inbound rule admits a public source to TCP/2375.
 
 **Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
 
-### 3. Close public exposure: Kubernetes API reachable from the public internet
+### 2. Close public exposure: Kubernetes API reachable from the public internet
 
 **Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
 
@@ -50,7 +43,7 @@ An inbound rule admits a public source to TCP/6443.
 
 **Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
 
-### 4. Close public exposure: PostgreSQL reachable from the public internet
+### 3. Close public exposure: PostgreSQL reachable from the public internet
 
 **Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
 
@@ -58,11 +51,19 @@ An inbound rule admits a public source to TCP/5432.
 
 **Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
 
-### 5. Close public exposure: Redis reachable from the public internet
+### 4. Close public exposure: Redis reachable from the public internet
 
 **Saving:** TBD · **Evidence:** HIGH (provider and host/runtime evidence agree) · **Risk of acting:** low
 
 An inbound rule admits a public source to TCP/6379.
+
+**Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
+
+### 5. Close public exposure: SSH reachable from the public internet
+
+**Saving:** TBD · **Evidence:** MEDIUM (cloud path observed; host firewall, listener, and auth not observed) · **Risk of acting:** low
+
+An inbound rule admits a public source to TCP/22.
 
 **Next step:** Remove the 0.0.0.0/0 rule in IaC or restrict it to known sources; then confirm the service is unreachable from outside.
 
@@ -223,11 +224,11 @@ Provider backups are off.
 
 **Observation:** Declared and observed source ranges differ for a security-sensitive port.
 
-**Expected:** TCP/22 sources equal the declared set \['100.64.0.0/10'\].
+**Expected:** TCP/5432 sources equal the declared set \['10.0.0.0/8'\].
 
 **Actual:** Unexpected observed sources: \['0.0.0.0/0'\].
 
-**Attack path:** 0.0.0.0/0 → tcp/22 → provider-policy:server:admin
+**Attack path:** 0.0.0.0/0 → tcp/5432 → provider-policy:server:public-pg
 
 **Verification:** Evidence is internally consistent and no observed compensating control refutes the path.
 

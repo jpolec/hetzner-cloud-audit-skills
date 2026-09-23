@@ -11,8 +11,16 @@
   "identified_potential_savings": {
     "monthly_net": 90.0,
     "annual_net": 1080.0,
+    "theoretical_monthly_net": 90.0,
+    "expected_monthly_net": 40.0,
+    "verified_monthly_net": 0.0,
     "confirmed_monthly_net": 0.0,
-    "basis": "Maximum non-overlapping candidate per asset; all require validation."
+    "basis": "Maximum non-overlapping candidate per asset; all require validation.",
+    "definitions": {
+      "theoretical": "every candidate, best one per asset",
+      "expected": "unused resources, plus rightsizing whose CPU, RAM, and disk telemetry cover the window",
+      "verified": "measured after the change: `hetzner-audit diff before.json after.json` reports the cost delta"
+    }
   },
   "servers": [
     {
@@ -164,8 +172,8 @@
       "risk": "medium",
       "confidence": 0.72,
       "prerequisites": [
-        "Collect guest RAM p95.",
-        "Validate root filesystem usage, I/O peaks, SLO, and migration path."
+        "Collect guest RAM p95 and filesystem occupancy (`--node-metrics`).",
+        "Validate I/O peaks, SLO, and migration path."
       ],
       "evidence": [
         {
@@ -200,7 +208,8 @@
           "Retain the prior configuration until owner acceptance and restore validation."
         ]
       },
-      "discovered_at": "2026-09-22T00:00:00+00:00"
+      "discovered_at": "2026-09-22T00:00:00+00:00",
+      "evidence_complete": false
     },
     {
       "id": "HETZ-COST-003-db0d8cbe69544c30",
@@ -407,7 +416,7 @@
     }
   ],
   "data_gaps": [
-    "Hetzner does not expose guest RAM utilization.",
+    "Hetzner does not expose guest RAM utilization; add `--node-metrics` (see `hetzner-audit metrics`).",
     "Filesystem occupancy, workload SLOs, and application architecture constraints are not provider metrics.",
     "Catalog prices can differ from invoices, credits, taxes, and legacy contracts."
   ],

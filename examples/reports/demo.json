@@ -53,7 +53,9 @@
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-BCP-001-63ce14eb9252c10a",
@@ -107,7 +109,9 @@
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-BCP-001-657df523d6f5020b",
@@ -161,7 +165,9 @@
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-BCP-001-6deecb58d09f333d",
@@ -215,7 +221,9 @@
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-BCP-001-da23afb6e191edab",
@@ -269,7 +277,9 @@
         "https://docs.hetzner.com/cloud/servers/backups-snapshots/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-DKR-001-41051b4409ad941e",
@@ -736,81 +746,7 @@
       "metadata": {}
     },
     {
-      "id": "HETZ-IAC-001-9c3eddeb6c5c135a",
-      "rule_id": "HETZ-IAC-001",
-      "title": "Runtime network access diverges from declared infrastructure",
-      "severity": "medium",
-      "confidence": 0.98,
-      "status": "confirmed",
-      "assets": [
-        "server:admin"
-      ],
-      "observation": "Declared and observed source ranges differ for a security-sensitive port.",
-      "expected_state": "TCP/22 sources equal the declared set ['100.64.0.0/10'].",
-      "actual_state": "Unexpected observed sources: ['0.0.0.0/0'].",
-      "evidence": [
-        {
-          "source": "repository",
-          "kind": "declared_expectation",
-          "asset_id": "server:admin",
-          "observed": "SSH only from Tailscale",
-          "path": "examples/intentionally-insecure/main.tf:12",
-          "collected_at": "2026-09-22T00:00:00+00:00"
-        },
-        {
-          "source": "fixture",
-          "kind": "observed_access",
-          "asset_id": "server:admin",
-          "observed": [
-            "0.0.0.0/0"
-          ],
-          "path": null,
-          "collected_at": "2026-09-22T00:00:00+00:00"
-        }
-      ],
-      "attack_path": [
-        "0.0.0.0/0",
-        "tcp/22",
-        "provider-policy:server:admin"
-      ],
-      "prerequisites": [
-        "Repository declaration is current and refers to the observed asset."
-      ],
-      "impact": "The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.",
-      "verification": {
-        "method": "deterministic evidence-contract verification",
-        "result": "confirmed",
-        "evidence": [
-          {
-            "source": "repository",
-            "kind": "declared_expectation",
-            "asset_id": "server:admin",
-            "observed": "SSH only from Tailscale",
-            "path": "examples/intentionally-insecure/main.tf:12",
-            "collected_at": "2026-09-22T00:00:00+00:00"
-          },
-          {
-            "source": "fixture",
-            "kind": "observed_access",
-            "asset_id": "server:admin",
-            "observed": [
-              "0.0.0.0/0"
-            ],
-            "path": null,
-            "collected_at": "2026-09-22T00:00:00+00:00"
-          }
-        ],
-        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
-      },
-      "remediation": "Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.",
-      "references": [
-        "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
-      ],
-      "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
-    },
-    {
-      "id": "HETZ-IAC-001-a5aff608f1082162",
+      "id": "HETZ-IAC-001-b03c8505ae5144b7",
       "rule_id": "HETZ-IAC-001",
       "title": "Runtime network access diverges from declared infrastructure",
       "severity": "medium",
@@ -867,6 +803,80 @@
             "source": "fixture",
             "kind": "observed_access",
             "asset_id": "server:public-pg",
+            "observed": [
+              "0.0.0.0/0"
+            ],
+            "path": null,
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          }
+        ],
+        "notes": "Evidence is internally consistent and no observed compensating control refutes the path."
+      },
+      "remediation": "Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.",
+      "references": [
+        "https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"
+      ],
+      "discovered_at": "2026-09-22T00:00:00+00:00",
+      "metadata": {}
+    },
+    {
+      "id": "HETZ-IAC-001-d139425286d699cf",
+      "rule_id": "HETZ-IAC-001",
+      "title": "Runtime network access diverges from declared infrastructure",
+      "severity": "medium",
+      "confidence": 0.98,
+      "status": "confirmed",
+      "assets": [
+        "server:admin"
+      ],
+      "observation": "Declared and observed source ranges differ for a security-sensitive port.",
+      "expected_state": "TCP/22 sources equal the declared set ['100.64.0.0/10'].",
+      "actual_state": "Unexpected observed sources: ['0.0.0.0/0'].",
+      "evidence": [
+        {
+          "source": "repository",
+          "kind": "declared_expectation",
+          "asset_id": "server:admin",
+          "observed": "SSH only from Tailscale",
+          "path": "examples/intentionally-insecure/main.tf:12",
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        },
+        {
+          "source": "fixture",
+          "kind": "observed_access",
+          "asset_id": "server:admin",
+          "observed": [
+            "0.0.0.0/0"
+          ],
+          "path": null,
+          "collected_at": "2026-09-22T00:00:00+00:00"
+        }
+      ],
+      "attack_path": [
+        "0.0.0.0/0",
+        "tcp/22",
+        "provider-policy:server:admin"
+      ],
+      "prerequisites": [
+        "Repository declaration is current and refers to the observed asset."
+      ],
+      "impact": "The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.",
+      "verification": {
+        "method": "deterministic evidence-contract verification",
+        "result": "confirmed",
+        "evidence": [
+          {
+            "source": "repository",
+            "kind": "declared_expectation",
+            "asset_id": "server:admin",
+            "observed": "SSH only from Tailscale",
+            "path": "examples/intentionally-insecure/main.tf:12",
+            "collected_at": "2026-09-22T00:00:00+00:00"
+          },
+          {
+            "source": "fixture",
+            "kind": "observed_access",
+            "asset_id": "server:admin",
             "observed": [
               "0.0.0.0/0"
             ],
@@ -947,7 +957,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "high"
+      }
     },
     {
       "id": "HETZ-NET-002-5438720e6556479e",
@@ -1440,7 +1452,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-NET-005-53061fc23c60befd",
@@ -1493,7 +1507,9 @@
         "https://docs.hetzner.com/cloud/firewalls/overview/"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-PG-001-7162f231c522c52f",
@@ -1625,7 +1641,9 @@
         "https://www.postgresql.org/docs/current/auth-pg-hba-conf.html"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "critical"
+      }
     },
     {
       "id": "HETZ-PG-002-fe11611b41e10123",
@@ -1902,7 +1920,9 @@
         "https://example.invalid/CVE-DEMO-0001"
       ],
       "discovered_at": "2026-09-22T00:00:00+00:00",
-      "metadata": {}
+      "metadata": {
+        "candidate_severity": "medium"
+      }
     },
     {
       "id": "HETZ-VULN-001-a4150c6fe1cb49e8",

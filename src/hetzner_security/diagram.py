@@ -36,6 +36,11 @@ CATEGORY = {
     "security": ("#d50c2d", "shield"),
     "other": ("#6b7280", "server"),
     "storage": ("#0f8b8d", "archive"),
+    "lb": ("#7c4dff", "balance"),
+    "k8s": ("#326ce5", "wheel"),
+    "dedicated": ("#374151", "server"),
+    "vswitch": ("#6d4fc2", "mesh"),
+    "bucket": ("#0f8b8d", "bucket"),
 }
 LOCATION_NAMES = {
     "fsn1": "Falkenstein", "nbg1": "Nuremberg", "hel1": "Helsinki",
@@ -50,6 +55,9 @@ GLYPHS = {
     "cloud": '<path d="M7 18h10.5a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7.3 9.2 4.4 4.4 0 0 0 7 18z"/>',
     "mesh": '<circle cx="6" cy="6" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="18" cy="6" r="1.6"/><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/><circle cx="12" cy="18" r="1.6"/>',
     "list": '<path d="M8 7h11M8 12h11M8 17h11M4.5 7h.01M4.5 12h.01M4.5 17h.01"/>',
+    "balance": '<circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v10M12 11l-6 6M12 11l6 6"/>',
+    "wheel": '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v6M12 14v6M4 12h6M14 12h6M6.3 6.3l4.2 4.2M13.5 13.5l4.2 4.2M17.7 6.3l-4.2 4.2M10.5 13.5l-4.2 4.2"/>',
+    "bucket": '<path d="M5 7h14l-1.6 12.2a2 2 0 0 1-2 1.8H8.6a2 2 0 0 1-2-1.8z"/><ellipse cx="12" cy="7" rx="7" ry="2.2"/>',
     "archive": '<rect x="3.5" y="4" width="17" height="5" rx="1"/><path d="M5 9v10h14V9M10 13h4"/>',
 }
 SOURCE_STYLE = {
@@ -244,7 +252,11 @@ def render_svg(
     else:
         outside_bottom = vpc_bottom
     zone_bottom = outside_bottom + 16
-    actions_y = zone_bottom + 22
+    beyond = _beyond_sections(topology, c)
+    beyond_y = zone_bottom + 22
+    per_row = max(1, int((width - 2 * margin - 32 + gap) // (node_w + gap)))
+    beyond_h = _beyond_height(beyond, per_row, node_h, gap)
+    actions_y = beyond_y + beyond_h + (22 if beyond_h else 0)
     legend_y = actions_y + _actions_height(actions, 6)
     height = legend_y + 92 + margin
 
@@ -252,7 +264,9 @@ def render_svg(
     add = out.append
     _open_svg(add, c, width, height)
     zone_names = sorted({item.get("network_zone", "") for item in servers if item.get("network_zone")})
-    subtitle = f"network zone {', '.join(zone_names) or 'unknown'} · cloud control plane only (no host evidence) · public IPs omitted"
+    hosts = sum(1 for item in servers if item.get("host"))
+    evidence = f"host evidence for {hosts} server{'s' if hosts != 1 else ''}" if hosts else "cloud control plane only (no host evidence)"
+    subtitle = f"network zone {', '.join(zone_names) or 'unknown'} · {evidence} · public IPs omitted"
     if topology.get("collected_at"):
         subtitle += f" · collected {str(topology['collected_at'])[:16].replace('T', ' ')} UTC"
     _header(
@@ -349,7 +363,9 @@ def render_svg(
         add(f'<text x="{x0 + 54}" y="{y0 + 23}" font-size="13" font-weight="700" fill="{c["text"]}">{escape(name[:22])}</text>')
         add(f'<text x="{x0 + 54}" y="{y0 + 39}" font-size="11" fill="{c["muted"]}">{escape(detail[:28])}</text>')
         flag_x = x0 + 54
-        for text, flag_color in flags[:2]:
+        for text, flag_color in flags[:3]:
+            if flag_x + len(text) * 5.9 > x0 + node_w - 6:
+                break  # never draw a clipped flag; the most important flags come first
             add(f'<text x="{flag_x}" y="{y0 + 52}" font-size="10" font-weight="700" fill="{flag_color}">{escape(text)}</text>')
             flag_x += 8 + len(text) * 6
         if pill:
@@ -370,6 +386,13 @@ def render_svg(
             flags.append(("deprecated type", c["public"]))
         if item["delete_protection"]:
             flags.append(("protected", c["vpc"]))
+        host = item.get("host")
+        if host and host["docker_bypass"]:
+            flags.insert(0, (f"docker bypass {len(host['docker_bypass'])}", c["critical"]))
+        if host and host["firewall"] == "none":
+            flags.insert(0, ("no host fw", c["public"]))
+        if item.get("k8s_role"):
+            flags.insert(0, ("k8s cp" if item["k8s_role"] == "control-plane" else "k8s", c["location"]))
         if not item["firewall"] and item["public_ip"]:
             flags.insert(0, ("no firewall", c["critical"]))
         pill = (EXPOSURE_PILL[item["exposure"]], c[item["exposure"]]) if item["exposure"] in EXPOSURE_PILL else None
@@ -379,6 +402,8 @@ def render_svg(
             bx, by = storage_positions[box["name"]]
             node(bx, by, box["name"], f"Storage Box · {box['type']}", "storage", None, [])
 
+    if beyond_h:
+        _draw_beyond(add, c, margin, beyond_y, width - 2 * margin, beyond, per_row, node, node_w, node_h, gap)
     if actions:
         _actions_panel(add, c, margin, actions_y, width - 2 * margin, actions, 6)
 
@@ -386,7 +411,11 @@ def render_svg(
     add(f'<rect x="{margin}" y="{legend_y}" width="{width - 2 * margin}" height="92" rx="10" fill="{c["surface"]}" stroke="{c["line"]}"/>')
     add(f'<text x="{margin + 16}" y="{legend_y + 22}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">LEGEND</text>')
     lx = margin + 16.0
-    for key, label in (("edge", "Edge & web"), ("app", "Application"), ("data", "Data"), ("security", "Identity & secrets"), ("other", "Other"), ("storage", "Storage Box")):
+    legend_items = [("edge", "Edge & web"), ("app", "Application"), ("data", "Data"), ("security", "Identity & secrets"), ("other", "Other"), ("storage", "Storage Box")]
+    present = {card[2] for _title, cards in beyond for card in cards}
+    legend_items += [(key, label) for key, label in (("lb", "Load balancer"), ("k8s", "Kubernetes"), ("dedicated", "Dedicated"),
+                                                     ("vswitch", "vSwitch"), ("bucket", "Bucket")) if key in present]
+    for key, label in legend_items:
         color, glyph = CATEGORY[key]
         _icon(add, lx, legend_y + 36, glyph, color, 22)
         add(f'<text x="{lx + 28}" y="{legend_y + 51}" font-size="11.5" fill="{c["text"]}">{escape(label)}</text>')
@@ -413,6 +442,76 @@ def render_svg(
 
 
 # ---------------------------------------------------------------- per-VM connectivity view
+
+Card = tuple[str, str, str, tuple[str, str] | None, list[tuple[str, str]]]  # name, detail, category, pill, flags
+
+
+def _beyond_sections(topology: dict[str, Any], c: dict[str, str]) -> list[tuple[str, list[Card]]]:
+    """Cards for everything outside the server grid, grouped by source."""
+    sections: list[tuple[str, list[Card]]] = []
+    lbs: list[Card] = [
+        (item["name"], ", ".join(item["services"]) or "no services", "lb",
+         ("PUBLIC", c["public"]) if item["public"] else None,
+         [(f"→ {', '.join(item['targets'][:3])}" if item["targets"] else "no targets", c["muted"])])
+        for item in topology.get("load_balancers") or []
+    ]
+    if lbs:
+        sections.append(("LOAD BALANCERS · Hetzner Cloud", lbs))
+    k8s = topology.get("kubernetes")
+    if k8s:
+        flags = [(f"{k8s['risky_workloads']} risky", c["critical"] if k8s["risky_workloads"] else c["vpc"]),
+                 (f"{k8s['node_port_services']} NodePort svc", c["public"] if k8s["node_port_services"] else c["muted"])]
+        sections.append(("KUBERNETES · correlated from kubectl", [
+            (k8s["name"], f"{len(k8s['nodes'])} nodes: {', '.join(k8s['nodes'][:3])}", "k8s", None, flags),
+            *[(name, "integration detected", "k8s", None, []) for name in k8s["integrations"][:3]],
+        ]))
+    robot: list[Card] = [
+        (item["name"], f"{item['product'] or ''} · {item['dc'] or ''}", "dedicated",
+         ("NO FW", c["critical"]) if item["firewall"] != "active" else None,
+         [("Robot fw " + item["firewall"], c["vpc"] if item["firewall"] == "active" else c["critical"])]
+         + ([("IPv6 open", c["public"])] if item["firewall"] == "active" and not item["filter_ipv6"] else []))
+        for item in topology.get("robot_servers") or []
+    ]
+    robot += [
+        (item["name"], f"vSwitch · VLAN {item['vlan']}", "vswitch", ("HYBRID", c["tailscale"]) if item["cloud_networks"] else None,
+         [(f"{len(item['members'])} dedicated ↔ {', '.join(item['cloud_networks']) or 'no cloud net'}", c["muted"])])
+        for item in topology.get("vswitches") or []
+    ]
+    if robot:
+        sections.append(("DEDICATED SERVERS · Hetzner Robot", robot))
+    buckets: list[Card] = [
+        (item["name"], f"bucket · {item['location']}", "bucket", ("PUBLIC", c["critical"]) if item["public"] else None,
+         [("versioned", c["vpc"]) if item["versioning"] else ("no versioning", c["public"])])
+        for item in topology.get("buckets") or []
+    ]
+    if buckets:
+        sections.append(("OBJECT STORAGE · S3 API", buckets))
+    return sections
+
+
+def _beyond_height(sections: list[tuple[str, list[Card]]], per_row: int, node_h: float, gap: float) -> float:
+    if not sections:
+        return 0
+    rows = sum(math.ceil(len(cards) / per_row) for _title, cards in sections)
+    return 40 + len(sections) * 34 + rows * (node_h + gap + 6) + 8
+
+
+def _draw_beyond(
+    add: Any, c: dict[str, str], x: float, y: float, width: float, sections: list[tuple[str, list[Card]]],
+    per_row: int, node: Any, node_w: float, node_h: float, gap: float,
+) -> None:
+    height = _beyond_height(sections, per_row, node_h, gap)
+    add(f'<rect x="{x}" y="{y}" width="{width}" height="{height}" rx="12" fill="none" stroke="{c["zone"]}" stroke-width="1.2" stroke-dasharray="2 4"/>')
+    add(f'<text x="{x + 16}" y="{y + 24}" font-size="12" font-weight="700" fill="{c["muted"]}">BEYOND THE SERVER GRID · load balancers, Kubernetes, dedicated servers, Object Storage</text>')
+    top = y + 40
+    for title, cards in sections:
+        add(f'<text x="{x + 16}" y="{top + 16}" font-size="11" font-weight="700" letter-spacing="0.5" fill="{c["text"]}">{escape(title)}</text>')
+        top += 34
+        for index, (name, detail, category, pill, flags) in enumerate(cards):
+            row, column = divmod(index, per_row)
+            node(x + 16 + column * (node_w + gap), top + row * (node_h + gap + 6), name, detail, category, pill, flags)
+        top += math.ceil(len(cards) / per_row) * (node_h + gap + 6)
+
 
 def _chips(item: dict[str, Any]) -> list[tuple[str, str]]:
     """Ingress summary per trust class, as (text, theme key) chips."""
@@ -680,7 +779,7 @@ def render_cost_svg(
             ("Spend concentration", f"{insights.get('top3_share', 0):.0%}", f"top 3 VMs · top 5 = {insights.get('top5_share', 0):.0%}", c["text"]),
             ("Identifiable waste", f"{currency} {insights.get('waste_monthly', 0):,.2f}", "unused resources · no telemetry needed", c["public"] if insights.get("waste_monthly") else c["vpc"]),
             ("Optimization candidates", opportunities[0], opportunities[1], c["private"]),
-            ("Confirmed savings", f"{currency} {float(savings.get('confirmed_monthly_net', 0) or 0):,.2f}", "needs RAM, disk, owner intent", c["public"]),
+            ("Expected savings", f"{currency} {float(savings.get('expected_monthly_net', 0) or 0):,.2f}", "waste + fully evidenced rightsizing", c["public"]),
             ("Provider backups", f"{backed}/{len(stateful)}", "stateful servers with backups on", c["public"] if backed < len(stateful) else c["vpc"]),
         ],
     )
@@ -780,5 +879,215 @@ def render_cost_svg(
         add(f'<text x="{lx + 30}" y="{legend_y + 49}" font-size="11.5" fill="{c["text"]}">{label}</text>')
         lx += 44 + len(label) * 6.6
     add(f'<text x="{lx + 10}" y="{legend_y + 49}" font-size="11.5" fill="{c["muted"]}">Status: REVIEW = exposure or high-value host on a shared network · DEPRECATED · COST = saving or storage-heavy · OK. Bars scale to the most expensive VM.</text>')
+    add("</svg>")
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------- per-VM host layers view
+def _wrap(text: str, limit: int) -> list[str]:
+    words, lines, line = text.split(), [], ""
+    for word in words:
+        if line and len(line) + 1 + len(word) > limit:
+            lines.append(line)
+            line = word
+        else:
+            line = f"{line} {word}".strip()
+    return [*lines, line] if line else lines or [""]
+
+
+def render_host_svg(
+    hosts: list[dict[str, Any]], title: str = "Per-VM host layers", theme: str = "light",
+    actions: list[dict[str, Any]] | None = None, missing: int = 0,
+) -> str:
+    """One row per server with a host bundle: each filtering layer, and what passes all of them."""
+    c = THEMES[theme]
+    margin, gap = 28, 14
+    width = 1500
+    stage_w = (width - 2 * margin - 32 - 4 * 34) / 5
+    chip_w, chip_h, per_row = 228, 40, 6
+
+    def panel_h(host: dict[str, Any]) -> float:
+        rows = math.ceil(len(host["containers"]) / per_row)
+        return 64 + 92 + (26 + rows * (chip_h + 8) if rows else 0) + 14
+
+    top = margin + HEADER_H + 20
+    heights = [panel_h(host) for host in hosts]
+    empty_h = 120 if not hosts else 0
+    actions_y = top + sum(heights) + gap * len(hosts) + empty_h + 10
+    security_actions = [item for item in actions or [] if item.get("category") == "security"]
+    height = actions_y + _actions_height(security_actions, 5) + margin
+
+    out: list[str] = []
+    add = out.append
+    _open_svg(add, c, width, height)
+    exposed = sum(1 for host in hosts if host["reachable"] != "none")
+    bypass = sum(1 for host in hosts if host["docker_bypass"])
+    unfiltered = sum(1 for host in hosts if "filters nothing" in str(host["engine"]))
+    _header(
+        add, c, width, margin, title,
+        "cloud firewall ∩ host firewall ∩ listener = reachable · Docker-published ports skip UFW/nftables input rules · from owner-run host bundles",
+        [
+            ("Hosts with evidence", str(len(hosts)), f"{missing} server(s) without a bundle", c["text"]),
+            ("Reachable end to end", str(exposed), "servers with a port open through every layer", c["critical"] if exposed else c["vpc"]),
+            ("Docker bypass", str(bypass), "servers publishing past the host firewall", c["critical"] if bypass else c["vpc"]),
+            ("No host firewall", str(unfiltered), "cloud firewall is the only layer", c["public"] if unfiltered else c["vpc"]),
+            ("Containers", str(sum(len(host["containers"]) for host in hosts)), "seen in docker inspect", c["text"]),
+        ],
+    )
+    if not hosts:
+        add(f'<rect x="{margin}" y="{top}" width="{width - 2 * margin}" height="100" rx="12" fill="{c["surface"]}" stroke="{c["line"]}"/>')
+        add(f'<text x="{margin + 20}" y="{top + 44}" font-size="15" font-weight="700" fill="{c["text"]}">No host evidence in this snapshot</text>')
+        add(f'<text x="{margin + 20}" y="{top + 68}" font-size="12.5" fill="{c["muted"]}">Run `hetzner-audit host-bundle` on each server (owner-run, read-only) and pass the output with --host-bundle.</text>')
+    y = float(top)
+    for host, panel in zip(hosts, heights, strict=True):
+        reachable = host["reachable"] != "none"
+        add(f'<rect x="{margin}" y="{y}" width="{width - 2 * margin}" height="{panel}" rx="12" fill="{c["surface"]}" stroke="{c["critical"] if reachable else c["line"]}" stroke-width="{1.6 if reachable else 1}" filter="url(#shadow)"/>')
+        _icon(add, margin + 16, y + 14, "server", CATEGORY["app"][0], 34)
+        add(f'<text x="{margin + 60}" y="{y + 30}" font-size="15" font-weight="800" fill="{c["text"]}">{escape(host["name"])}</text>')
+        add(f'<text x="{margin + 60}" y="{y + 48}" font-size="11.5" fill="{c["muted"]}">{escape(host["subtitle"])}</text>')
+        stages = [
+            ("CLOUD FIREWALL", f"admits {host['cloud_admits']}", c["text"]),
+            (f"HOST FIREWALL · {str(host['engine']).split(' ')[0].upper()}",
+             f"admits {host['host_firewall_admits']}" + (" (filters nothing)" if "filters nothing" in str(host["engine"]) else ""),
+             c["public"] if "filters nothing" in str(host["engine"]) else c["text"]),
+            ("PUBLIC LISTENERS", host["public_listeners"], c["text"]),
+            ("DOCKER PUBLISHED", ("bypass " + ", ".join(map(str, host["docker_bypass"]))) if host["docker_bypass"] else "no bypass", c["critical"] if host["docker_bypass"] else c["vpc"]),
+            ("REACHABLE FROM INTERNET", host["reachable"], c["critical"] if reachable else c["vpc"]),
+        ]
+        private = host.get("private_reachable")
+        sx = margin + 16.0
+        sy = y + 64
+        for index, (label, value, color) in enumerate(stages):
+            last = index == len(stages) - 1
+            add(f'<rect x="{sx:.1f}" y="{sy}" width="{stage_w:.1f}" height="78" rx="9" fill="{c["band"]}" stroke="{color if last else c["line"]}" stroke-width="{1.6 if last else 1}"/>')
+            add(f'<text x="{sx + 12:.1f}" y="{sy + 20}" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="{c["muted"]}">{escape(label)}</text>')
+            for line_index, line in enumerate(_wrap(value, 30)[:3]):
+                add(f'<text x="{sx + 12:.1f}" y="{sy + 40 + line_index * 15}" font-size="12.5" font-weight="700" fill="{color}">{escape(line)}</text>')
+            if last and private is not None:
+                add(f'<text x="{sx + 12:.1f}" y="{sy + 66}" font-size="11" font-weight="700" fill="{c["public"] if private != "none" else c["muted"]}">'
+                    f'{escape(_short("private network: " + private, 38))}</text>')
+            if not last:
+                ax = sx + stage_w + 4
+                add(f'<path d="M {ax:.1f} {sy + 39} L {ax + 24:.1f} {sy + 39}" stroke="{c["muted"]}" stroke-width="1.6" marker-end="url(#arrow)"/>')
+                add(f'<text x="{ax + 12:.1f}" y="{sy + 32}" text-anchor="middle" font-size="12" font-weight="800" fill="{c["muted"]}">∩</text>')
+            sx += stage_w + 34
+        if host["containers"]:
+            cy = sy + 92
+            add(f'<text x="{margin + 16}" y="{cy + 12}" font-size="10.5" font-weight="700" letter-spacing="0.5" fill="{c["muted"]}">CONTAINERS</text>')
+            for index, item in enumerate(host["containers"]):
+                row, column = divmod(index, per_row)
+                cx = margin + 16 + column * (chip_w + 10)
+                ry = cy + 22 + row * (chip_h + 8)
+                risky = bool(item["risks"])
+                add(f'<rect x="{cx}" y="{ry}" width="{chip_w}" height="{chip_h}" rx="8" fill="{c["surface"]}" stroke="{c["critical"] if risky else c["line"]}"/>')
+                add(f'<text x="{cx + 10}" y="{ry + 16}" font-size="11.5" font-weight="700" fill="{c["text"]}">{escape(_short(item["name"], 30))}</text>')
+                detail = item["risks"] or item["ports"] or "not published"
+                add(f'<text x="{cx + 10}" y="{ry + 31}" font-size="10.5" fill="{c["critical"] if risky or item["bypass"] else c["muted"]}">{escape(_short(detail, 36))}</text>')
+        y += panel + gap
+    if security_actions:
+        _actions_panel(add, c, margin, actions_y, width - 2 * margin, security_actions, 5, title="HOST AND SECURITY ACTIONS")
+    add("</svg>")
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------- posture overview
+POSTURE_DOMAINS: tuple[tuple[str, tuple[str, ...]], ...] = (
+    ("Network exposure", ("HETZ-NET-", "HETZ-FW-", "HETZ-LB-", "HETZ-XLY-", "HETZ-K8S-001", "HETZ-ROB-001", "HETZ-ROB-002", "HETZ-ROB-003", "HETZ-ROB-005")),
+    ("Host and runtime", ("HETZ-HOST-", "HETZ-SSH-", "HETZ-DKR-", "HETZ-K8S-002", "HETZ-VULN-")),
+    ("Data services", ("HETZ-PG-", "HETZ-RDS-", "HETZ-OBJ-", "HETZ-STO-")),
+    ("Identity and access", ("HETZ-KEY-", "HETZ-ATT-", "HETZ-CHG-")),
+    ("Resilience", ("HETZ-BCP-", "HETZ-GOV-001", "HETZ-PLC-", "HETZ-CERT-", "HETZ-DNS-", "HETZ-IMG-")),
+    ("Governance and drift", ("HETZ-GOV-", "HETZ-IAC-", "HETZ-XPR-")),
+)
+SEVERITIES = ("critical", "high", "medium", "low", "info")
+
+
+def posture_matrix(findings: list[Any]) -> dict[str, dict[str, dict[str, int]]]:
+    """domain -> severity (or 'unscored' for hypotheses) -> {'confirmed': n, 'needs_validation': n}."""
+    matrix: dict[str, dict[str, dict[str, int]]] = {name: {} for name, _ in POSTURE_DOMAINS}
+    for finding in findings:
+        status = finding.status.value
+        if status == "rejected":
+            continue
+        domain = next((name for name, prefixes in POSTURE_DOMAINS if finding.rule_id.startswith(prefixes)), "Governance and drift")
+        # Hypotheses carry no severity; place them by the rule's candidate severity when known.
+        severity = finding.severity.value if finding.severity else str(finding.metadata.get("candidate_severity") or "unscored")
+        cell = matrix[domain].setdefault(severity, {"confirmed": 0, "needs_validation": 0})
+        cell[status] = cell.get(status, 0) + 1
+    return matrix
+
+
+def render_posture_svg(
+    matrix: dict[str, dict[str, dict[str, int]]], coverage: list[tuple[str, int, str]], sources: list[str],
+    title: str = "Security posture", theme: str = "light", actions: list[dict[str, Any]] | None = None,
+    details: list[str] | None = None,
+) -> str:
+    source_count = len(sources)
+    sources = [*sources, *(details or [])]
+    c = THEMES[theme]
+    margin, width = 28, 1500
+    columns = [*SEVERITIES, "unscored"]
+    label_w, cell_w, row_h = 230, (1500 - 2 * 28 - 32 - 230) / 6, 58
+    grid_top = margin + HEADER_H + 20
+    grid_h = 48 + len(matrix) * row_h + 16
+    side_top = grid_top + grid_h + 20
+    cov_h = 44 + len(coverage) * 30 + 12
+    src_h = 44 + max(1, len(sources)) * 20 + 12
+    actions_y = side_top + max(cov_h, src_h) + 20
+    height = actions_y + _actions_height(actions, 5) + margin
+    confirmed = sum(cell.get("confirmed", 0) for row in matrix.values() for cell in row.values())
+    pending = sum(cell.get("needs_validation", 0) for row in matrix.values() for cell in row.values())
+    severe = sum(cell.get("confirmed", 0) for row in matrix.values() for sev, cell in row.items() if sev in {"critical", "high"})
+    out: list[str] = []
+    add = out.append
+    _open_svg(add, c, width, height)
+    _header(
+        add, c, width, margin, title, "confirmed = evidence complete · to validate = a layer is not observed yet · rejected findings are not shown",
+        [
+            ("Confirmed", str(confirmed), "evidence complete", c["critical"] if confirmed else c["vpc"]),
+            ("Critical + high", str(severe), "confirmed only", c["critical"] if severe else c["vpc"]),
+            ("To validate", str(pending), "hypotheses with a missing layer", c["public"] if pending else c["vpc"]),
+            ("Evidence sources", str(source_count), "API, host, IaC, owner", c["text"]),
+        ],
+    )
+    add(f'<rect x="{margin}" y="{grid_top}" width="{width - 2 * margin}" height="{grid_h}" rx="12" fill="{c["surface"]}" stroke="{c["line"]}" filter="url(#shadow)"/>')
+    heads = {"critical": c["critical"], "high": c["critical"], "medium": c["public"], "low": c["location"], "info": c["muted"], "unscored": c["muted"]}
+    for index, column in enumerate(columns):
+        x = margin + 16 + label_w + index * cell_w
+        add(f'<text x="{x + cell_w / 2:.1f}" y="{grid_top + 30}" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="{heads[column]}">{escape(column.upper() if column != "unscored" else "TO VALIDATE")}</text>')
+    for row_index, (domain, row) in enumerate(matrix.items()):
+        y = grid_top + 48 + row_index * row_h
+        add(f'<line x1="{margin + 16}" y1="{y}" x2="{width - margin - 16}" y2="{y}" stroke="{c["line"]}"/>')
+        add(f'<text x="{margin + 24}" y="{y + 34}" font-size="13.5" font-weight="700" fill="{c["text"]}">{escape(domain)}</text>')
+        for index, column in enumerate(columns):
+            cell = row.get(column, {})
+            done, todo = cell.get("confirmed", 0), cell.get("needs_validation", 0)
+            x = margin + 16 + label_w + index * cell_w
+            if not done and not todo:
+                add(f'<text x="{x + cell_w / 2:.1f}" y="{y + 34}" text-anchor="middle" font-size="13" fill="{c["line"]}">·</text>')
+                continue
+            color = heads[column]
+            add(f'<rect x="{x + 10:.1f}" y="{y + 10}" width="{cell_w - 20:.1f}" height="{row_h - 20}" rx="9" fill="{color}" opacity="{0.9 if done else 0.18}"/>')
+            text = f"{done}" + (f" +{todo}?" if todo else "") if done else f"{todo}?"
+            add(f'<text x="{x + cell_w / 2:.1f}" y="{y + 35}" text-anchor="middle" font-size="15" font-weight="800" fill="{"#fff" if done else c["text"]}">{escape(text)}</text>')
+    half = (width - 2 * margin - 16) / 2
+    add(f'<rect x="{margin}" y="{side_top}" width="{half}" height="{cov_h}" rx="12" fill="{c["surface"]}" stroke="{c["line"]}"/>')
+    add(f'<text x="{margin + 16}" y="{side_top + 24}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">WHAT THIS AUDIT KNOWS</text>')
+    for index, (name, percent, basis) in enumerate(coverage):
+        y = side_top + 44 + index * 30
+        add(f'<text x="{margin + 16}" y="{y + 12}" font-size="12" font-weight="700" fill="{c["text"]}">{escape(name)}</text>')
+        bar_x, bar_w = margin + 200, half - 200 - 70
+        add(f'<rect x="{bar_x}" y="{y + 2}" width="{bar_w:.1f}" height="12" rx="6" fill="{c["band"]}" stroke="{c["line"]}"/>')
+        fill = c["vpc"] if percent >= 80 else c["public"] if percent >= 30 else c["critical"]
+        add(f'<rect x="{bar_x}" y="{y + 2}" width="{max(0, bar_w * percent / 100):.1f}" height="12" rx="6" fill="{fill}"/>')
+        add(f'<text x="{bar_x + bar_w + 10:.1f}" y="{y + 13}" font-size="12" font-weight="800" fill="{fill}">{percent}%</text>')
+        add(f'<title>{escape(basis)}</title>')
+    sx = margin + half + 16
+    add(f'<rect x="{sx}" y="{side_top}" width="{half}" height="{src_h}" rx="12" fill="{c["surface"]}" stroke="{c["line"]}"/>')
+    add(f'<text x="{sx + 16}" y="{side_top + 24}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">EVIDENCE SOURCES</text>')
+    for index, line in enumerate(sources or ["Hetzner Cloud API only"]):
+        add(f'<text x="{sx + 16}" y="{side_top + 48 + index * 20}" font-size="12" fill="{c["text"]}">• {escape(_short(line, 112))}</text>')
+    if actions:
+        _actions_panel(add, c, margin, actions_y, width - 2 * margin, actions, 5)
     add("</svg>")
     return "\n".join(out)

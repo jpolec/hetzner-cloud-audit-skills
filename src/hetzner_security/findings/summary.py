@@ -14,8 +14,10 @@ from ..actions import (
     render_coverage_markdown,
 )
 from ..actions import coverage as coverage_rows
+from ..analyzers.changes import change_summary
 from ..cost import analyze_cost
 from ..models import Asset, Finding, FindingStatus, Snapshot
+from ..projects import project_summary
 from ..text import md
 
 SCOPE_TYPES = (
@@ -84,6 +86,8 @@ def build_summary(
             "potential_monthly": report["identified_potential_savings"]["monthly_net"],
             "potential_annual": report["identified_potential_savings"]["annual_net"],
             "confirmed_monthly": report["identified_potential_savings"]["confirmed_monthly_net"],
+            "expected_monthly": report["identified_potential_savings"].get("expected_monthly_net", 0.0),
+            "verified_monthly": report["identified_potential_savings"].get("verified_monthly_net", 0.0),
             "metrics_collected": any(item.get("cpu_samples") for item in servers),
             **{key: value for key, value in cost_insights(report).items() if key not in {"waste", "storage_heavy"}},
         }
@@ -99,8 +103,98 @@ def build_summary(
         "failed_endpoints": failed_endpoints,
         "suppressed": suppressed or [],
         "missing_layers": missing_layers,
+        "host_evidence": host_rows(snapshot),
+        "other_sources": other_sources(snapshot),
         "cost": cost,
+        "changes": change_summary(snapshot) if any(str(key).endswith("actions") for key in coverage) else None,
+        "projects": project_summary(snapshot) if snapshot.metadata.get("projects") else [],
     }
+
+
+def host_rows(snapshot: Snapshot) -> list[dict[str, Any]]:
+    """Per server with a host bundle: what each layer admits and what is reachable end to end."""
+    from ..analyzers.host import _cloud_world
+    from ..flows import PortSet, port_set
+
+    rows = []
+    for asset in snapshot.assets:
+        props = asset.properties
+        if asset.type != "server" or not props.get("host_evidence"):
+            continue
+        firewall = props.get("host_firewall") or {}
+        cloud = _cloud_world(asset, snapshot, "tcp")
+        listening = PortSet.of([(port, port) for port in props.get("listening_ports") or []])
+        host_allowed = port_set(props.get("host_firewall_allow_ports"))
+        own_rules = port_set(firewall.get("world_tcp_ranges"))
+        bypass = sorted({item["host_port"] for item in props.get("docker_published") or []
+                         if item.get("bind") in {"wildcard", "public"} and item.get("protocol") == "tcp" and item["host_port"] not in own_rules})
+        rows.append({
+            "name": asset.name,
+            "engine": f"{firewall.get('engine')}" + ("" if firewall.get("active") else " (filters nothing)"),
+            "host_firewall_admits": firewall.get("world_tcp") or "nothing",
+            "public_listeners": listening.describe() or "none",
+            "docker_bypass": bypass,
+            "cloud_admits": cloud.describe() or "nothing",
+            "reachable": cloud.intersection(host_allowed).intersection(listening).describe() or "none",
+            # Cloud Firewalls never filter private networks: host firewall and listeners decide alone.
+            "private_reachable": (
+                PortSet.of([(port, port) for port in props.get("private_listening_ports") or []])
+                .intersection(port_set(props.get("host_firewall_private_allow_ports"))).describe() or "none"
+            ) if props.get("private_net") else None,
+            "containers": sum(1 for other in snapshot.assets if other.type == "container" and other.properties.get("server") == asset.id),
+        })
+    return rows
+
+
+def other_sources(snapshot: Snapshot) -> list[str]:
+    """One line per optional evidence source that was supplied."""
+    meta = snapshot.metadata
+    of = [asset for asset in snapshot.assets]
+    lines = []
+    robot = [asset for asset in of if asset.type == "robot_server"]
+    if robot:
+        active = sum(1 for asset in robot if (asset.properties.get("robot_firewall") or {}).get("status") == "active")
+        vswitches = sum(1 for asset in of if asset.type == "vswitch")
+        lines.append(f"Robot: {len(robot)} dedicated server(s), Robot firewall active on {active}; {vswitches} vSwitch(es).")
+    buckets = [asset for asset in of if asset.type == "bucket"]
+    if buckets:
+        from ..collectors.objectstorage import public_grants, public_statements
+
+        public = sum(1 for asset in buckets if public_grants(asset.properties) or public_statements(asset.properties))
+        versioned = sum(1 for asset in buckets if asset.properties.get("versioning") == "Enabled")
+        lines.append(f"Object Storage: {len(buckets)} bucket(s), {public} with public access, {versioned} versioned.")
+    k8s = meta.get("kubernetes")
+    if k8s:
+        workloads = sum(1 for asset in of if asset.type == "k8s_workload")
+        services = sum(1 for asset in of if asset.type == "k8s_service")
+        lines.append(
+            f"Kubernetes ({k8s['cluster']}): {len(k8s['matched_nodes'])}/{k8s['nodes']} node(s) matched to servers; "
+            f"{workloads} workload(s) with node-level access; {services} NodePort/LoadBalancer service(s); "
+            f"integrations: {', '.join(k8s['integrations']) or 'none detected'}."
+        )
+    terraform = meta.get("terraform")
+    if terraform:
+        lines.append(
+            f"Terraform ({terraform['kind']}): {len(terraform['managed'])} resource(s) matched; {len(terraform['unmanaged'])} not in state; "
+            f"{len(terraform['missing'])} in state but gone; {len(terraform['attribute_drift'])} with drifted settings; "
+            f"{len(terraform['pending_changes'])} pending plan change(s)."
+        )
+    attestations = meta.get("attestations")
+    if attestations:
+        answers = list((attestations.get("answers") or {}).values())
+        lines.append(
+            f"Owner checklist: {sum(1 for value in answers if value is True)} yes · {sum(1 for value in answers if value is False)} no · "
+            f"{sum(1 for value in answers if value not in (True, False))} not verified"
+            + (f" (answered by {attestations['answered_by']}, {attestations.get('date') or 'undated'})" if attestations.get("answered_by") else "")
+            + "."
+        )
+    metrics = meta.get("node_metrics")
+    if metrics:
+        lines.append(f"Guest telemetry: {len(metrics['matched'])} server(s) matched" + (f"; unmatched hosts: {', '.join(metrics['unmatched'])}" if metrics["unmatched"] else "") + ".")
+    unmatched = [item["server"] for item in meta.get("host_bundles") or [] if item.get("status") == "unmatched"]
+    if unmatched:
+        lines.append(f"Host bundles not matched to any server: {', '.join(unmatched)} (set HETZNER_AUDIT_SERVER to the Hetzner server name).")
+    return lines
 
 
 def _count(value: int, one: str, many: str) -> str:
@@ -138,6 +232,14 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
             else "none",
         ),
     ]
+    if summary.get("projects"):
+        rows.insert(1, ("Projects", " · ".join(
+            f"{item['project']} ({item['assets'].get('server', 0)} servers)" for item in summary["projects"]
+        )))
+    changes = summary.get("changes")
+    if changes:
+        top = ", ".join(f"{command} {count}" for command, count in list(changes["by_command"].items())[:4])
+        rows.append((f"Provider changes ({changes['window_days']} days)", f"{changes['total']} actions" + (f" · {top}" if top else "")))
     cost = summary.get("cost")
     if cost:
         currency = cost["currency"]
@@ -153,10 +255,26 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
                 if cost["metrics_collected"]
                 else "not evaluated: CPU metrics not collected (run `hetzner-audit cost --metrics-days 30`)",
             ),
-            ("Confirmed savings", f"{currency} {cost['confirmed_monthly']:,.2f}/month (confirmation needs RAM, disk, owner intent, rollback)"),
+            ("Savings: theoretical · expected · verified",
+             f"{currency} {cost['potential_monthly']:,.2f} · {cost.get('expected_monthly', 0):,.2f} · {cost.get('verified_monthly', 0):,.2f} per month "
+             "(expected = unused resources plus rightsizing with full CPU/RAM/disk telemetry; verified = measured by `diff` after a change)"),
         ]
     lines = ["## At a glance", "", "| | |", "|---|---|", *(f"| {name} | {md(value).replace(chr(92) + '`', '`')} |" for name, value in rows), ""]
     lines += render_coverage_markdown(summary.get("coverage", []), summary.get("provenance", []))
+    if summary.get("host_evidence") or summary.get("other_sources"):
+        lines += ["### Evidence beyond the Cloud API", ""]
+        if summary.get("host_evidence"):
+            lines += ["| Server | Host firewall | Admits from Internet | Public listeners | Docker bypass | Cloud Firewall admits | Reachable from Internet | Reachable from private network |",
+                      "|---|---|---|---|---|---|---|---|"]
+            lines += [
+                f"| {md(row['name'])} | {md(str(row['engine']))} | {md(row['host_firewall_admits'])} | {md(row['public_listeners'])} | "
+                f"{', '.join(map(str, row['docker_bypass'])) or 'none'} | {md(row['cloud_admits'])} | **{md(row['reachable'])}** | "
+                f"{md(row['private_reachable']) if row['private_reachable'] is not None else 'not in a network'} |"
+                for row in summary["host_evidence"]
+            ]
+            lines.append("")
+        lines += [f"- {md(line)}" for line in summary.get("other_sources", [])]
+        lines.append("")
     lines += render_actions_markdown(summary.get("actions", []), cost["currency"] if cost else "EUR")
     lines += ["## Findings by status", "", "### Confirmed", ""]
     lines += [
@@ -173,7 +291,8 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
     lines += ["", "### Collection gaps", ""]
     lines += [f"- Endpoint {md(name)}" for name in summary["failed_endpoints"]] or ["- Every Hetzner endpoint was collected."]
     lines += [
-        f"- {name}: not collected. The Hetzner API cannot see it; related findings stay `needs_validation`."
+        f"- {name}: not collected. The Hetzner API cannot see it; related findings stay `needs_validation` "
+        "until you add `--host-bundle` (see `hetzner-audit host-bundle`)."
         for name in summary["missing_layers"]
     ]
     if summary.get("suppressed"):

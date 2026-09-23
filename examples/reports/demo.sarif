@@ -6,7 +6,7 @@
       "tool": {
         "driver": {
           "name": "hetzner-cloud-audit-skills",
-          "version": "0.5.0",
+          "version": "0.7.0",
           "rules": [
             {
               "id": "HETZ-BCP-001",
@@ -316,7 +316,7 @@
             "confidence": 0.98,
             "status": "confirmed",
             "assets": [
-              "server:admin"
+              "server:public-pg"
             ]
           }
         },
@@ -330,7 +330,7 @@
             "confidence": 0.98,
             "status": "confirmed",
             "assets": [
-              "server:public-pg"
+              "server:admin"
             ]
           }
         },

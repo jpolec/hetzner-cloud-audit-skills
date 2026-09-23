@@ -1,0 +1,258 @@
+{
+ "apiVersion": "v1",
+ "kind": "List",
+ "items": [
+  {
+   "apiVersion": "v1",
+   "kind": "Node",
+   "metadata": {
+    "name": "cp-1",
+    "labels": {
+     "kubernetes.io/hostname": "cp-1",
+     "node-role.kubernetes.io/control-plane": "true"
+    }
+   },
+   "spec": {
+    "providerID": "hcloud://201",
+    "podCIDR": "10.42.0.0/24"
+   },
+   "status": {
+    "nodeInfo": {
+     "kubeletVersion": "v1.31.4+k3s1"
+    },
+    "addresses": [
+     {
+      "type": "InternalIP",
+      "address": "10.0.1.201"
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Node",
+   "metadata": {
+    "name": "worker-1",
+    "labels": {
+     "kubernetes.io/hostname": "worker-1"
+    }
+   },
+   "spec": {
+    "providerID": "hcloud://202",
+    "podCIDR": "10.42.0.0/24"
+   },
+   "status": {
+    "nodeInfo": {
+     "kubeletVersion": "v1.31.4+k3s1"
+    },
+    "addresses": [
+     {
+      "type": "InternalIP",
+      "address": "10.0.1.202"
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Node",
+   "metadata": {
+    "name": "worker-2",
+    "labels": {
+     "kubernetes.io/hostname": "worker-2"
+    }
+   },
+   "spec": {
+    "providerID": "hcloud://203",
+    "podCIDR": "10.42.0.0/24"
+   },
+   "status": {
+    "nodeInfo": {
+     "kubeletVersion": "v1.31.4+k3s1"
+    },
+    "addresses": [
+     {
+      "type": "InternalIP",
+      "address": "10.0.1.203"
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Pod",
+   "metadata": {
+    "namespace": "kube-system",
+    "name": "cilium-abcde",
+    "ownerReferences": [
+     {
+      "kind": "DaemonSet",
+      "name": "cilium"
+     }
+    ]
+   },
+   "spec": {
+    "nodeName": "worker-1",
+    "containers": [
+     {
+      "name": "agent",
+      "image": "quay.io/cilium/cilium:v1.16.4",
+      "securityContext": {
+       "privileged": true
+      }
+     }
+    ],
+    "hostNetwork": true,
+    "volumes": [
+     {
+      "name": "bpf",
+      "hostPath": {
+       "path": "/sys"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Pod",
+   "metadata": {
+    "namespace": "kube-system",
+    "name": "hcloud-cloud-controller-manager-7d9f-x1",
+    "ownerReferences": [
+     {
+      "kind": "ReplicaSet",
+      "name": "hcloud-cloud-controller-manager-7d9f"
+     }
+    ]
+   },
+   "spec": {
+    "nodeName": "cp-1",
+    "containers": [
+     {
+      "name": "ccm",
+      "image": "docker.io/hetznercloud/hcloud-cloud-controller-manager:v1.21.0"
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Pod",
+   "metadata": {
+    "namespace": "shop",
+    "name": "builder-6c7b-a1",
+    "ownerReferences": [
+     {
+      "kind": "ReplicaSet",
+      "name": "builder-6c7b"
+     }
+    ]
+   },
+   "spec": {
+    "nodeName": "worker-2",
+    "containers": [
+     {
+      "name": "builder",
+      "image": "docker:27-dind"
+     }
+    ],
+    "volumes": [
+     {
+      "name": "sock",
+      "hostPath": {
+       "path": "/var/run/docker.sock"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Pod",
+   "metadata": {
+    "namespace": "shop",
+    "name": "web-5f6d-b2",
+    "ownerReferences": [
+     {
+      "kind": "ReplicaSet",
+      "name": "web-5f6d"
+     }
+    ]
+   },
+   "spec": {
+    "nodeName": "worker-1",
+    "containers": [
+     {
+      "name": "web",
+      "image": "registry.example/web:2.3",
+      "ports": [
+       {
+        "containerPort": 8080
+       }
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Service",
+   "metadata": {
+    "namespace": "shop",
+    "name": "web-nodeport"
+   },
+   "spec": {
+    "type": "NodePort",
+    "ports": [
+     {
+      "port": 80,
+      "targetPort": 8080,
+      "nodePort": 30080,
+      "protocol": "TCP"
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Service",
+   "metadata": {
+    "namespace": "shop",
+    "name": "web-lb",
+    "annotations": {
+     "load-balancer.hetzner.cloud/location": "fsn1"
+    }
+   },
+   "spec": {
+    "type": "LoadBalancer",
+    "externalTrafficPolicy": "Cluster",
+    "ports": [
+     {
+      "port": 443,
+      "targetPort": 8443,
+      "nodePort": 31443,
+      "protocol": "TCP"
+     }
+    ]
+   }
+  },
+  {
+   "apiVersion": "v1",
+   "kind": "Service",
+   "metadata": {
+    "namespace": "shop",
+    "name": "db"
+   },
+   "spec": {
+    "type": "ClusterIP",
+    "ports": [
+     {
+      "port": 5432
+     }
+    ]
+   }
+  }
+ ],
+ "_note": "Invented cluster in kubectl output shape."
+}

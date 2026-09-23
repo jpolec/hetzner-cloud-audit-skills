@@ -1,0 +1,73 @@
+hetzner-audit-host-bundle 1
+
+===HETZNER-AUDIT meta===
+server=app-1
+collected_at=2026-09-23T08:00:00Z
+kernel=6.8.0-45-generic
+ID=ubuntu
+VERSION_ID="24.04"
+
+===HETZNER-AUDIT ufw===
+Status: active
+Logging: on (low)
+Default: deny (incoming), allow (outgoing), deny (routed)
+New profiles: skip
+
+To                         Action      From
+--                         ------      ----
+2222/tcp                  ALLOW IN    100.64.0.0/10
+2222/tcp                  ALLOW IN    10.0.0.0/16
+Anywhere                   ALLOW IN    100.64.0.0/10
+Anywhere                   ALLOW IN    10.0.0.0/16
+51820/udp                  ALLOW IN    Anywhere
+51820/udp (v6)             ALLOW IN    Anywhere (v6)
+
+===HETZNER-AUDIT nftables===
+table inet filter {
+	chain input {
+		type filter hook input priority filter; policy accept;
+		jump ufw-before-input
+	}
+}
+
+===HETZNER-AUDIT docker_user===
+-N DOCKER-USER
+-A DOCKER-USER -j RETURN
+
+===HETZNER-AUDIT listeners===
+tcp   LISTEN 0      4096         0.0.0.0:2222      0.0.0.0:*    users:(("sshd",pid=812,fd=3))
+tcp   LISTEN 0      4096            [::]:2222         [::]:*    users:(("sshd",pid=812,fd=4))
+tcp   LISTEN 0      4096         0.0.0.0:9001       0.0.0.0:*    users:(("docker-proxy",pid=2201,fd=4))
+tcp   LISTEN 0      4096         0.0.0.0:9002       0.0.0.0:*    users:(("docker-proxy",pid=2240,fd=4))
+tcp   LISTEN 0      4096         0.0.0.0:9003       0.0.0.0:*    users:(("docker-proxy",pid=2290,fd=4))
+tcp   LISTEN 0      4096      100.64.0.7:4100       0.0.0.0:*    users:(("docker-proxy",pid=2310,fd=4))
+tcp   LISTEN 0      4096       127.0.0.1:4100       0.0.0.0:*    users:(("docker-proxy",pid=2311,fd=4))
+tcp   LISTEN 0      4096       127.0.0.1:5432       0.0.0.0:*    users:(("docker-proxy",pid=2350,fd=4))
+tcp   LISTEN 0      4096   127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=501,fd=15))
+udp   UNCONN 0      0            0.0.0.0:51820      0.0.0.0:*
+udp   UNCONN 0      0      127.0.0.53%lo:53         0.0.0.0:*    users:(("systemd-resolve",pid=501,fd=14))
+
+===HETZNER-AUDIT sshd===
+port 2222
+permitrootlogin without-password
+pubkeyauthentication yes
+passwordauthentication no
+kbdinteractiveauthentication no
+permitemptypasswords no
+x11forwarding no
+
+===HETZNER-AUDIT docker===
+{"name":"/api-app","image":"registry.example/api:1.4","user":"app","privileged":false,"pid_mode":"","network_mode":"app_default","cap_add":null,"security_opt":null,"ports":{"9001/tcp":[{"HostIp":"0.0.0.0","HostPort":"9001"},{"HostIp":"::","HostPort":"9001"}]},"mounts":[]}
+{"name":"/worker-app","image":"registry.example/worker:1.4","user":"app","privileged":false,"pid_mode":"","network_mode":"app_default","cap_add":null,"security_opt":null,"ports":{"9002/tcp":[{"HostIp":"0.0.0.0","HostPort":"9002"},{"HostIp":"::","HostPort":"9002"}]},"mounts":[]}
+{"name":"/monitor-api","image":"registry.example/monitor:2.0","user":"","privileged":false,"pid_mode":"","network_mode":"app_default","cap_add":null,"security_opt":null,"ports":{"8080/tcp":[{"HostIp":"0.0.0.0","HostPort":"9003"},{"HostIp":"::","HostPort":"9003"}]},"mounts":[]}
+{"name":"/scheduler","image":"registry.example/scheduler:1.0","user":"","privileged":false,"pid_mode":"","network_mode":"app_default","cap_add":null,"security_opt":null,"ports":{"4100/tcp":[{"HostIp":"100.64.0.7","HostPort":"4100"},{"HostIp":"127.0.0.1","HostPort":"4100"}]},"mounts":[]}
+{"name":"/app-postgres","image":"postgres:16","user":"","privileged":false,"pid_mode":"","network_mode":"app_default","cap_add":null,"security_opt":null,"ports":{"5432/tcp":[{"HostIp":"127.0.0.1","HostPort":"5432"}]},"mounts":[{"Type":"volume","Source":"/var/lib/docker/volumes/pgdata/_data","Destination":"/var/lib/postgresql/data","RW":true}]}
+{"name":"/cadvisor","image":"gcr.io/cadvisor/cadvisor:v0.49.1","user":"","privileged":true,"pid_mode":"","network_mode":"app_default","cap_add":null,"security_opt":null,"ports":{"8080/tcp":null},"mounts":[{"Type":"bind","Source":"/","Destination":"/rootfs","RW":false},{"Type":"bind","Source":"/var/run/docker.sock","Destination":"/var/run/docker.sock","RW":false},{"Type":"bind","Source":"/sys","Destination":"/sys","RW":false}]}
+
+===HETZNER-AUDIT pg_hba===
+not found
+
+===HETZNER-AUDIT redis===
+not installed
+
+===HETZNER-AUDIT end===

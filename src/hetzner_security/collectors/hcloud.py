@@ -22,7 +22,7 @@ from ..models import Asset, Edge, Evidence, Fact, Snapshot
 
 API_BASE = "https://api.hetzner.cloud/v1"
 HETZNER_API_BASE = "https://api.hetzner.com/v1"
-COLLECTOR_VERSION = "0.5.0"
+COLLECTOR_VERSION = "0.7.0"
 RESOURCE_ENDPOINTS = {
     "server": "servers",
     "server_type": "server_types",
@@ -46,6 +46,21 @@ HETZNER_RESOURCE_ENDPOINTS = {
     "storage_box_type": "storage_box_types",
 }
 
+# Action history per resource family; read newest first and only back to ACTION_WINDOW_DAYS.
+ACTION_ENDPOINTS = {
+    "server": "servers/actions",
+    "firewall": "firewalls/actions",
+    "volume": "volumes/actions",
+    "floating_ip": "floating_ips/actions",
+    "primary_ip": "primary_ips/actions",
+    "load_balancer": "load_balancers/actions",
+    "network": "networks/actions",
+    "image": "images/actions",
+    "certificate": "certificates/actions",
+    "storage_box": "hetzner:storage_boxes/actions",
+}
+ACTION_WINDOW_DAYS = 30
+ACTION_MAX_PAGES = 10
 
 MAX_ATTEMPTS = 4
 MAX_PAGES = 1000  # 50 per page: far above any real project, but bounded
@@ -185,6 +200,7 @@ class ReadOnlyHCloudCollector:
 
         collected_at = datetime.now(UTC).isoformat()
         run_id = "run-" + hashlib.sha256(collected_at.encode()).hexdigest()[:16]
+        signals = self._collect_actions(coverage, collected_at)
         if self.include_metrics:
             self._collect_server_metrics(raw_by_kind.get("server", []), coverage, collected_at)
 
@@ -242,6 +258,7 @@ class ReadOnlyHCloudCollector:
             assets=assets,
             edges=edges,
             facts=facts,
+            signals=signals,
             metadata={
                 "collector": "hcloud_api",
                 "collector_version": COLLECTOR_VERSION,
@@ -251,6 +268,38 @@ class ReadOnlyHCloudCollector:
                 "coverage": coverage,
             },
         )
+
+    def _collect_actions(self, coverage: dict[str, dict[str, object]], collected_at: str) -> list[dict[str, Any]]:
+        """Recent provider actions (newest first) as change signals; history is evidence of drift."""
+        cutoff = datetime.fromisoformat(collected_at) - timedelta(days=ACTION_WINDOW_DAYS)
+        signals: list[dict[str, Any]] = []
+        failed: list[str] = []
+        truncated: list[str] = []
+        for kind, endpoint in ACTION_ENDPOINTS.items():
+            base_url = self.base_url
+            path = endpoint
+            if endpoint.startswith("hetzner:"):
+                path, base_url = endpoint.removeprefix("hetzner:"), HETZNER_API_BASE
+            try:
+                for page in range(1, ACTION_MAX_PAGES + 1):
+                    payload = self._get_json(path, {"page": page, "per_page": 50, "sort": "started:desc"}, base_url=base_url)
+                    rows = payload.get("actions", []) or []
+                    recent = [row for row in rows if (started := _action_time(row)) is not None and started >= cutoff]
+                    signals.extend(_action_signal(row, kind) for row in recent)
+                    if len(recent) < len(rows) or not payload.get("meta", {}).get("pagination", {}).get("next_page"):
+                        break
+                else:
+                    truncated.append(kind)  # page cap reached inside the window: history is incomplete
+            except HCloudCollectionError:
+                failed.append(kind)
+        coverage["actions"] = {
+            "status": "collected" if not failed and not truncated else "partial",
+            "count": len(signals),
+            "window_days": ACTION_WINDOW_DAYS,
+            **({"failed": failed} if failed else {}),
+            **({"truncated": truncated} if truncated else {}),
+        }
+        return signals
 
     def _collect_server_metrics(
         self,
@@ -285,6 +334,34 @@ class ReadOnlyHCloudCollector:
         }
 
 
+def _action_time(row: dict[str, Any]) -> datetime | None:
+    value = row.get("started")
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
+
+
+def _action_signal(row: dict[str, Any], family: str) -> dict[str, Any]:
+    resources = [item for item in row.get("resources") or [] if isinstance(item, dict)]
+    error = row.get("error")
+    return {
+        "type": "provider_action",
+        "id": row.get("id"),
+        "family": family,
+        "command": row.get("command"),
+        "status": row.get("status"),
+        "started": row.get("started"),
+        "finished": row.get("finished"),
+        "resources": [{"id": item.get("id"), "type": item.get("type")} for item in resources],
+        "asset_ids": [f"hcloud:{item.get('type')}:{item.get('id')}" for item in resources],
+        "error": error.get("code") if isinstance(error, dict) else None,  # the message can echo input
+    }
+
+
 EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 # Storage Box hostnames embed the account ID (u123456.your-storagebox.de).
 STORAGE_BOX_HOST_PATTERN = re.compile(r"\bu\d+(?:-sub\d+)?\.your-storagebox\.de\b")
@@ -303,6 +380,9 @@ def _sanitize_resource(value: Any, key: str = "") -> Any:
     if lowered == "public_key" and isinstance(value, str):
         # Keep the key type for evidence; drop key material and the comment (often an email).
         return (value.split()[0] + " [key material and comment omitted]") if value.strip() else value
+    if lowered == "certificate" and isinstance(value, str) and "BEGIN CERTIFICATE" in value:
+        # Public, but bulky and often names the organization; validity dates stay as fields.
+        return "[certificate PEM omitted]"
     if isinstance(value, dict):
         return {str(k): _sanitize_resource(v, str(k)) for k, v in value.items()}
     if isinstance(value, list):

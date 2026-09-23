@@ -1,0 +1,54 @@
+hetzner-audit-host-bundle 1
+
+===HETZNER-AUDIT meta===
+server=db-1
+collected_at=2026-09-23T08:05:00Z
+ID=debian
+VERSION_ID="12"
+
+===HETZNER-AUDIT ufw===
+Status: inactive
+
+===HETZNER-AUDIT nftables===
+table inet filter {
+	chain input {
+		type filter hook input priority filter; policy accept;
+	}
+}
+
+===HETZNER-AUDIT docker_user===
+not installed
+
+===HETZNER-AUDIT listeners===
+tcp   LISTEN 0      128          0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=700,fd=3))
+tcp   LISTEN 0      244          0.0.0.0:5432       0.0.0.0:*    users:(("postgres",pid=990,fd=6))
+tcp   LISTEN 0      511          0.0.0.0:6379       0.0.0.0:*    users:(("redis-server",pid=1010,fd=6))
+
+===HETZNER-AUDIT sshd===
+port 22
+permitrootlogin yes
+passwordauthentication yes
+kbdinteractiveauthentication no
+permitemptypasswords no
+
+===HETZNER-AUDIT docker===
+not installed
+
+===HETZNER-AUDIT pg_hba===
+# file /etc/postgresql/16/main/pg_hba.conf
+local   all             postgres                                peer
+host    all             all             127.0.0.1/32            scram-sha-256
+host    replication     all             0.0.0.0/0               reject
+host    replication     all             0.0.0.0/0               trust
+host    all             all             0.0.0.0/0               md5
+
+===HETZNER-AUDIT redis===
+bind
+
+protected-mode
+no
+requirepass
+<empty>
+user default on nopass sanitize-payload ~* &* +@all
+
+===HETZNER-AUDIT end===

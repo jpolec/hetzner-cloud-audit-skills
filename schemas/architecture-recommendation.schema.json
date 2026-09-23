@@ -291,6 +291,10 @@
     "discovered_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "evidence_complete": {
+      "type": "boolean",
+      "description": "CPU, RAM, and disk telemetry cover the observation window and RAM use is not rising."
     }
   }
 }

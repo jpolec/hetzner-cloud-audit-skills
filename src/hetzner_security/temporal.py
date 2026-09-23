@@ -83,7 +83,28 @@ def diff_snapshots(before: Snapshot, after: Snapshot) -> dict[str, Any]:
         "new_allowlisted_flows": new_allowlisted,
         "coverage_regressions": coverage_regressions,
         "security_regression": bool(new_exposures),
+        "cost": _cost_delta(before, after),
     }
+
+
+def _cost_delta(before: Snapshot, after: Snapshot) -> dict[str, Any] | None:
+    """Verified savings: the catalog cost measured before and after, when both snapshots carry pricing."""
+    if not all(any(asset.type == "pricing" for asset in item.assets) for item in (before, after)):
+        return None
+    from .cost import analyze_cost
+
+    gaps = [
+        f"{label}:{name}"
+        for label, item in (("before", before), ("after", after))
+        for name, state in (item.metadata.get("coverage") or {}).items()
+        if isinstance(state, dict) and state.get("status") in {"failed", "partial"}
+        and name in {"server", "volume", "primary_ip", "floating_ip", "load_balancer", "storage_box", "image", "pricing"}
+    ]
+    if gaps:
+        return {"verified_monthly_savings": None, "unverifiable": f"collection gaps: {', '.join(gaps)}"}
+    old = analyze_cost(before)["current_catalog_estimate"]["monthly_net"]
+    new = analyze_cost(after)["current_catalog_estimate"]["monthly_net"]
+    return {"before_monthly_net": old, "after_monthly_net": new, "verified_monthly_savings": round(old - new, 2)}
 
 
 def _snapshot_identity(snapshot: Snapshot) -> dict[str, Any]:
@@ -140,6 +161,14 @@ def render_diff_markdown(diff: dict[str, Any]) -> str:
         f"- Security policy regression: {'yes' if diff['security_regression'] else 'no'}",
         "",
     ]
+    cost = diff.get("cost")
+    if cost and cost.get("verified_monthly_savings") is None:
+        lines[-1:-1] = [f"- Catalog cost: not compared ({cost.get('unverifiable')})"]
+    elif cost:
+        lines[-1:-1] = [
+            f"- Catalog cost: EUR {cost['before_monthly_net']:.2f} → EUR {cost['after_monthly_net']:.2f}/month "
+            f"(verified saving EUR {cost['verified_monthly_savings']:.2f}/month)"
+        ]
     if diff["new_exposures"]:
         lines.extend(["## New exposure (flows allowed now that were not allowed before)", ""])
         for item in diff["new_exposures"]:

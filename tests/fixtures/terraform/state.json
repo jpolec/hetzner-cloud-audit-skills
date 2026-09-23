@@ -1,0 +1,26 @@
+{
+  "format_version": "1.0",
+  "terraform_version": "1.9.5",
+  "values": {
+    "root_module": {
+      "resources": [
+        {"address": "hcloud_firewall.web", "mode": "managed", "type": "hcloud_firewall", "name": "web",
+         "values": {"id": "101", "name": "web", "labels": {},
+                    "rule": [
+                      {"direction": "in", "protocol": "tcp", "port": "443", "source_ips": ["0.0.0.0/0", "::/0"], "destination_ips": []},
+                      {"direction": "in", "protocol": "tcp", "port": "22", "source_ips": ["100.64.0.0/10"], "destination_ips": []}
+                    ]}},
+        {"address": "hcloud_server.gone", "mode": "managed", "type": "hcloud_server", "name": "gone",
+         "values": {"id": "999", "name": "old-worker", "server_type": "cx22"}},
+        {"address": "data.hcloud_image.ubuntu", "mode": "data", "type": "hcloud_image", "name": "ubuntu", "values": {"id": "1"}}
+      ],
+      "child_modules": [
+        {"address": "module.app", "resources": [
+          {"address": "module.app.hcloud_server.web", "mode": "managed", "type": "hcloud_server", "name": "web",
+           "values": {"id": "11", "name": "web-1", "server_type": "cx22", "delete_protection": true, "rebuild_protection": true,
+                      "backups": true, "firewall_ids": [101], "labels": {"environment": "production", "role": "web"}}}
+        ]}
+      ]
+    }
+  }
+}

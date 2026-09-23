@@ -1,0 +1,181 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1310" viewBox="0 0 1500 1310" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" rx="16" fill="#f4f4f4"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker><filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>
+<rect x="28" y="28" width="22" height="22" rx="5" fill="#d50c2d"/>
+<g transform="translate(32 32) scale(0.58)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
+<text x="58" y="44" font-size="14" font-weight="800" fill="#1f1f1f">hetzner-audit</text>
+<text x="160" y="44" font-size="12.5" fill="#6b6b6b">read-only Hetzner Cloud audit · github.com/jpolec/hetzner-cloud-audit-skills</text>
+<text x="28" y="78" font-size="22" font-weight="700" fill="#1f1f1f">Security posture</text>
+<text x="28" y="102" font-size="13" fill="#6b6b6b">confirmed = evidence complete · to validate = a layer is not observed yet · rejected findings are not shown</text>
+<rect x="28.0" y="124" width="352.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="42.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">CONFIRMED</text>
+<text x="42.0" y="178" font-size="28" font-weight="800" fill="#d50c2d">27</text>
+<text x="42.0" y="198" font-size="11.5" fill="#6b6b6b">evidence complete</text>
+<rect x="392.0" y="124" width="352.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="406.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">CRITICAL + HIGH</text>
+<text x="406.0" y="178" font-size="28" font-weight="800" fill="#d50c2d">8</text>
+<text x="406.0" y="198" font-size="11.5" fill="#6b6b6b">confirmed only</text>
+<rect x="756.0" y="124" width="352.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="770.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">TO VALIDATE</text>
+<text x="770.0" y="178" font-size="28" font-weight="800" fill="#d98e04">19</text>
+<text x="770.0" y="198" font-size="11.5" fill="#6b6b6b">hypotheses with a missing layer</text>
+<rect x="1120.0" y="124" width="352.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="1134.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">EVIDENCE SOURCES</text>
+<text x="1134.0" y="178" font-size="28" font-weight="800" fill="#1f1f1f">8</text>
+<text x="1134.0" y="198" font-size="11.5" fill="#6b6b6b">API, host, IaC, owner</text>
+<rect x="28" y="254" width="1444" height="412" rx="12" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="372.5" y="284" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="#d50c2d">CRITICAL</text>
+<text x="569.5" y="284" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="#d50c2d">HIGH</text>
+<text x="766.5" y="284" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="#d98e04">MEDIUM</text>
+<text x="963.5" y="284" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="#2f6fdb">LOW</text>
+<text x="1160.5" y="284" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="#6b6b6b">INFO</text>
+<text x="1357.5" y="284" text-anchor="middle" font-size="11" font-weight="800" letter-spacing="0.6" fill="#6b6b6b">TO VALIDATE</text>
+<line x1="44" y1="302" x2="1456" y2="302" stroke="#e3e3e3"/>
+<text x="52" y="336" font-size="13.5" font-weight="700" fill="#1f1f1f">Network exposure</text>
+<text x="372.5" y="336" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<rect x="481.0" y="312" width="177.0" height="38" rx="9" fill="#d50c2d" opacity="0.9"/>
+<text x="569.5" y="337" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1 +3?</text>
+<rect x="678.0" y="312" width="177.0" height="38" rx="9" fill="#d98e04" opacity="0.9"/>
+<text x="766.5" y="337" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1 +1?</text>
+<rect x="875.0" y="312" width="177.0" height="38" rx="9" fill="#2f6fdb" opacity="0.9"/>
+<text x="963.5" y="337" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1</text>
+<text x="1160.5" y="336" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1357.5" y="336" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<line x1="44" y1="360" x2="1456" y2="360" stroke="#e3e3e3"/>
+<text x="52" y="394" font-size="13.5" font-weight="700" fill="#1f1f1f">Host and runtime</text>
+<rect x="284.0" y="370" width="177.0" height="38" rx="9" fill="#d50c2d" opacity="0.9"/>
+<text x="372.5" y="395" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1</text>
+<rect x="481.0" y="370" width="177.0" height="38" rx="9" fill="#d50c2d" opacity="0.9"/>
+<text x="569.5" y="395" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">3</text>
+<rect x="678.0" y="370" width="177.0" height="38" rx="9" fill="#d98e04" opacity="0.9"/>
+<text x="766.5" y="395" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">2</text>
+<rect x="875.0" y="370" width="177.0" height="38" rx="9" fill="#2f6fdb" opacity="0.9"/>
+<text x="963.5" y="395" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">3 +1?</text>
+<text x="1160.5" y="394" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1357.5" y="394" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<line x1="44" y1="418" x2="1456" y2="418" stroke="#e3e3e3"/>
+<text x="52" y="452" font-size="13.5" font-weight="700" fill="#1f1f1f">Data services</text>
+<rect x="284.0" y="428" width="177.0" height="38" rx="9" fill="#d50c2d" opacity="0.9"/>
+<text x="372.5" y="453" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1</text>
+<rect x="481.0" y="428" width="177.0" height="38" rx="9" fill="#d50c2d" opacity="0.9"/>
+<text x="569.5" y="453" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1 +1?</text>
+<rect x="678.0" y="428" width="177.0" height="38" rx="9" fill="#d98e04" opacity="0.9"/>
+<text x="766.5" y="453" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">3</text>
+<rect x="875.0" y="428" width="177.0" height="38" rx="9" fill="#2f6fdb" opacity="0.9"/>
+<text x="963.5" y="453" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">2</text>
+<text x="1160.5" y="452" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1357.5" y="452" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<line x1="44" y1="476" x2="1456" y2="476" stroke="#e3e3e3"/>
+<text x="52" y="510" font-size="13.5" font-weight="700" fill="#1f1f1f">Identity and access</text>
+<text x="372.5" y="510" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<rect x="481.0" y="486" width="177.0" height="38" rx="9" fill="#d50c2d" opacity="0.9"/>
+<text x="569.5" y="511" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1</text>
+<rect x="678.0" y="486" width="177.0" height="38" rx="9" fill="#d98e04" opacity="0.9"/>
+<text x="766.5" y="511" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">2 +1?</text>
+<rect x="875.0" y="486" width="177.0" height="38" rx="9" fill="#2f6fdb" opacity="0.9"/>
+<text x="963.5" y="511" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1 +1?</text>
+<text x="1160.5" y="510" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1357.5" y="510" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<line x1="44" y1="534" x2="1456" y2="534" stroke="#e3e3e3"/>
+<text x="52" y="568" font-size="13.5" font-weight="700" fill="#1f1f1f">Resilience</text>
+<text x="372.5" y="568" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="569.5" y="568" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<rect x="678.0" y="544" width="177.0" height="38" rx="9" fill="#d98e04" opacity="0.9"/>
+<text x="766.5" y="569" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1 +8?</text>
+<text x="963.5" y="568" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1160.5" y="568" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1357.5" y="568" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<line x1="44" y1="592" x2="1456" y2="592" stroke="#e3e3e3"/>
+<text x="52" y="626" font-size="13.5" font-weight="700" fill="#1f1f1f">Governance and drift</text>
+<text x="372.5" y="626" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="569.5" y="626" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<rect x="678.0" y="602" width="177.0" height="38" rx="9" fill="#d98e04" opacity="0.9"/>
+<text x="766.5" y="627" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">1 +1?</text>
+<rect x="875.0" y="602" width="177.0" height="38" rx="9" fill="#2f6fdb" opacity="0.9"/>
+<text x="963.5" y="627" text-anchor="middle" font-size="15" font-weight="800" fill="#fff">2 +2?</text>
+<text x="1160.5" y="626" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<text x="1357.5" y="626" text-anchor="middle" font-size="13" fill="#e3e3e3">·</text>
+<rect x="28" y="686" width="714.0" height="236" rx="12" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="44" y="710" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">WHAT THIS AUDIT KNOWS</text>
+<text x="44" y="742" font-size="12" font-weight="700" fill="#1f1f1f">Cost</text>
+<rect x="228" y="732" width="444.0" height="12" rx="6" fill="#fafafa" stroke="#e3e3e3"/>
+<rect x="228" y="732" width="444.0" height="12" rx="6" fill="#1f9d55"/>
+<text x="682.0" y="743" font-size="12" font-weight="800" fill="#1f9d55">100%</text>
+<title>catalog price found per server</title>
+<text x="44" y="772" font-size="12" font-weight="700" fill="#1f1f1f">CPU utilization</text>
+<rect x="228" y="762" width="444.0" height="12" rx="6" fill="#fafafa" stroke="#e3e3e3"/>
+<rect x="228" y="762" width="0.0" height="12" rx="6" fill="#d50c2d"/>
+<text x="682.0" y="773" font-size="12" font-weight="800" fill="#d50c2d">0%</text>
+<title>provider CPU metrics (RAM/disk never)</title>
+<text x="44" y="802" font-size="12" font-weight="700" fill="#1f1f1f">Ownership</text>
+<rect x="228" y="792" width="444.0" height="12" rx="6" fill="#fafafa" stroke="#e3e3e3"/>
+<rect x="228" y="792" width="350.8" height="12" rx="6" fill="#d98e04"/>
+<text x="682.0" y="803" font-size="12" font-weight="800" fill="#d98e04">79%</text>
+<title>owner or project label</title>
+<text x="44" y="832" font-size="12" font-weight="700" fill="#1f1f1f">Provider backups</text>
+<rect x="228" y="822" width="444.0" height="12" rx="6" fill="#fafafa" stroke="#e3e3e3"/>
+<rect x="228" y="822" width="0.0" height="12" rx="6" fill="#d50c2d"/>
+<text x="682.0" y="833" font-size="12" font-weight="800" fill="#d50c2d">0%</text>
+<title>of 10 stateful servers</title>
+<text x="44" y="862" font-size="12" font-weight="700" fill="#1f1f1f">RAM and disk telemetry</text>
+<rect x="228" y="852" width="444.0" height="12" rx="6" fill="#fafafa" stroke="#e3e3e3"/>
+<rect x="228" y="852" width="62.2" height="12" rx="6" fill="#d50c2d"/>
+<text x="682.0" y="863" font-size="12" font-weight="800" fill="#d50c2d">14%</text>
+<title>node exporter via `--node-metrics`, full window</title>
+<text x="44" y="892" font-size="12" font-weight="700" fill="#1f1f1f">Host/runtime evidence</text>
+<rect x="228" y="882" width="444.0" height="12" rx="6" fill="#fafafa" stroke="#e3e3e3"/>
+<rect x="228" y="882" width="62.2" height="12" rx="6" fill="#d50c2d"/>
+<text x="682.0" y="893" font-size="12" font-weight="800" fill="#d50c2d">14%</text>
+<title>host firewall, listeners, service config (`--host-bundle`)</title>
+<rect x="758.0" y="686" width="714.0" height="336" rx="12" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="774.0" y="710" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">EVIDENCE SOURCES</text>
+<text x="774.0" y="734" font-size="12" fill="#1f1f1f">• Hetzner Cloud API (GET requests)</text>
+<text x="774.0" y="754" font-size="12" fill="#1f1f1f">• host bundles for 2 server(s), run by the owner</text>
+<text x="774.0" y="774" font-size="12" fill="#1f1f1f">• Terraform JSON</text>
+<text x="774.0" y="794" font-size="12" fill="#1f1f1f">• node exporter telemetry</text>
+<text x="774.0" y="814" font-size="12" fill="#1f1f1f">• kubectl listing</text>
+<text x="774.0" y="834" font-size="12" fill="#1f1f1f">• owner checklist answers</text>
+<text x="774.0" y="854" font-size="12" fill="#1f1f1f">• Hetzner Robot API</text>
+<text x="774.0" y="874" font-size="12" fill="#1f1f1f">• Object Storage S3 API</text>
+<text x="774.0" y="894" font-size="12" fill="#1f1f1f">• Robot: 3 dedicated server(s), Robot firewall active on 2; 1 vSwitch(es).</text>
+<text x="774.0" y="914" font-size="12" fill="#1f1f1f">• Object Storage: 3 bucket(s), 2 with public access, 1 versioned.</text>
+<text x="774.0" y="934" font-size="12" fill="#1f1f1f">• Kubernetes (shop): 3/3 node(s) matched to servers; 2 workload(s) with node-level access; 2 NodePort/LoadBalance…</text>
+<text x="774.0" y="954" font-size="12" fill="#1f1f1f">• Terraform (state): 3 resource(s) matched; 12 not in state; 1 in state but gone; 1 with drifted settings; 0 pend…</text>
+<text x="774.0" y="974" font-size="12" fill="#1f1f1f">• Owner checklist: 3 yes · 2 no · 2 not verified (answered by owner, 2026-09-23).</text>
+<text x="774.0" y="994" font-size="12" fill="#1f1f1f">• Guest telemetry: 2 server(s) matched.</text>
+<rect x="28" y="1042" width="1444" height="228" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="44" y="1066" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">RECOMMENDED ACTIONS</text>
+<text x="1456" y="1066" text-anchor="end" font-size="11" fill="#6b6b6b">plans for a human · the tool changes nothing</text>
+<circle cx="56" cy="1096" r="11" fill="#1f1f1f"/>
+<text x="56" y="1100" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">1</text>
+<text x="76" y="1094" font-size="12.5" font-weight="700" fill="#1f1f1f">Bucket ACL grants access to everyone</text>
+<text x="76" y="1111" font-size="11" fill="#6b6b6b">Set the bucket ACL to private and serve public files through a policy on a dedicated prefix or bucket.</text>
+<text x="1456" y="1094" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
+<rect x="1346" y="1100" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1366.0" y="1111" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
+<text x="1456" y="1111" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<circle cx="56" cy="1142" r="11" fill="#1f1f1f"/>
+<text x="56" y="1146" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">2</text>
+<text x="76" y="1140" font-size="12.5" font-weight="700" fill="#1f1f1f">Docker-published ports bypass the host firewall; only the Cloud Firewall protects them</text>
+<text x="76" y="1157" font-size="11" fill="#6b6b6b">Bind published ports to 127.0.0.1 or the private/VPN address (for example `127.0.0.1:8080:8080`), or add DOCKER-USER rules; keep the Cloud Firewall r…</text>
+<text x="1456" y="1140" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
+<rect x="1346" y="1146" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1366.0" y="1157" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
+<text x="1456" y="1157" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<circle cx="56" cy="1188" r="11" fill="#1f1f1f"/>
+<text x="56" y="1192" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">3</text>
+<text x="76" y="1186" font-size="12.5" font-weight="700" fill="#1f1f1f">Bucket policy allows anonymous reads</text>
+<text x="76" y="1203" font-size="11" fill="#6b6b6b">Remove the wildcard principal, or scope Resource to a public prefix and Action to s3:GetObject.</text>
+<text x="1456" y="1186" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk low</text>
+<rect x="1332" y="1192" width="54" height="15" rx="7.5" fill="#d98e04"/>
+<text x="1359.0" y="1203" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">MEDIUM</text>
+<text x="1456" y="1203" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<circle cx="56" cy="1234" r="11" fill="#1f1f1f"/>
+<text x="56" y="1238" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">4</text>
+<text x="76" y="1232" font-size="12.5" font-weight="700" fill="#1f1f1f">Dedicated server has no active Robot firewall</text>
+<text x="76" y="1249" font-size="11" fill="#6b6b6b">Enable the Robot firewall with a default-discard template and explicit accepts.</text>
+<text x="1456" y="1232" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk medium</text>
+<rect x="1332" y="1238" width="54" height="15" rx="7.5" fill="#d98e04"/>
+<text x="1359.0" y="1249" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">MEDIUM</text>
+<text x="1456" y="1249" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+</svg>

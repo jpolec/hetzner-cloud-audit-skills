@@ -8,7 +8,9 @@ import json
 from collections.abc import Callable
 from dataclasses import replace
 
+from ..flows import PortSet, port_set
 from ..graph import AttackGraph
+from ..host.parsers import pg_remote_decisions
 from ..models import (
     Asset,
     Edge,
@@ -186,13 +188,36 @@ def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Find
                     port = max(start, first)
                     label = f"{proto}/{first}" if first == last else f"{proto}/{first}-{last}"
                     evidence = [_evidence(asset, "firewall_rule", rule, "properties.inbound")]
-                    if port in _int_set(asset.properties.get("listening_ports")):
+                    suffix = "" if proto == "tcp" else "_udp"
+                    listening = port_set(asset.properties.get(f"listening{suffix}_ports"))
+                    host_allowed = port_set(asset.properties.get(f"host_firewall_allow{suffix}_ports"))
+                    host_known = (
+                        asset.properties.get("host_evidence")
+                        and asset.properties.get(f"host_firewall_allow{suffix}_ports") is not None
+                        and asset.properties.get(f"listening{suffix}_ports") is not None
+                    )
+                    if host_known:  # both layers observed; otherwise the finding stays needs_validation
+                        # Flow intersection: cloud rule ∩ service range ∩ host firewall ∩ listener.
+                        window = PortSet.of([(max(start, first), min(end, last))])
+                        reachable = window.intersection(host_allowed).intersection(listening)
                         evidence.append(
-                            _evidence(asset, "listening_socket", {"protocol": proto, "port": port}, "properties.listening_ports")
+                            _evidence(
+                                asset,
+                                "host_flow_intersection",
+                                {"cloud": window.describe(), "host_firewall": host_allowed.intersection(window).describe() or "none",
+                                 "listening": listening.intersection(window).describe() or "none", "reachable": reachable.describe() or "none"},
+                                "properties.host_evidence",
+                            )
                         )
-                    if port in _int_set(asset.properties.get("host_firewall_allow_ports")):
+                        if reachable:
+                            port = next(iter(reachable))[0]
+                    if port in listening:
                         evidence.append(
-                            _evidence(asset, "host_firewall_allow", {"protocol": proto, "port": port}, "properties.host_firewall_allow_ports")
+                            _evidence(asset, "listening_socket", {"protocol": proto, "port": port}, f"properties.listening{suffix}_ports")
+                        )
+                    if port in host_allowed:
+                        evidence.append(
+                            _evidence(asset, "host_firewall_allow", {"protocol": proto, "port": port}, f"properties.host_firewall_allow{suffix}_ports")
                         )
                     output.append(
                         _candidate(
@@ -364,6 +389,7 @@ def expectation_drift(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
         unexpected = observed - allowed
         if not unexpected:
             continue
+        spec = str(expectation.get("port_spec", f"tcp/{port}"))
         target_asset = snapshot.asset_map().get(target)
         observed_source = target_asset.source if target_asset is not None else "observed_state"
         evidence = [
@@ -378,15 +404,15 @@ def expectation_drift(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
                 0.96,
                 [target],
                 "Declared and observed source ranges differ for a security-sensitive port.",
-                f"TCP/{port} sources equal the declared set {sorted(allowed)}.",
+                f"{spec.upper()} sources equal the declared set {sorted(allowed)}.",
                 f"Unexpected observed sources: {sorted(unexpected)}.",
                 evidence,
-                [*sorted(unexpected), f"tcp/{port}", f"provider-policy:{target}"],
+                [*sorted(unexpected), spec, f"provider-policy:{target}"],
                 ["Repository declaration is current and refers to the observed asset."],
                 "The provider policy no longer enforces the reviewed source restriction; downstream reachability requires separate host and service evidence.",
                 "Reconcile the runtime firewall to reviewed IaC, then import or remove manual drift.",
                 ["https://developer.hashicorp.com/terraform/tutorials/state/resource-drift"],
-                f"{port}:{','.join(sorted(unexpected))}",
+                f"{spec}:{','.join(sorted(unexpected))}",
             )
         )
     return output
@@ -491,8 +517,11 @@ def postgres_configuration(snapshot: Snapshot, graph: AttackGraph) -> list[Findi
     for asset in snapshot.assets:
         if asset.type != "postgres":
             continue
-        for index, hba in enumerate(asset.properties.get("pg_hba", [])):
-            if hba.get("method") == "trust" and hba.get("address") in PUBLIC_SOURCES | {"0.0.0.0/0", "::/0"}:
+        entries = asset.properties.get("pg_hba", [])
+        # First match wins: a reject line earlier in the file shadows a later trust line.
+        for hba in pg_remote_decisions(entries):
+            index = entries.index(hba)
+            if hba.get("method") == "trust":
                 output.append(
                     _candidate(
                         "HETZ-PG-001",
@@ -908,10 +937,19 @@ RULES: tuple[Rule, ...] = (
 
 
 def hunt(snapshot: Snapshot) -> list[Finding]:
-    from .resources import RESOURCE_RULES  # resources builds on helpers in this module
+    from .attestations import ATTESTATION_RULES  # these modules build on helpers in this one
+    from .changes import CHANGE_RULES
+    from .host import HOST_RULES
+    from .iac import IAC_RULES
+    from .k8s import K8S_RULES
+    from .objectstorage import OBJECT_STORAGE_RULES
+    from .projects import PROJECT_RULES
+    from .resources import RESOURCE_RULES
+    from .robot import ROBOT_RULES
 
     graph = AttackGraph(snapshot)
-    candidates = [finding for rule in (*RULES, *RESOURCE_RULES) for finding in rule(snapshot, graph)]
+    rules = (*RULES, *RESOURCE_RULES, *HOST_RULES, *CHANGE_RULES, *IAC_RULES, *PROJECT_RULES, *ROBOT_RULES, *OBJECT_STORAGE_RULES, *K8S_RULES, *ATTESTATION_RULES)
+    candidates = [finding for rule in rules for finding in rule(snapshot, graph)]
     collected_at = snapshot.metadata.get("collected_at")
     if isinstance(collected_at, str):
         for candidate in candidates:

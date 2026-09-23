@@ -5,8 +5,13 @@ from __future__ import annotations
 from collections import defaultdict, deque
 from typing import Any
 
+from .flows import port_set
 from .models import Asset, Edge, Snapshot
 from .text import md
+
+# A public IP alone admits no traffic, and "runs" (server -> container/database) records ownership,
+# not a network flow; neither is a hop an attacker can take by itself.
+NON_TRAVERSABLE = {"public_interface", "runs"}
 
 
 class AttackGraph:
@@ -41,8 +46,7 @@ class AttackGraph:
             for edge in self.outgoing.get(node, []):
                 if edge.target in visited:
                     continue
-                # A public IP alone admits no traffic; only firewall "allows" edges carry it.
-                if edge.relation == "public_interface":
+                if edge.relation in NON_TRAVERSABLE:
                     continue
                 next_path = [*path, edge]
                 if edge.target == target:
@@ -171,7 +175,14 @@ class AttackGraph:
                         "collected_at": None,
                     }
                 )
-        complete = target_type in {"postgres", "redis", "service"} and (
+        host_complete = bool(
+            target_type == "server"
+            and target_properties.get("host_evidence")
+            and port is not None
+            and port in port_set(target_properties.get("listening_ports"))
+            and port in port_set(target_properties.get("host_firewall_allow_ports"))
+        )
+        complete = host_complete or target_type in {"postgres", "redis", "service", "container"} and (
             {"listening_socket", "host_firewall_allow"} <= evidence_kinds
             or runtime_complete
         )

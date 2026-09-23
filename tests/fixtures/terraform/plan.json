@@ -1,0 +1,98 @@
+{
+  "format_version": "1.2",
+  "prior_state": {
+    "format_version": "1.0",
+    "values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "hcloud_firewall.web",
+            "mode": "managed",
+            "type": "hcloud_firewall",
+            "name": "web",
+            "values": {
+              "id": "101",
+              "name": "web",
+              "rule": [
+                {
+                  "direction": "in",
+                  "protocol": "tcp",
+                  "port": "443",
+                  "source_ips": [
+                    "0.0.0.0/0",
+                    "::/0"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "resource_changes": [
+    {
+      "address": "hcloud_firewall.web",
+      "type": "hcloud_firewall",
+      "change": {
+        "actions": [
+          "update"
+        ]
+      }
+    },
+    {
+      "address": "hcloud_server.web",
+      "type": "hcloud_server",
+      "change": {
+        "actions": [
+          "delete",
+          "create"
+        ]
+      }
+    },
+    {
+      "address": "hcloud_ssh_key.me",
+      "type": "hcloud_ssh_key",
+      "change": {
+        "actions": [
+          "no-op"
+        ]
+      }
+    }
+  ],
+  "planned_values": {
+    "root_module": {
+      "resources": [
+        {
+          "address": "hcloud_firewall.web",
+          "mode": "managed",
+          "type": "hcloud_firewall",
+          "name": "web",
+          "values": {
+            "id": "101",
+            "name": "web",
+            "rule": [
+              {
+                "direction": "in",
+                "protocol": "tcp",
+                "port": "443",
+                "source_ips": [
+                  "0.0.0.0/0",
+                  "::/0"
+                ]
+              },
+              {
+                "direction": "in",
+                "protocol": "tcp",
+                "port": "22",
+                "source_ips": [
+                  "100.64.0.0/10"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

@@ -10,6 +10,7 @@ import ipaddress
 from html import escape
 from typing import Any
 
+from .flows import port_set
 from .models import Asset, Snapshot
 from .text import md
 
@@ -181,6 +182,8 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
                 "sensitive": _sensitive(server),
                 "ingress": ingress,
                 "exposure": exposure,
+                "host": _host_summary(server),
+                "k8s_role": (props.get("k8s") or {}).get("role"),
             }
         )
     unattached = [
@@ -241,10 +244,84 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
         ],
         "servers": servers,
         "storage_boxes": storage_boxes,
+        **_beyond(snapshot),
         "unattached_volumes": [asset.name for asset in unattached],
         "stats": stats,
         "collected_at": snapshot.metadata.get("collected_at"),
     }
+
+
+def _host_summary(server: Asset) -> dict[str, Any] | None:
+    """Host-bundle facts a diagram can show: firewall engine, Docker bypass, container count."""
+    props = server.properties
+    if not props.get("host_evidence"):
+        return None
+    firewall = props.get("host_firewall") or {}
+    own = port_set(firewall.get("world_tcp_ranges"))
+    bypass = sorted({item["host_port"] for item in props.get("docker_published") or []
+                     if item.get("bind") in {"wildcard", "public"} and item["host_port"] not in own})
+    return {
+        "firewall": firewall.get("engine") if firewall.get("active") else "none",
+        "docker_bypass": bypass,
+        "containers": len({item.get("container") for item in props.get("docker_published") or []}),
+        "password_ssh": (props.get("sshd") or {}).get("passwordauthentication") == "yes",
+    }
+
+
+def _beyond(snapshot: Snapshot) -> dict[str, Any]:
+    """Resources outside the server grid: load balancers, Robot, vSwitch, buckets, Kubernetes, misc."""
+    from .collectors.objectstorage import public_grants, public_statements
+
+    names = {asset.id: asset.name for asset in snapshot.assets}
+    of = snapshot.assets
+    load_balancers = []
+    for lb in (asset for asset in of if asset.type == "load_balancer"):
+        targets = set()
+        for target in lb.properties.get("targets") or []:
+            for item in [target, *(target.get("targets") or [])]:
+                server_id = (item.get("server") or {}).get("id")
+                if server_id is not None:
+                    targets.add(names.get(f"hcloud:server:{server_id}", str(server_id)))
+        load_balancers.append({
+            "name": lb.name,
+            "public": bool((lb.properties.get("public_net") or {}).get("enabled", True)),
+            "services": [f"{item.get('protocol')} {item.get('listen_port')}→{item.get('destination_port')}" for item in lb.properties.get("services") or []],
+            "targets": sorted(targets),
+        })
+    robot = [
+        {"name": asset.name, "product": asset.properties.get("product"), "dc": asset.properties.get("dc"),
+         "firewall": (asset.properties.get("robot_firewall") or {}).get("status") or "absent",
+         "filter_ipv6": (asset.properties.get("robot_firewall") or {}).get("filter_ipv6")}
+        for asset in of if asset.type == "robot_server"
+    ]
+    vswitches = [
+        {"name": asset.name, "vlan": asset.properties.get("vlan"),
+         "members": [names.get(f"robot:server:{number}", str(number)) for number in asset.properties.get("servers") or []],
+         "cloud_networks": [names.get(f"hcloud:network:{item.get('id')}", str(item.get("id"))) for item in asset.properties.get("cloud_network") or []]}
+        for asset in of if asset.type == "vswitch"
+    ]
+    buckets = [
+        {"name": asset.name, "location": asset.properties.get("location"),
+         "public": bool(public_grants(asset.properties) or public_statements(asset.properties)),
+         "versioning": asset.properties.get("versioning") == "Enabled"}
+        for asset in of if asset.type == "bucket"
+    ]
+    k8s = None
+    cluster = next((asset for asset in of if asset.type == "k8s_cluster"), None)
+    if cluster:
+        k8s = {
+            "name": cluster.name,
+            "nodes": sorted(asset.name for asset in of if asset.type == "server" and asset.properties.get("k8s")),
+            "risky_workloads": sum(1 for asset in of if asset.type == "k8s_workload" and not asset.properties.get("system")),
+            "system_workloads": sum(1 for asset in of if asset.type == "k8s_workload" and asset.properties.get("system")),
+            "node_port_services": sum(1 for asset in of if asset.type == "k8s_service"),
+            "integrations": cluster.properties.get("integrations") or [],
+        }
+    misc = {kind: sum(1 for asset in of if asset.type == kind)
+            for kind in ("floating_ip", "certificate", "zone", "placement_group")}
+    return {"load_balancers": load_balancers, "robot_servers": robot, "vswitches": vswitches, "buckets": buckets,
+            "kubernetes": k8s, "misc": {key: value for key, value in misc.items() if value},
+            "projects": [item["name"] for item in snapshot.metadata.get("projects") or []]}
 
 
 def _group_title(key: str) -> str:

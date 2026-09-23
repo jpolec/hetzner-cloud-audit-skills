@@ -141,6 +141,84 @@ def _storage_box(project: _Project, bad: bool) -> None:
         project.plant("HETZ-STO-001", box)
 
 
+def _host(server: Asset, **props: Any) -> None:
+    server.properties.update({"host_evidence": {"bundle_version": 1, "complete": True}, **props})
+
+
+def _docker_bypass(project: _Project, bad: bool) -> None:
+    server = project.server([_rule("tcp", 8443, 8443, WORLD)])  # not 443: see _no_firewall
+    _host(
+        server,
+        host_firewall={"engine": "ufw", "active": True, "world_tcp": "8443", "world_tcp_ranges": [[8443, 8443]]},
+        docker_published=[{"container": "api", "host_port": 9001, "protocol": "tcp", "bind": "wildcard" if bad else "loopback",
+                           "host_ip": "0.0.0.0" if bad else "127.0.0.1"}],
+        docker_user_filters=False,
+    )
+    if bad:
+        project.plant("HETZ-DKR-005", server)
+
+
+def _ssh_password(project: _Project, bad: bool) -> None:
+    server = project.server([_rule("tcp", 22, 22, ["100.64.0.0/10"])])
+    _host(server, sshd={"port": ["22"], "passwordauthentication": "yes" if bad else "no", "permitrootlogin": "prohibit-password"})
+    if bad:
+        project.plant("HETZ-SSH-001", server)
+
+
+def _no_host_firewall(project: _Project, bad: bool) -> None:
+    server = project.server([_rule("tcp", 8443, 8443, WORLD)])
+    _host(server, host_firewall={"engine": "nftables", "active": not bad, "world_tcp": "all" if bad else "8443",
+                                 "world_tcp_ranges": [[0, 65535]] if bad else [[8443, 8443]]})
+    if bad:
+        project.plant("HETZ-HOST-001", server)
+
+
+def _wide_bind(project: _Project, bad: bool) -> None:
+    server = project.server([_rule("tcp", 8443, 8443, WORLD)])
+    _host(server, listeners=[{"protocol": "tcp", "port": 5432, "address": "0.0.0.0" if bad else "127.0.0.1",
+                              "bind": "wildcard" if bad else "loopback", "process": "postgres"}])
+    if bad:
+        project.plant("HETZ-HOST-002", server)
+
+
+def _pg_remote_auth(project: _Project, bad: bool) -> None:
+    asset_id = project._id("postgres")
+    entries = [{"type": "hostssl" if not bad else "host", "database": "all", "user": "all", "address": "0.0.0.0/0", "method": "scram-sha-256"}]
+    pg = Asset(asset_id, "postgres", asset_id.split(":")[-1], {"pg_hba": entries, "port": 5432}, {}, "host_bundle")
+    project.assets.append(pg)
+    if bad:
+        project.plant("HETZ-PG-003", pg)
+
+
+def _robot_ipv6(project: _Project, bad: bool) -> None:
+    asset_id = project._id("robot_server")
+    firewall = {"present": True, "status": "active", "filter_ipv6": not bad, "rules": [
+        {"ip_version": "ipv4", "src_ip": None, "dst_port": "443", "protocol": "tcp", "action": "accept"}]}
+    server = Asset(asset_id, "robot_server", asset_id.split(":")[-1], {"server_ipv6_net": "2001:db8::", "robot_firewall": firewall}, {}, "robot_api")
+    project.assets.append(server)
+    if bad:
+        project.plant("HETZ-ROB-005", server)
+
+
+def _public_bucket(project: _Project, bad: bool) -> None:
+    asset_id = project._id("bucket")
+    acl = [{"grantee": "account", "permission": "FULL_CONTROL"}, *([{"grantee": "AllUsers", "permission": "READ"}] if bad else [])]
+    bucket = Asset(asset_id, "bucket", asset_id.split(":")[-1], {"acl": acl, "policy": None, "versioning": "Enabled"}, {}, "object_storage_api")
+    project.assets.append(bucket)
+    if bad:
+        project.plant("HETZ-OBJ-001", bucket)
+
+
+def _pod_breakout(project: _Project, bad: bool) -> None:
+    asset_id = project._id("k8s_workload")
+    workload = Asset(asset_id, "k8s_workload", asset_id.split(":")[-1], {
+        "namespace": "shop", "system": False, "pods": 2, "nodes": [], "privileged": bad, "host_pid": False,
+        "host_network": False, "host_ipc": False, "sensitive_host_paths": [], "capabilities": []}, {}, "kubernetes")
+    project.assets.append(workload)
+    if bad:
+        project.plant("HETZ-K8S-002", workload)
+
+
 SCENARIOS: dict[str, Scenario] = {
     "HETZ-NET-001": _ssh,
     "HETZ-NET-003": _postgres,
@@ -152,6 +230,14 @@ SCENARIOS: dict[str, Scenario] = {
     "HETZ-GOV-004": _unlabeled,
     "HETZ-KEY-001": _weak_key,
     "HETZ-STO-001": _storage_box,
+    "HETZ-DKR-005": _docker_bypass,
+    "HETZ-SSH-001": _ssh_password,
+    "HETZ-HOST-001": _no_host_firewall,
+    "HETZ-HOST-002": _wide_bind,
+    "HETZ-PG-003": _pg_remote_auth,
+    "HETZ-ROB-005": _robot_ipv6,
+    "HETZ-OBJ-001": _public_bucket,
+    "HETZ-K8S-002": _pod_breakout,
 }
 
 

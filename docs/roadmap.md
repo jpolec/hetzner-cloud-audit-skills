@@ -68,23 +68,26 @@ Driven by an external review that noted the collector was wide and the analyzer 
 - Core correctness from an architecture review: semantic flow-set diff, listener ∩ host-firewall confirmation, load balancers in the attack graph, stateful detection, and an honest metrics window.
 - SSH key strength and age, `audit.ignore` owner labels, suggested `hcloud` commands, traffic quota and overage, and a generated TP/FP/FN benchmark.
 
-## v0.6 — host evidence and drift
+## v0.6 + v0.7 — host evidence, drift, and beyond one project (released together as v0.7.0, 2026-09-23)
 
-1. **Host evidence bundle** (`host-bundle`): an opt-in, versioned read-only allowlist covering UFW/nftables, `ss` listeners, sshd effective config, Docker published ports (UFW bypass), capabilities and mounts, PostgreSQL `pg_hba` (first-match order), and Redis bind and ACL. It turns `cloud_path_present` into `reachable` or `rejected` through flow intersection: cloud firewall ∩ host firewall ∩ listener ∩ application policy.
-2. **Terraform ↔ runtime drift** from `terraform show -json` and saved plans.
-3. **Hetzner `/actions` history** as drift signals (`disable_protection`, `remove_from_resource`, `change_dns_ptr`, `rebuild`).
-4. **Anonymized real-response fixtures** for load balancers, certificates, and DNS.
-5. **Cost evidence**: RAM and disk p95 from node exporter or Prometheus, sample coverage and seasonality, and separate theoretical, expected, and verified savings.
+Done:
 
-## v0.7 — beyond one Cloud project
+1. ✅ **Host evidence bundle** (`host-bundle`): owner-run read-only script; flow intersection across Cloud Firewall, host firewall (UFW, nftables, iptables), and listeners; Docker bypass; sshd; containers; `pg_hba` first-match order; Redis bind and ACL.
+2. ✅ **Terraform ↔ runtime drift** from `terraform show -json` state and saved plans.
+3. ✅ **Provider `/actions` history** as change signals.
+4. ✅ **API-reference-shaped fixtures** for load balancers, certificates, and DNS, run end to end through the collector. (Real anonymized responses still welcome from users who run these resources.)
+5. ✅ **Cost evidence**: RAM and disk from node exporter via Prometheus, coverage against the audit window, and theoretical/expected/verified savings.
+6. ✅ **Multi-project** snapshots and merge with cross-project trust rules.
+7. ✅ **Hetzner Robot**: dedicated servers, Robot firewall, vSwitch, keys.
+8. ✅ **Object Storage**: ACLs, bucket policies, versioning.
+9. ✅ **Kubernetes correlation**: NodePorts versus node firewalls, workloads with node-level access, CCM/CSI.
+10. ✅ **Console checklist** with owner attestations.
 
-Each item is a separate API with its own credentials, so each ships as its own read-only collector feeding the same fact → flow → finding engine:
+Next, in order:
 
-1. **Multi-project**: several read-only tokens combined into one report, with trust boundaries between projects.
-2. **Hetzner Robot** (dedicated servers, vSwitch, Robot firewall) through the Robot webservice with a read-only user.
-3. **Object Storage** (S3 API): public buckets, bucket policies, and access keys.
-4. **Kubernetes on Hetzner**, correlation only: kube-hetzner, CCM, and CSI; public API server, kubelet, etcd, NodePort, privileged pods, and hostPath.
-5. **Console members and 2FA** have no API, so they get a guided checklist the agent walks through with the owner.
+- Live validation of the host bundle, Robot, Object Storage, and Kubernetes on real accounts, and anonymized fixtures from those runs.
+- firewalld zones and CSF in the host-firewall evaluator (today they stay "unknown").
+- Evidence age and baseline selection for `diff` in CI, and a PR comment.
 
 ## Later
 
