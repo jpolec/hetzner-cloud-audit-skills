@@ -176,7 +176,7 @@ def provenance(snapshot: Snapshot, cost: dict[str, Any] | None) -> list[str]:
     ]
     if cost:
         lines.append(
-            f"Pricing: current Hetzner catalog, net ({cost.get('currency', 'EUR')}), VAT excluded; usage-based traffic not included; invoice reconciliation not performed."
+            f"Pricing: current Hetzner catalog, net ({cost.get('currency', 'EUR')}), VAT excluded; traffic overage from current-period usage only; invoice reconciliation not performed."
         )
     return lines
 
@@ -295,6 +295,12 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
             "Provider backups are off." + (f" Storage Box {', '.join(boxes)} exists, so application-level backups may cover this." if boxes else ""),
             backups[0], None, "low", None,
             "Record which mechanism protects each volume and run one restore test; enable provider backups (+20% of the server price) where none exists.", ["HETZ-BCP-001"])
+    for item in (cost or {}).get("traffic", {}).get("near_quota", []):
+        add(48, f"Traffic on {item['name']} is at {item['used_percent']:.0f}% of the included quota",
+            "Outgoing traffic beyond the included quota is billed per TB; the period is not over yet.",
+            None, ("HIGH", "usage reported by the Hetzner API for this billing period"), "low",
+            item.get("overage_net") or None,
+            "Check what is sending the traffic (backups, public downloads, replication) and move bulk transfers onto the private network or a CDN.", [], "cost")
     if insights.get("storage_heavy"):
         names = ", ".join(str(item["name"]) for item in insights["storage_heavy"])
         add(80, f"Review storage footprint: {names}",

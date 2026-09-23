@@ -34,7 +34,9 @@
       "cpu_p95_capacity_percent": 10.0,
       "cpu_max_capacity_percent": 10.0,
       "metrics_start": "2026-08-23T00:00:00+00:00",
-      "metrics_end": "2026-09-22T00:00:00+00:00"
+      "metrics_end": "2026-09-22T00:00:00+00:00",
+      "traffic_used_percent": null,
+      "traffic_overage_net": null
     },
     {
       "asset_id": "hcloud:server:2",
@@ -55,7 +57,9 @@
       "cpu_p95_capacity_percent": null,
       "cpu_max_capacity_percent": null,
       "metrics_start": null,
-      "metrics_end": null
+      "metrics_end": null,
+      "traffic_used_percent": null,
+      "traffic_overage_net": null
     },
     {
       "asset_id": "hcloud:server:3",
@@ -76,7 +80,9 @@
       "cpu_p95_capacity_percent": 100.0,
       "cpu_max_capacity_percent": 100.0,
       "metrics_start": "2026-08-23T00:00:00+00:00",
-      "metrics_end": "2026-09-22T00:00:00+00:00"
+      "metrics_end": "2026-09-22T00:00:00+00:00",
+      "traffic_used_percent": null,
+      "traffic_overage_net": null
     }
   ],
   "resource_components_net": {
@@ -122,7 +128,9 @@
         "cpu_p95_capacity_percent": 10.0,
         "cpu_max_capacity_percent": 10.0,
         "metrics_start": "2026-08-23T00:00:00+00:00",
-        "metrics_end": "2026-09-22T00:00:00+00:00"
+        "metrics_end": "2026-09-22T00:00:00+00:00",
+        "traffic_used_percent": null,
+        "traffic_overage_net": null
       },
       "metrics": [
         {
@@ -228,7 +236,9 @@
         "cpu_p95_capacity_percent": 10.0,
         "cpu_max_capacity_percent": 10.0,
         "metrics_start": "2026-08-23T00:00:00+00:00",
-        "metrics_end": "2026-09-22T00:00:00+00:00"
+        "metrics_end": "2026-09-22T00:00:00+00:00",
+        "traffic_used_percent": null,
+        "traffic_overage_net": null
       },
       "metrics": [
         {
@@ -334,7 +344,9 @@
         "cpu_p95_capacity_percent": null,
         "cpu_max_capacity_percent": null,
         "metrics_start": null,
-        "metrics_end": null
+        "metrics_end": null,
+        "traffic_used_percent": null,
+        "traffic_overage_net": null
       },
       "metrics": [],
       "data_gaps": [
@@ -398,5 +410,10 @@
     "Hetzner does not expose guest RAM utilization.",
     "Filesystem occupancy, workload SLOs, and application architecture constraints are not provider metrics.",
     "Catalog prices can differ from invoices, credits, taxes, and legacy contracts."
-  ]
+  ],
+  "traffic": {
+    "basis": "Outgoing traffic in the current billing period, as reported by the API; overage is priced per TB for the server type.",
+    "overage_monthly_net": 0.0,
+    "near_quota": []
+  }
 }

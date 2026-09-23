@@ -8,6 +8,7 @@
 | Confirmed (evidence complete) | 23 findings |
 | Needs host/runtime validation | 10 hypotheses |
 | Rejected by the verifier | 0 |
+| Suppressed by owner labels | 0 |
 | Collection gaps | none |
 
 ### What this audit knows

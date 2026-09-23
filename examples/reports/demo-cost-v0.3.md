@@ -34,6 +34,11 @@
 - Candidate: `retire after owner, dependency, and restore validation`
 - Required validation: Owner confirms the server is not a rollback or cold-standby asset.; Required data and restore points are preserved.
 
+## Traffic
+
+- Overage already incurred this period: EUR 0.00
+- No server is above 80% of its included traffic.
+
 ## Data gaps
 
 - Hetzner does not expose guest RAM utilization.

@@ -162,6 +162,20 @@ class V03Test(unittest.TestCase):
             loaded = load_snapshot(output_path)
             self.assertEqual(loaded.facts[0].run_id, "run-a")
 
+    def test_traffic_overage_and_quota_warning(self) -> None:
+        from hetzner_security.actions import build_actions
+
+        server_type = {"name": "t", "architecture": "x86", "cores": 2, "memory": 4,
+                       "prices": [{"location": "fsn1", "price_monthly": {"net": "5"}, "price_per_tb_traffic": {"net": "1.00"}}]}
+        heavy = Asset("hcloud:server:1", "server", "cdn-origin", {"id": 1, "status": "running", "location": {"name": "fsn1"}, "server_type": server_type,
+                      "included_traffic": 20 * 10**12, "outgoing_traffic": 22 * 10**12}, {}, "hcloud_api")
+        snapshot = Snapshot(assets=[heavy], metadata={"collected_at": "2026-09-23T00:00:00+00:00"})
+        report = analyze_cost(snapshot)
+        self.assertEqual(report["traffic"]["overage_monthly_net"], 2.0)
+        self.assertEqual(report["traffic"]["near_quota"][0]["name"], "cdn-origin")
+        actions = build_actions(snapshot, [], report)
+        self.assertTrue(any("at 110% of the included quota" in item["title"] for item in actions))
+
     def test_rightsizing_needs_enough_telemetry(self) -> None:
         current_type = {"name": "big", "architecture": "x86", "cpu_type": "shared", "cores": 4, "memory": 8,
                         "prices": [{"location": "fsn1", "price_monthly": {"net": "100"}}]}

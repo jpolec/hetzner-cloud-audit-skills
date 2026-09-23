@@ -88,6 +88,7 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
     metrics_coverage = (snapshot.metadata.get("coverage") or {}).get("server_metrics") or {}
     requested_days = metrics_coverage.get("window_days") if isinstance(metrics_coverage, dict) else None
     telemetry_gaps: list[str] = []
+    traffic_warnings: list[dict[str, Any]] = []
 
     volume_rate = _nested_float(pricing, "volume", "price_per_gb_month", "net")
     backup_pct = _nested_float(pricing, "server_backup", "percentage") / 100.0
@@ -138,8 +139,11 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
             "cpu_max_capacity_percent": round(cpu_max_capacity, 2) if cpu_max_capacity is not None else None,
             "metrics_start": props.get("metrics", {}).get("start") if isinstance(props.get("metrics"), dict) else None,
             "metrics_end": props.get("metrics", {}).get("end") if isinstance(props.get("metrics"), dict) else None,
+            **_traffic(props, current_type, location),
         }
         server_rows.append(row)
+        if (row.get("traffic_used_percent") or 0) >= TRAFFIC_WARN_PERCENT:
+            traffic_warnings.append(row)
 
         if props.get("status") != "running" and monthly > 0:
             recommendations.append(
@@ -355,6 +359,14 @@ def analyze_cost(snapshot: Snapshot) -> dict[str, Any]:
             "Catalog prices can differ from invoices, credits, taxes, and legacy contracts.",
             *telemetry_gaps,
         ],
+        "traffic": {
+            "basis": "Outgoing traffic in the current billing period, as reported by the API; overage is priced per TB for the server type.",
+            "overage_monthly_net": round(sum(float(row.get("traffic_overage_net") or 0) for row in server_rows), 2),
+            "near_quota": [
+                {"name": row["name"], "used_percent": row["traffic_used_percent"], "overage_net": row["traffic_overage_net"]}
+                for row in traffic_warnings
+            ],
+        },
     }
 
 
@@ -477,6 +489,32 @@ def _best_arm_candidate(
         return None
     price, item = min(candidates, key=lambda value: value[0])
     return item, price
+
+
+TRAFFIC_WARN_PERCENT = 80.0
+TB = 1_000_000_000_000
+
+
+def _traffic(props: dict[str, Any], server_type: dict[str, Any], location: str) -> dict[str, Any]:
+    """Outgoing traffic against the included quota, and the overage it has already caused."""
+    included = props.get("included_traffic")
+    outgoing = props.get("outgoing_traffic")
+    if not isinstance(included, (int, float)) or not isinstance(outgoing, (int, float)) or included <= 0:
+        return {"traffic_used_percent": None, "traffic_overage_net": None}
+    price_per_tb = 0.0
+    for price in server_type.get("prices") or []:
+        if isinstance(price, dict) and price.get("location") == location:
+            try:
+                price_per_tb = float((price.get("price_per_tb_traffic") or {}).get("net") or 0)
+            except (TypeError, ValueError):
+                price_per_tb = 0.0
+    overage_tb = max(0.0, (outgoing - included) / TB)
+    return {
+        "traffic_out_tb": round(outgoing / TB, 3),
+        "traffic_included_tb": round(included / TB, 1),
+        "traffic_used_percent": round(100 * outgoing / included, 2),
+        "traffic_overage_net": round(overage_tb * price_per_tb, 2),
+    }
 
 
 def _observation_window(current: dict[str, Any], observed_at: str) -> dict[str, Any]:
@@ -618,5 +656,13 @@ def render_cost_markdown(report: dict[str, Any]) -> str:
                 "",
             ]
         )
+    traffic = report.get("traffic") or {}
+    if traffic:
+        lines.extend(["## Traffic", "", f"- Overage already incurred this period: EUR {traffic.get('overage_monthly_net', 0):.2f}"])
+        for item in traffic.get("near_quota", []):
+            lines.append(f"- {item['name']}: {item['used_percent']:.0f}% of the included quota used")
+        if not traffic.get("near_quota"):
+            lines.append("- No server is above 80% of its included traffic.")
+        lines.append("")
     lines.extend(["## Data gaps", "", *[f"- {gap}" for gap in report["data_gaps"]]])
     return "\n".join(lines)
