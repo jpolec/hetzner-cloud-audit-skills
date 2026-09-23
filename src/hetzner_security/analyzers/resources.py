@@ -16,6 +16,8 @@ from ..models import Asset, Finding, Severity, Snapshot
 from .rules import _candidate, _evidence
 
 # End of standard support (Ubuntu) or of LTS (Debian); source: vendor lifecycle pages.
+# Dates are conservative (never earlier than the vendor's); re-check and bump OS_END_OF_SUPPORT_AS_OF.
+OS_END_OF_SUPPORT_AS_OF = "2026-09-23"
 OS_END_OF_SUPPORT = {
     ("ubuntu", "16.04"): "2021-04-30",
     ("ubuntu", "18.04"): "2023-05-31",

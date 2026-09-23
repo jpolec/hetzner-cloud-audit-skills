@@ -74,3 +74,22 @@ jobs:
           format: markdown
           output: /tmp/cost-audit.md
       - run: grep -F 'EUR 90.00/month' /tmp/cost-audit.md
+      - uses: ./
+        with:
+          mode: audit
+          input: benchmarks/scenarios/v0.1-insecure.json
+          format: sarif
+          output: /tmp/audit.sarif
+          fail-on: none
+      - run: python3 -c "import json; json.load(open('/tmp/audit.sarif'))"
+      - id: gate
+        continue-on-error: true
+        uses: ./
+        with:
+          mode: audit
+          input: benchmarks/scenarios/v0.1-insecure.json
+          format: markdown
+          output: /tmp/audit.md
+          fail-on: confirmed-high
+      - name: fail-on confirmed-high must fail on the insecure fixture
+        run: test "${{ steps.gate.outcome }}" = "failure"

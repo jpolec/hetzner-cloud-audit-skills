@@ -152,7 +152,7 @@ Treat reports as sensitive. They contain names, private addresses, and topology.
 
 ## 3. The report: what to fix, in order
 
-![Audit summary of an example project: no database open to the Internet, one indirect pivot path, three confirmed findings](https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/audit-overview.png)
+![Audit summary of an example project: no database open to the Internet, one indirect pivot path, six confirmed findings including Storage Box exposure](https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/audit-overview.png)
 
 Every audit opens with three things:
 

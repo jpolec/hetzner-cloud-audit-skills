@@ -299,7 +299,10 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
     for finding in by_rule.get("HETZ-GOV-004", []):
         add(92, f"Label {len(finding.assets)} servers with environment and role", finding.observation, finding, None, "low", None,
             "Add environment, role, and owner labels in IaC (sensitivity=high for databases and secrets) so policy and blast-radius checks cover every server.", ["HETZ-GOV-004"])
-    for finding in [] if by_rule.get("HETZ-GOV-004") else by_rule.get("HETZ-GOV-002", []):  # GOV-004 action covers owner labels too
+    unlabeled = {asset for finding in by_rule.get("HETZ-GOV-004", []) for asset in finding.assets}
+    for finding in by_rule.get("HETZ-GOV-002", []):
+        if set(finding.assets) <= unlabeled:
+            continue  # the GOV-004 action already asks for owner labels on these servers
         add(95, f"Add owner/project labels to {len(finding.assets)} servers", finding.observation, finding, None, "low", None,
             "Add owner, project, environment, and role labels through IaC.", ["HETZ-GOV-002"])
     # Rule families that map one finding to one action: (priority, category, risk of acting).
@@ -323,8 +326,15 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
         "HETZ-FW-004": (97, "hygiene", "low"),
     }
     for rule_id, (priority, category, risk) in generic.items():
-        for finding in by_rule.get(rule_id, []):
-            add(priority, finding.title, finding.observation, finding, None, risk, None, finding.remediation, [rule_id], category)
+        group = by_rule.get(rule_id, [])
+        if not group:
+            continue
+        first = group[0]
+        if len(group) == 1:
+            add(priority, first.title, first.observation, first, None, risk, None, first.remediation, [rule_id], category)
+        else:  # one action per rule, not one per resource
+            names = ", ".join(_names(snapshot, [item.assets[0] for item in group[:5]])) + (" …" if len(group) > 5 else "")
+            add(priority, f"{first.title} ({len(group)} resources)", f"Affected: {names}. {first.observation}", first, None, risk, None, first.remediation, [rule_id], category)
     actions.sort(key=lambda item: item["priority"])
     for index, item in enumerate(actions, 1):
         item["rank"] = index

@@ -82,5 +82,17 @@ class ActionsTest(unittest.TestCase):
         self.assertEqual(evidence_level(labels)[0], "HIGH")
 
 
+class GroupedActionsTest(unittest.TestCase):
+    def test_many_findings_of_one_rule_become_one_action(self) -> None:
+        records = [
+            Asset(f"hcloud:dns_rrset:r{index}", "dns_rrset", f"r{index}.example.com A", {"type": "A", "records": [{"value": f"198.51.100.{index}"}]}, source="hcloud_api")
+            for index in range(1, 8)
+        ]
+        snapshot = Snapshot(assets=records)
+        actions = [item for item in build_actions(snapshot, verify_all(hunt(snapshot), snapshot)) if "HETZ-DNS-001" in item["rules"]]
+        self.assertEqual(len(actions), 1)
+        self.assertIn("(7 resources)", actions[0]["title"])
+
+
 if __name__ == "__main__":
     unittest.main()
