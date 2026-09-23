@@ -55,7 +55,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 ### Added
 
 - `hetzner-audit map` renders the network topology as Markdown with Mermaid, a dependency-free SVG, or JSON. Firewall sources are grouped into Internet, Cloudflare, Tailscale, private-network, and allow-listed classes, and public IP addresses are never printed.
-- A README screenshot and example map from a real 18-server Hetzner project, with identifiers replaced.
+- A README screenshot and example map derived from a real Hetzner project.
 - `HETZ-GOV-003` reports servers running a deprecated Hetzner server type.
 - Markdown audit and `path` output show asset names instead of numeric provider IDs.
 - `HETZ-NET-006` flags web origins open to any address while peer servers accept web traffic only from Cloudflare.

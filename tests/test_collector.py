@@ -41,8 +41,10 @@ class CollectorSafetyTest(unittest.TestCase):
                 "username": "u123456",
                 "public_net": {"ipv4": {"ip": "192.0.2.10", "dns_ptr": "static.example.net"}, "ipv6": {"dns_ptr": []}},
                 "labels": {"owner": "ops@example.com"},
+                "server": "u123456.your-storagebox.de",
             }
         )
+        self.assertEqual(value["server"], "[REDACTED:storage-box-host]")
         self.assertEqual(value["public_key"], "ssh-ed25519 [key material and comment omitted]")
         self.assertEqual(value["fingerprint"], "a4:95:53")
         self.assertEqual(value["username"], "[REDACTED:personal]")

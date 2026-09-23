@@ -256,6 +256,8 @@ class ReadOnlyHCloudCollector:
 
 
 EMAIL_PATTERN = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
+# Storage Box hostnames embed the account ID (u123456.your-storagebox.de).
+STORAGE_BOX_HOST_PATTERN = re.compile(r"\bu\d+(?:-sub\d+)?\.your-storagebox\.de\b")
 SECRET_KEYS = {"token", "password", "private_key", "secret", "user_data"}
 # Personal or account-identifying fields that no audit rule needs.
 PERSONAL_KEYS = {"dns_ptr", "username"}
@@ -276,6 +278,7 @@ def _sanitize_resource(value: Any, key: str = "") -> Any:
     if isinstance(value, list):
         return [_sanitize_resource(item, key) for item in value]
     if isinstance(value, str):
+        value = STORAGE_BOX_HOST_PATTERN.sub("[REDACTED:storage-box-host]", value)
         return EMAIL_PATTERN.sub("[REDACTED:email]", value)
     return value
 

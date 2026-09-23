@@ -28,7 +28,7 @@ def evidence_level(finding: Finding) -> tuple[str, str]:
         return "HIGH", "explicit provider state"
     if finding.status == FindingStatus.REJECTED:
         return "LOW", "refuted by an observed control"
-    if kinds & {"firewall_rule", "private_network_unfiltered", "public_interface"}:
+    if kinds & {"firewall_rule", "private_network", "private_network_unfiltered", "public_interface"}:
         return "MEDIUM", "cloud path observed; host firewall, listener, and auth not observed"
     return "LOW", "absence of evidence; depends on collector coverage and owner intent"
 

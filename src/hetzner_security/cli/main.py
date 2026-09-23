@@ -91,6 +91,7 @@ def build_parser() -> argparse.ArgumentParser:
         default="architecture",
         help="SVG view: architecture, per-VM connectivity, or per-VM cost",
     )
+    topology.add_argument("--max-actions", type=int, default=6, help="Recommended actions drawn on the SVG (0 hides them)")
     return parser
 
 
@@ -139,6 +140,10 @@ def _render_map_svg(snapshot: Snapshot, topology: dict[str, Any], args: argparse
     title = args.title if args.title != "Hetzner Cloud architecture" else titles[args.view]
     cost = analyze_cost(snapshot) if any(asset.type == "pricing" for asset in snapshot.assets) else None
     actions = build_actions(snapshot, _findings(snapshot), cost)
+    view_category = {"connectivity": "security", "cost": "cost"}.get(args.view)
+    if view_category:
+        actions = [item for item in actions if item.get("category") == view_category]
+    actions = actions[: max(args.max_actions, 0)]
     if args.view == "connectivity":
         return render_connectivity_svg(topology, title, args.theme, actions)
     if args.view == "cost":

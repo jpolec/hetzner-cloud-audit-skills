@@ -1,6 +1,6 @@
 # v0.3.1 release notes
 
-v0.3.1 comes from the first audit of a real 18-server Hetzner project. It adds a network map and fixes the defects that run exposed.
+v0.3.1 comes from the first audit of a real Hetzner project. It adds a network map and fixes the defects that run exposed.
 
 ## Highlights
 
@@ -11,7 +11,7 @@ v0.3.1 comes from the first audit of a real 18-server Hetzner project. It adds a
 - Published on PyPI: `uvx hetzner-audit --help`.
 - Markdown audit and `path` output now show asset names instead of numeric provider IDs.
 - The SVG map uses a light theme by default (`--theme dark` is available), and all README images share that style.
-- The README leads with a map and an audit summary from the real project, with identifiers replaced.
+- The README leads with a network map and an audit summary.
 
 ## Fixed
 

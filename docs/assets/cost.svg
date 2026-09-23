@@ -1,0 +1,263 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1460" height="1034" viewBox="0 0 1460 1034" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">
+<rect width="100%" height="100%" rx="16" fill="#f4f4f4"/>
+<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker><filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>
+<rect x="28" y="28" width="22" height="22" rx="5" fill="#d50c2d"/>
+<g transform="translate(32 32) scale(0.58)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
+<text x="58" y="44" font-size="14" font-weight="800" fill="#1f1f1f">hetzner-audit</text>
+<text x="160" y="44" font-size="12.5" fill="#6b6b6b">read-only Hetzner Cloud audit · github.com/jpolec/hetzner-cloud-audit-skills</text>
+<text x="28" y="78" font-size="22" font-weight="700" fill="#1f1f1f">Per-VM monthly cost · example project</text>
+<text x="28" y="102" font-size="13" fill="#6b6b6b">Hetzner catalog prices, net · VAT excluded · traffic not included · not an invoice · no CPU metrics collected</text>
+<rect x="28.0" y="124" width="224.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="42.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">MONTHLY ESTIMATE</text>
+<text x="42.0" y="178" font-size="28" font-weight="800" fill="#1f1f1f">EUR 319</text>
+<text x="42.0" y="198" font-size="11.5" fill="#6b6b6b">EUR 3,829 per year · 14 servers</text>
+<rect x="264.0" y="124" width="224.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="278.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">SPEND CONCENTRATION</text>
+<text x="278.0" y="178" font-size="28" font-weight="800" fill="#1f1f1f">56%</text>
+<text x="278.0" y="198" font-size="11.5" fill="#6b6b6b">top 3 VMs · top 5 = 70%</text>
+<rect x="500.0" y="124" width="224.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="514.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">IDENTIFIABLE WASTE</text>
+<text x="514.0" y="178" font-size="28" font-weight="800" fill="#d98e04">EUR 2.29</text>
+<text x="514.0" y="198" font-size="11.5" fill="#6b6b6b">unused resources · no telemetry needed</text>
+<rect x="736.0" y="124" width="224.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="750.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">OPTIMIZATION CANDIDATES</text>
+<text x="750.0" y="178" font-size="28" font-weight="800" fill="#2f6fdb">n/a</text>
+<text x="750.0" y="198" font-size="11.5" fill="#6b6b6b">not evaluated: no CPU metrics collected</text>
+<rect x="972.0" y="124" width="224.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="986.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">CONFIRMED SAVINGS</text>
+<text x="986.0" y="178" font-size="28" font-weight="800" fill="#d98e04">EUR 0.00</text>
+<text x="986.0" y="198" font-size="11.5" fill="#6b6b6b">needs RAM, disk, owner intent</text>
+<rect x="1208.0" y="124" width="224.0" height="86" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="1222.0" y="146" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">PROVIDER BACKUPS</text>
+<text x="1222.0" y="178" font-size="28" font-weight="800" fill="#d98e04">0/10</text>
+<text x="1222.0" y="198" font-size="11.5" fill="#6b6b6b">stateful servers with backups on</text>
+<text x="28" y="268" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">COST BY ROLE</text>
+<rect x="28.0" y="278" width="840.1" height="18" rx="4" fill="#6b7280"/>
+<text x="36.0" y="291" font-size="11" font-weight="700" fill="#fff">Other 60%</text>
+<text x="28.0" y="312" font-size="10.5" fill="#6b6b6b">EUR 188</text>
+<rect x="870.1" y="278" width="201.4" height="18" rx="4" fill="#2f6fdb"/>
+<text x="878.1" y="291" font-size="11" font-weight="700" fill="#fff">Data 14%</text>
+<text x="870.1" y="312" font-size="10.5" fill="#6b6b6b">EUR 45</text>
+<rect x="1073.5" y="278" width="159.1" height="18" rx="4" fill="#e8710a"/>
+<text x="1081.5" y="291" font-size="11" font-weight="700" fill="#fff">Applications 11%</text>
+<text x="1073.5" y="312" font-size="10.5" fill="#6b6b6b">EUR 36</text>
+<rect x="1234.6" y="278" width="102.1" height="18" rx="4" fill="#7c4dff"/>
+<text x="1234.6" y="312" font-size="10.5" fill="#6b6b6b">EUR 23</text>
+<rect x="1338.8" y="278" width="91.2" height="18" rx="4" fill="#d50c2d"/>
+<text x="1338.8" y="312" font-size="10.5" fill="#6b6b6b">EUR 21</text>
+<rect x="28" y="332" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="38" y="344" width="34" height="34" rx="7" fill="#6b7280"/>
+<g transform="translate(43 349) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="82" y="356" font-size="13" font-weight="700" fill="#1f1f1f">lake-1</text>
+<text x="284" y="358" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 104.31</text>
+<text x="82" y="374" font-size="10.5" fill="#6b6b6b">cpx42 · 8c/16G · fsn1</text>
+<rect x="40.0" y="388" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="40.0" y="388" width="162.5" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="202.5" y="388" width="80.3" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="282.8" y="388" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="40" y="414" font-size="10.5" fill="#6b6b6b">server 69.49 · volumes 34.32 · ipv4 0.50</text>
+<rect x="262.8" y="324" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="274.4" y="335.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="312" y="332" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="322" y="344" width="34" height="34" rx="7" fill="#e8710a"/>
+<g transform="translate(327 349) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="366" y="356" font-size="13" font-weight="700" fill="#1f1f1f">api-1</text>
+<text x="568" y="358" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 35.99</text>
+<text x="366" y="374" font-size="10.5" fill="#6b6b6b">cpx32 · 4c/8G · fsn1</text>
+<rect x="324.0" y="388" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="324.0" y="388" width="83.0" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="407.0" y="388" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="324" y="414" font-size="10.5" fill="#6b6b6b">server 35.49 · ipv4 0.50</text>
+<rect x="546.8" y="324" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="558.4" y="335.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="596" y="332" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="606" y="344" width="34" height="34" rx="7" fill="#6b7280"/>
+<g transform="translate(611 349) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="650" y="356" font-size="13" font-weight="700" fill="#1f1f1f">etl-1</text>
+<text x="852" y="358" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 34.79</text>
+<text x="650" y="374" font-size="10.5" fill="#6b6b6b">cx43 · 8c/16G · fsn1</text>
+<rect x="608.0" y="388" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="608.0" y="388" width="37.4" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="645.4" y="388" width="42.8" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="688.2" y="388" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="608" y="414" font-size="10.5" fill="#6b6b6b">server 15.99 · volumes 18.30 · ipv4 0.50</text>
+<rect x="817.6" y="324" width="36.4" height="16" rx="8" fill="#1f9d55"/>
+<text x="835.8" y="335.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">COST</text>
+<text x="608" y="432" font-size="10.5" font-weight="700" fill="#d98e04">storage-heavy · review volume footprint</text>
+<rect x="880" y="332" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="890" y="344" width="34" height="34" rx="7" fill="#2f6fdb"/>
+<g transform="translate(895 349) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></g>
+<text x="934" y="356" font-size="13" font-weight="700" fill="#1f1f1f">pg-main</text>
+<text x="1136" y="358" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 22.72</text>
+<text x="934" y="374" font-size="10.5" fill="#6b6b6b">cx33 · 4c/8G · fsn1</text>
+<rect x="892.0" y="388" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="892.0" y="388" width="19.9" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="911.9" y="388" width="32.1" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="944.0" y="388" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="892" y="414" font-size="10.5" fill="#6b6b6b">server 8.49 · volumes 13.73 · ipv4 0.50</text>
+<rect x="1088.4" y="324" width="49.6" height="16" rx="8" fill="#d50c2d"/>
+<text x="1113.2" y="335.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">REVIEW</text>
+<text x="892" y="432" font-size="10.5" font-weight="700" fill="#d98e04">storage-heavy · review volume footprint</text>
+<rect x="1164" y="332" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="1174" y="344" width="34" height="34" rx="7" fill="#2f6fdb"/>
+<g transform="translate(1179 349) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></g>
+<text x="1218" y="356" font-size="13" font-weight="700" fill="#1f1f1f">pg-replica</text>
+<text x="1420" y="358" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 22.72</text>
+<text x="1218" y="374" font-size="10.5" fill="#6b6b6b">cx33 · 4c/8G · nbg1</text>
+<rect x="1176.0" y="388" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="1176.0" y="388" width="19.9" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="1195.9" y="388" width="32.1" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="1228.0" y="388" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="1176" y="414" font-size="10.5" fill="#6b6b6b">server 8.49 · volumes 13.73 · ipv4 0.50</text>
+<rect x="1385.6" y="324" width="36.4" height="16" rx="8" fill="#1f9d55"/>
+<text x="1403.8" y="335.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">COST</text>
+<text x="1176" y="432" font-size="10.5" font-weight="700" fill="#d98e04">storage-heavy · review volume footprint</text>
+<rect x="28" y="460" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="38" y="472" width="34" height="34" rx="7" fill="#6b7280"/>
+<g transform="translate(43 477) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="82" y="484" font-size="13" font-weight="700" fill="#1f1f1f">preview-1</text>
+<text x="284" y="486" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 22.28</text>
+<text x="82" y="502" font-size="10.5" fill="#6b6b6b">cpx22 · 2c/4G · hel1</text>
+<rect x="40.0" y="516" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="40.0" y="516" width="45.6" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="85.6" y="516" width="5.4" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="90.9" y="516" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="40" y="542" font-size="10.5" fill="#6b6b6b">server 19.49 · volumes 2.29 · ipv4 0.50</text>
+<rect x="236.4" y="452" width="49.6" height="16" rx="8" fill="#d50c2d"/>
+<text x="261.2" y="463.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">REVIEW</text>
+<rect x="312" y="460" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="322" y="472" width="34" height="34" rx="7" fill="#6b7280"/>
+<g transform="translate(327 477) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="366" y="484" font-size="13" font-weight="700" fill="#1f1f1f">analytics-1</text>
+<text x="568" y="486" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 19.99</text>
+<text x="366" y="502" font-size="10.5" fill="#6b6b6b">cpx22 · 2c/4G · fsn1</text>
+<rect x="324.0" y="516" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="324.0" y="516" width="45.6" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="369.6" y="516" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="324" y="542" font-size="10.5" fill="#6b6b6b">server 19.49 · ipv4 0.50</text>
+<rect x="546.8" y="452" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="558.4" y="463.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="596" y="460" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="606" y="472" width="34" height="34" rx="7" fill="#7c4dff"/>
+<g transform="translate(611 477) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8"/></g>
+<text x="650" y="484" font-size="13" font-weight="700" fill="#1f1f1f">web-1</text>
+<text x="852" y="486" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 8.99</text>
+<text x="650" y="502" font-size="10.5" fill="#6b6b6b">cx33 · 4c/8G · nbg1</text>
+<rect x="608.0" y="516" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="608.0" y="516" width="19.9" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="627.9" y="516" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="608" y="542" font-size="10.5" fill="#6b6b6b">server 8.49 · ipv4 0.50</text>
+<rect x="830.8" y="452" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="842.4" y="463.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="880" y="460" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="890" y="472" width="34" height="34" rx="7" fill="#7c4dff"/>
+<g transform="translate(895 477) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8"/></g>
+<text x="934" y="484" font-size="13" font-weight="700" fill="#1f1f1f">web-2</text>
+<text x="1136" y="486" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 8.28</text>
+<text x="934" y="502" font-size="10.5" fill="#6b6b6b">cx23 · 2c/4G · fsn1</text>
+<rect x="892.0" y="516" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="892.0" y="516" width="12.8" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="904.8" y="516" width="5.4" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="910.2" y="516" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="892" y="542" font-size="10.5" fill="#6b6b6b">server 5.49 · volumes 2.29 · ipv4 0.50</text>
+<rect x="1114.8" y="452" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="1126.4" y="463.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="1164" y="460" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="1174" y="472" width="34" height="34" rx="7" fill="#d50c2d"/>
+<g transform="translate(1179 477) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
+<text x="1218" y="484" font-size="13" font-weight="700" fill="#1f1f1f">sso-1</text>
+<text x="1420" y="486" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 7.13</text>
+<text x="1218" y="502" font-size="10.5" fill="#6b6b6b">cx23 · 2c/4G · nbg1</text>
+<rect x="1176.0" y="516" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="1176.0" y="516" width="12.8" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="1188.8" y="516" width="2.7" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="1191.5" y="516" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="1176" y="542" font-size="10.5" fill="#6b6b6b">server 5.49 · volumes 1.14 · ipv4 0.50</text>
+<rect x="1372.4" y="452" width="49.6" height="16" rx="8" fill="#d50c2d"/>
+<text x="1397.2" y="463.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">REVIEW</text>
+<rect x="28" y="588" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="38" y="600" width="34" height="34" rx="7" fill="#d50c2d"/>
+<g transform="translate(43 605) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
+<text x="82" y="612" font-size="13" font-weight="700" fill="#1f1f1f">idp-1</text>
+<text x="284" y="614" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 7.13</text>
+<text x="82" y="630" font-size="10.5" fill="#6b6b6b">cx23 · 2c/4G · fsn1</text>
+<rect x="40.0" y="644" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="40.0" y="644" width="12.8" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="52.8" y="644" width="2.7" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="55.5" y="644" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="40" y="670" font-size="10.5" fill="#6b6b6b">server 5.49 · volumes 1.14 · ipv4 0.50</text>
+<rect x="262.8" y="580" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="274.4" y="591.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="312" y="588" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="322" y="600" width="34" height="34" rx="7" fill="#6b7280"/>
+<g transform="translate(327 605) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g>
+<text x="366" y="612" font-size="13" font-weight="700" fill="#1f1f1f">jobs-1</text>
+<text x="568" y="614" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 6.71</text>
+<text x="366" y="630" font-size="10.5" fill="#6b6b6b">cx22 · 2c/4G · fsn1</text>
+<rect x="324.0" y="644" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="324.0" y="644" width="10.5" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="334.5" y="644" width="4.0" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="338.5" y="644" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="324" y="670" font-size="10.5" fill="#6b6b6b">server 4.49 · volumes 1.72 · ipv4 0.50</text>
+<rect x="494.0" y="580" width="76.0" height="16" rx="8" fill="#d98e04"/>
+<text x="532.0" y="591.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">DEPRECATED</text>
+<text x="324" y="688" font-size="10.5" font-weight="700" fill="#d98e04">deprecated type · see migration action</text>
+<rect x="596" y="588" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="606" y="600" width="34" height="34" rx="7" fill="#d50c2d"/>
+<g transform="translate(611 605) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g>
+<text x="650" y="612" font-size="13" font-weight="700" fill="#1f1f1f">secrets-1</text>
+<text x="852" y="614" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 6.56</text>
+<text x="650" y="630" font-size="10.5" fill="#6b6b6b">cx23 · 2c/4G · hel1</text>
+<rect x="608.0" y="644" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="608.0" y="644" width="12.8" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="620.8" y="644" width="1.3" height="10" rx="2" fill="#0f8b8d"/>
+<rect x="622.2" y="644" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="608" y="670" font-size="10.5" fill="#6b6b6b">server 5.49 · volumes 0.57 · ipv4 0.50</text>
+<rect x="830.8" y="580" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="842.4" y="591.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="880" y="588" width="268" height="112" rx="9" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<rect x="890" y="600" width="34" height="34" rx="7" fill="#7c4dff"/>
+<g transform="translate(895 605) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.2 2.3 3.2 5 3.2 8s-1 5.7-3.2 8c-2.2-2.3-3.2-5-3.2-8s1-5.7 3.2-8"/></g>
+<text x="934" y="612" font-size="13" font-weight="700" fill="#1f1f1f">gw-1</text>
+<text x="1136" y="614" text-anchor="end" font-size="16" font-weight="800" fill="#1f1f1f">EUR 5.99</text>
+<text x="934" y="630" font-size="10.5" fill="#6b6b6b">cx23 · 2c/4G · fsn1</text>
+<rect x="892.0" y="644" width="244" height="10" rx="3" fill="#e3e3e3"/>
+<rect x="892.0" y="644" width="12.8" height="10" rx="2" fill="#2f6fdb"/>
+<rect x="904.8" y="644" width="1.2" height="10" rx="2" fill="#6d4fc2"/>
+<text x="892" y="670" font-size="10.5" fill="#6b6b6b">server 5.49 · ipv4 0.50</text>
+<rect x="1114.8" y="580" width="23.2" height="16" rx="8" fill="#6b6b6b"/>
+<text x="1126.4" y="591.5" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">OK</text>
+<rect x="28" y="724" width="1404" height="48" rx="10" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="44" y="744" font-size="11.5" font-weight="700" fill="#1f1f1f">Outside servers: unattached volumes EUR 2.29 · storage boxes EUR 3.20</text>
+<text x="44" y="762" font-size="11" fill="#1f9d55">Validate retirement of an unattached volume (save EUR 2.29/mo)</text>
+<rect x="28" y="788" width="1404" height="136" rx="10" fill="#ffffff" stroke="#e3e3e3" filter="url(#shadow)"/>
+<text x="44" y="812" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">RECOMMENDED COST ACTIONS</text>
+<text x="1416" y="812" text-anchor="end" font-size="11" fill="#6b6b6b">plans for a human · the tool changes nothing</text>
+<circle cx="56" cy="842" r="11" fill="#1f1f1f"/>
+<text x="56" y="846" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">4</text>
+<text x="76" y="840" font-size="12.5" font-weight="700" fill="#1f1f1f">Migrate jobs-1 off deprecated cx22</text>
+<text x="76" y="857" font-size="11" fill="#6b6b6b">Plan a resize or rebuild during a maintenance window, update IaC, and keep a snapshot for rollback.</text>
+<text x="1416" y="840" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">saving TBD  ·  risk medium</text>
+<rect x="1306" y="846" width="40" height="15" rx="7.5" fill="#1f9d55"/>
+<text x="1326.0" y="857" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">HIGH</text>
+<text x="1416" y="857" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<circle cx="56" cy="888" r="11" fill="#1f1f1f"/>
+<text x="56" y="892" text-anchor="middle" font-size="11" font-weight="800" fill="#ffffff">5</text>
+<text x="76" y="886" font-size="12.5" font-weight="700" fill="#1f1f1f">Validate retirement of an unattached volume: orphan-data</text>
+<text x="76" y="903" font-size="11" fill="#6b6b6b">Confirm the owner and any restore dependency, snapshot if unsure, then delete through IaC.</text>
+<text x="1416" y="886" text-anchor="end" font-size="11" font-weight="700" fill="#1f1f1f">EUR 2.29/mo  ·  risk low</text>
+<rect x="1292" y="892" width="54" height="15" rx="7.5" fill="#d98e04"/>
+<text x="1319.0" y="903" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">MEDIUM</text>
+<text x="1416" y="903" text-anchor="end" font-size="10.5" fill="#6b6b6b">evidence</text>
+<rect x="28" y="936" width="1404" height="70" rx="10" fill="#ffffff" stroke="#e3e3e3"/>
+<text x="44" y="958" font-size="11" font-weight="700" letter-spacing="0.6" fill="#6b6b6b">LEGEND</text>
+<rect x="44.0" y="976" width="22" height="10" rx="2" fill="#2f6fdb"/>
+<text x="74.0" y="985" font-size="11.5" fill="#1f1f1f">server type</text>
+<rect x="160.6" y="976" width="22" height="10" rx="2" fill="#0f8b8d"/>
+<text x="190.6" y="985" font-size="11.5" fill="#1f1f1f">attached volumes</text>
+<rect x="310.2" y="976" width="22" height="10" rx="2" fill="#6d4fc2"/>
+<text x="340.2" y="985" font-size="11.5" fill="#1f1f1f">primary IPv4</text>
+<rect x="433.4" y="976" width="22" height="10" rx="2" fill="#1f9d55"/>
+<text x="463.4" y="985" font-size="11.5" fill="#1f1f1f">backups</text>
+<text x="533.5999999999999" y="985" font-size="11.5" fill="#6b6b6b">Status: REVIEW = exposure or high-value host on a shared network · DEPRECATED · COST = saving or storage-heavy · OK. Bars scale to the most expensive VM.</text>
+</svg>
