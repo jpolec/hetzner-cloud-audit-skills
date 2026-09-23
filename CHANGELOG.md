@@ -4,6 +4,16 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-09-23
+
+### Fixed
+
+- `diff` lost new ingress from edge proxies: growth classified `edge:<provider>` fell between the world/wide and allow-list lists, so a strict regression could fail CI without showing the flow. New ingress is now partitioned into `new_exposures` (world, wide) and `new_trusted_flows` (allow-lists and edge proxies), with `new_ingress_flows` listing all of it.
+- `path` counted leaving the query's source as a pivot. The source is taken as already controlled, so `--from web --to db` needs 0 pivots while `--from internet` needs 1.
+- `path` picked the shortest path even when a slightly longer one needed no compromised host. It now minimizes pivots first, then length.
+- A fully evidenced path that needs a pivot is `reachable_after_pivot`, not `reachable`.
+- The flow-space difference is a sweep over the source axis with merged slabs: memory is linear in the number of rules (measured: 2,500 overlapping rules per side in about 5 s), with an input cap against crafted snapshots.
+
 ## [0.8.1] - 2026-09-23
 
 ### Security
@@ -303,7 +313,8 @@ v0.6 and v0.7 of the roadmap ship together as one release.
 - Agent orchestrator and seven focused SKILL.md modules.
 - Synthetic 33-problem benchmark, demo reports, schemas, tests, CI, and threat model.
 
-[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.1...HEAD
+[Unreleased]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.2...HEAD
+[0.8.2]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.7.0...v0.8.0
 [0.7.0]: https://github.com/jpolec/hetzner-cloud-audit-skills/compare/v0.4.0...v0.7.0

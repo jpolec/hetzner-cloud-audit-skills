@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "hetzner-audit"
-version = "0.8.1"
+version = "0.8.2"
 description = "Hetzner Audit: know your Hetzner Cloud. Read-only security, cost, and architecture audit with evidence-backed recommended actions"
 readme = "README.md"
 requires-python = ">=3.11"
