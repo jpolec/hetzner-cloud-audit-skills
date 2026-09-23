@@ -69,3 +69,6 @@ packages = ["hetzner_security"]
 addopts = "-q"
 pythonpath = ["src"]
 testpaths = ["tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S311"]  # seeded PRNG for property tests, not cryptography

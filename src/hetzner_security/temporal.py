@@ -5,7 +5,9 @@ from __future__ import annotations
 import json
 from typing import Any
 
+from .flows import exposure_growth, snapshot_exposure
 from .models import Edge, Snapshot
+from .text import md
 
 
 def _canonical(value: Any) -> str:
@@ -43,11 +45,13 @@ def diff_snapshots(before: Snapshot, after: Snapshot) -> dict[str, Any]:
 
     new_edges = [after_edges[key] for key in sorted(after_edges.keys() - before_edges.keys())]
     removed_edge_candidates = [before_edges[key] for key in sorted(before_edges.keys() - after_edges.keys())]
-    new_exposures = [
-        edge.to_dict()
-        for edge in new_edges
-        if edge.source == "internet" and edge.relation in {"allows", "public_interface"}
-    ]
+    # Semantic exposure diff: flows allowed now minus flows allowed before (see flows.py).
+    growth = exposure_growth(snapshot_exposure(before), snapshot_exposure(after))
+    for item in growth:
+        asset = after_assets.get(item["asset"])
+        item["name"] = asset.name if asset else item["asset"]
+    new_exposures = [item for item in growth if item["source_class"] in {"world", "wide"}]
+    new_allowlisted = [item for item in growth if item["source_class"] == "allowlist"]
     coverage_regressions = _coverage_regressions(before, after)
     regressed_sources = {item["source"] for item in coverage_regressions}
     removed_candidates = sorted(before_assets.keys() - after_assets.keys())
@@ -76,6 +80,7 @@ def diff_snapshots(before: Snapshot, after: Snapshot) -> dict[str, Any]:
         "removed_edges": [edge.to_dict() for edge in removed_edges],
         "uncertain_removed_edges": [edge.to_dict() for edge in uncertain_removed_edges],
         "new_exposures": new_exposures,
+        "new_allowlisted_flows": new_allowlisted,
         "coverage_regressions": coverage_regressions,
         "security_regression": bool(new_exposures),
     }
@@ -136,10 +141,17 @@ def render_diff_markdown(diff: dict[str, Any]) -> str:
         "",
     ]
     if diff["new_exposures"]:
-        lines.extend(["## New exposure", ""])
-        for edge in diff["new_exposures"]:
-            service = "/".join(str(value) for value in (edge.get("protocol"), edge.get("port")) if value is not None)
-            lines.append(f"- `{edge['source']}` → `{edge['target']}` ({service or edge['relation']})")
+        lines.extend(["## New exposure (flows allowed now that were not allowed before)", ""])
+        for item in diff["new_exposures"]:
+            lines.append(
+                f"- `{md(item.get('name', item['asset']))}` · {item['family']} {item['protocol'].upper()} "
+                f"{item['ports']} from {item['source_class']} sources"
+            )
+        lines.append("")
+    if diff.get("new_allowlisted_flows"):
+        lines.extend(["## New allow-listed flows (specific public sources)", ""])
+        for item in diff["new_allowlisted_flows"]:
+            lines.append(f"- `{md(item.get('name', item['asset']))}` · {item['family']} {item['protocol'].upper()} {item['ports']}")
         lines.append("")
     if diff["coverage_regressions"]:
         lines.extend(["## Coverage regressions", ""])

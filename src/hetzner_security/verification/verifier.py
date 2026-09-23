@@ -110,12 +110,22 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
                 confidence=0.05,
             )
         target_properties = assets[target].properties
-        if not target_properties.get("listening_ports") or not target_properties.get(
-            "host_firewall_allow_ports"
-        ):
+        listening = _int_values(target_properties.get("listening_ports"))
+        host_allowed = _int_values(target_properties.get("host_firewall_allow_ports"))
+        if not listening or not host_allowed:
             return _needs(
                 result,
                 "The cloud path is observed, but host firewall, listener/container publication, and application authorization remain decisive.",
+            )
+        if not listening & host_allowed:
+            # Both layers are evidenced, but no port is both open in the host firewall and listening.
+            return _set(
+                result,
+                FindingStatus.REJECTED,
+                "listener and host-firewall intersection",
+                candidate.evidence,
+                f"No listening port {sorted(listening)} is admitted by the host firewall {sorted(host_allowed)}.",
+                confidence=0.1,
             )
         if assets[target].properties.get("host_firewall_allows_source") is False:
             return _set(
@@ -193,6 +203,18 @@ def verify(candidate: Finding, snapshot: Snapshot, graph: AttackGraph) -> Findin
         "Evidence is internally consistent and no observed compensating control refutes the path.",
         confidence=min(0.99, candidate.confidence + 0.02),
     )
+
+
+def _int_values(value: object) -> set[int]:
+    if not isinstance(value, (list, tuple, set)):
+        return set()
+    output = set()
+    for item in value:
+        try:
+            output.add(int(item))
+        except (TypeError, ValueError):
+            continue
+    return output
 
 
 def _needs(finding: Finding, note: str) -> Finding:
