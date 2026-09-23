@@ -28,6 +28,14 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
   - a band for resources outside the private network, including Storage Boxes;
   - summary tiles and a legend.
 
+- `map --view connectivity`: a per-VM bus diagram of the private network, highlighting sensitive hosts and each VM's ingress per trust class.
+- `map --view cost`: a per-VM cost diagram showing catalog cost per VM, component bars, CPU p95, the best candidate saving, cost split by role, and resources outside servers.
+- A `hetzner-audit` brand line on every diagram and README image, which now share one visual style.
+
+### Fixed
+
+- Private networks are now modeled as unfiltered, because Hetzner Cloud Firewalls do not filter private network traffic. Previously, reachability inside a network was derived from firewall rules with private source ranges, which have no effect. As a result, members without such rules looked unreachable. `HETZ-XLY-002` now says so explicitly and recommends a dedicated network or host firewall instead.
+
 ### Changed
 
 - Collector errors carry the HTTP status, so 401, 403, 404, and 429 can be told apart.

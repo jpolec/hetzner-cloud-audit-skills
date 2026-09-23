@@ -160,6 +160,8 @@ It exits non-zero when the token is missing or rejected, or when core endpoints 
 ```sh
 hetzner-audit map --format markdown --output network-map.md   # Mermaid diagram and table; renders on GitHub
 hetzner-audit map --format svg --output architecture.svg      # architecture diagram (--theme dark)
+hetzner-audit map --format svg --view connectivity --output connectivity.svg
+hetzner-audit map --format svg --view cost --output cost.svg   # per-VM catalog cost, CPU p95, candidates
 ```
 
 The SVG is laid out like a cloud architecture diagram:
@@ -170,6 +172,12 @@ The SVG is laid out like a cloud architecture diagram:
 - one dashed column per location, crossed by role tiers;
 - servers outside any private network and Storage Boxes in their own band;
 - a legend along the bottom.
+
+The **connectivity** view shows each VM on its private network, with the ingress it accepts from the Internet, Cloudflare, and Tailscale. The **cost** view lists each VM's catalog cost, broken down by server, volumes, IPv4, and backups, with CPU p95 and the best candidate saving, which still needs validation.
+
+![Per-VM connectivity of a real Hetzner project: private network bus, sensitive hosts highlighted, ingress per trust class](https://raw.githubusercontent.com/jpolec/hetzner-cloud-audit-skills/main/docs/assets/connectivity.png)
+
+> **Hetzner Cloud Firewalls do not filter private network traffic** ([Hetzner FAQ](https://docs.hetzner.com/cloud/firewalls/faq/)). Every server on a private network reaches every port on every other member, and firewall rules with private source ranges have no effect on that traffic. The tool models it that way, so only host-firewall evidence can mark a private path as blocked.
 
 Each server is tagged by exposure:
 

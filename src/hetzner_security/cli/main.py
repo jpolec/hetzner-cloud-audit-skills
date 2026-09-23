@@ -13,7 +13,7 @@ from ..collectors.fixture import load_snapshot
 from ..collectors.hcloud import HCloudCollectionError, ReadOnlyHCloudCollector
 from ..cost import analyze_cost, render_cost_markdown
 from ..coverage import plan_coverage, render_coverage, save_coverage, update_coverage
-from ..diagram import render_svg
+from ..diagram import render_connectivity_svg, render_cost_svg, render_svg
 from ..doctor import render_doctor_markdown, run_doctor
 from ..findings import render_json, render_markdown, render_sarif
 from ..findings.summary import build_summary
@@ -84,6 +84,12 @@ def build_parser() -> argparse.ArgumentParser:
     _common(topology, formats=("markdown", "mermaid", "svg", "json"))
     topology.add_argument("--title", default="Hetzner Cloud architecture")
     topology.add_argument("--theme", choices=("light", "dark"), default="light", help="SVG color theme")
+    topology.add_argument(
+        "--view",
+        choices=("architecture", "connectivity", "cost"),
+        default="architecture",
+        help="SVG view: architecture, per-VM connectivity, or per-VM cost",
+    )
     return parser
 
 
@@ -96,7 +102,7 @@ def _snapshot(args: argparse.Namespace) -> Snapshot:
         snapshot = Snapshot(metadata={"dry_run": True, "planned_collector": "hcloud_api_get_only"})
     else:
         snapshot = ReadOnlyHCloudCollector(
-            include_metrics=args.command == "cost",
+            include_metrics=args.command == "cost" or getattr(args, "view", None) == "cost",
             metrics_days=getattr(args, "metrics_days", 30),
         ).collect()
     if args.policy:
@@ -121,6 +127,20 @@ def _filter_command(snapshot: Snapshot, command: str) -> Snapshot:
         signals=snapshot.signals,
         metadata=snapshot.metadata,
     )
+
+
+def _render_map_svg(snapshot: Snapshot, topology: dict[str, Any], args: argparse.Namespace) -> str:
+    titles = {
+        "architecture": "Hetzner Cloud architecture",
+        "connectivity": "Per-VM connectivity",
+        "cost": "Per-VM monthly cost",
+    }
+    title = args.title if args.title != "Hetzner Cloud architecture" else titles[args.view]
+    if args.view == "connectivity":
+        return render_connectivity_svg(topology, title, args.theme)
+    if args.view == "cost":
+        return render_cost_svg(topology, analyze_cost(snapshot), title, args.theme)
+    return render_svg(topology, title, args.theme)
 
 
 def _findings(snapshot: Snapshot, *, verify: bool = True) -> list[Finding]:
@@ -167,7 +187,7 @@ def run(args: argparse.Namespace) -> int:
         output = {
             "json": lambda: json.dumps(topology, indent=2),
             "mermaid": lambda: render_mermaid(topology),
-            "svg": lambda: render_svg(topology, args.title, args.theme),
+            "svg": lambda: _render_map_svg(snapshot, topology, args),
             "markdown": lambda: render_topology_markdown(topology),
         }[args.format]()
     elif args.command == "ask":

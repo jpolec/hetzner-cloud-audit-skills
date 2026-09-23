@@ -1,29 +1,41 @@
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Hetzner attack path demo</title>
+<title>hetzner-audit attack path</title>
 <style>
-  *{box-sizing:border-box}body{margin:0;background:#f4f4f4;color:#1f1f1f;font-family:Inter,ui-sans-serif,system-ui;padding:52px}
-  .shell{max-width:1320px;margin:auto;border:1px solid #e3e3e3;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px #0000001a;background:#ffffff}
-  .bar{height:54px;background:#fafafa;border-bottom:1px solid #e3e3e3;display:flex;align-items:center;padding:0 20px;gap:10px}.dot{width:13px;height:13px;border-radius:50%}.r{background:#d50c2d}.y{background:#d98e04}.g{background:#1f9d55}.title{margin:auto;color:#6b6b6b;font:600 14px ui-monospace,SFMono-Regular,monospace}
-  .term{padding:30px 34px 38px;font:17px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace}.prompt{color:#1f9d55}.cmd{color:#1f1f1f}.muted{color:#6b6b6b}.cyan{color:#2f6fdb}.good{color:#1f9d55}.warn{color:#d98e04}.purple{color:#6d4fc2}.line{border-top:1px solid #ececec;margin:18px 0}.path{padding:3px 0 3px 26px;border-left:2px solid #d6d6d6;margin-left:10px}.result{font-size:25px;font-weight:800}
+*{box-sizing:border-box}
+body{margin:0;width:1440px;background:#f4f4f4;color:#1f1f1f;font:14px/1.45 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;padding:30px 36px 28px}
+.brand{display:flex;align-items:center;gap:8px;margin-bottom:12px}.brand b{font-size:14px;font-weight:800}.brand span{font-size:12.5px;color:#6b6b6b;margin-left:4px}
+h1{font-size:22px;margin:0 0 4px;font-weight:700}.sub{font-size:13px;color:#6b6b6b;margin-bottom:18px}
+.tiles{display:grid;gap:12px;margin-bottom:16px}
+.card{background:#fff;border:1px solid #e3e3e3;border-radius:10px;box-shadow:0 1px 3px #00000014}
+.tile{padding:14px 16px}.tile .l{font-size:11px;font-weight:700;letter-spacing:.06em;color:#6b6b6b;text-transform:uppercase}
+.tile .v{font-size:28px;font-weight:800;margin:4px 0 2px}.tile .n{font-size:11.5px;color:#6b6b6b}
+.sec{font-size:11px;font-weight:700;letter-spacing:.06em;color:#6b6b6b;text-transform:uppercase;margin:0 0 10px}
+.pill{display:inline-block;border-radius:9px;padding:2px 8px;color:#fff;font-size:9.5px;font-weight:800;letter-spacing:.04em;vertical-align:middle}
+.chip{text-transform:none;letter-spacing:0;font-weight:400;display:inline-block;font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;background:#f1f1f1;border:1px solid #e3e3e3;border-radius:6px;padding:3px 8px;color:#1f1f1f}
+.row{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid #f0f0f0}.row:first-of-type{border-top:0}
+.row .t{font-weight:600}.row .m{font-size:12px;color:#6b6b6b}.rid{font:12px ui-monospace,Menlo,monospace;color:#6d4fc2;font-weight:600}
+.ic{flex:none;display:block}
+.foot{margin-top:16px;font-size:12px;color:#6b6b6b;display:flex;gap:18px;align-items:center}
+.arrow{color:#8a8a8a;font-size:18px;font-weight:700}
 </style>
-<div class="shell">
-  <div class="bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="title">synthetic attack path · cited evidence · no active probing</span></div>
-  <div class="term">
-    <div><span class="prompt">›</span> <span class="cmd">hetzner-audit path --from staging-worker --to prod-db --protocol tcp --port 5432</span></div>
-    <div class="line"></div>
-    <div class="path"><span class="cyan">staging-worker</span> <span class="muted">environment=staging</span></div>
-    <div class="path">↓ private network <span class="purple">10.20.0.0/16</span> <span class="muted">HETZNER_NETWORK_128</span></div>
-    <div class="path">↓ host firewall accepts tcp/5432 <span class="muted">UFW_RULE_17</span></div>
-    <div class="path">↓ Docker publishes 5432 <span class="muted">DOCKER_PORT_31</span></div>
-    <div class="path"><span class="cyan">prod-db</span> · pg_hba accepts staging CIDR <span class="muted">PG_HBA_04</span></div>
-    <div class="line"></div>
-    <div class="result"><span class="good">REACHABLE</span> &nbsp; confidence 0.97</div>
-    <div>All four necessary conditions are observed. This is not inferred from a provider firewall rule alone.</div>
-    <div class="line"></div>
-    <div class="warn">If host/runtime evidence were absent, the result would be CLOUD_PATH_PRESENT — not confirmed reachability.</div>
-  </div>
+<body>
+<div class="brand"><svg width="22" height="22" viewBox="0 0 22 22"><rect width="22" height="22" rx="5" fill="#d50c2d"/><g transform="translate(4 4) scale(0.58)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g></svg><b>hetzner-audit</b><span>read-only Hetzner Cloud audit · github.com/jpolec/hetzner-cloud-audit-skills</span></div>
+<h1>Attack path · synthetic example</h1>
+<div class="sub"><span class="chip">hetzner-audit path --from staging-worker --to prod-db --port 5432</span> &nbsp;cited evidence · no active probing</div>
+<div style="display:flex;gap:10px;align-items:stretch">
+<div class="card" style="flex:1;padding:14px;min-width:0"><svg class="ic" width="34" height="34" viewBox="0 0 34 34"><rect width="34" height="34" rx="7" fill="#e8710a"/><g transform="translate(5 5) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g></svg><div class="t" style="font-weight:700;margin-top:10px">staging-worker</div><div class="m" style="font-size:12px;color:#6b6b6b">environment=staging</div><div style="margin-top:8px"><span class="chip" style="font-size:11px">source</span></div></div><div class="arrow" style="align-self:center">→</div>
+<div class="card" style="flex:1;padding:14px;min-width:0"><svg class="ic" width="34" height="34" viewBox="0 0 34 34"><rect width="34" height="34" rx="7" fill="#1f9d55"/><g transform="translate(5 5) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="9" width="16" height="11" rx="2"/><path d="M8 9V6.5a4 4 0 0 1 8 0V9"/></g></svg><div class="t" style="font-weight:700;margin-top:10px">private network</div><div class="m" style="font-size:12px;color:#6b6b6b">10.20.0.0/16</div><div style="margin-top:8px"><span class="chip" style="font-size:11px">HETZNER_NETWORK_128</span></div></div><div class="arrow" style="align-self:center">→</div>
+<div class="card" style="flex:1;padding:14px;min-width:0"><svg class="ic" width="34" height="34" viewBox="0 0 34 34"><rect width="34" height="34" rx="7" fill="#d50c2d"/><g transform="translate(5 5) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 2.8v5.4c0 4.4-3 8.3-7 9.8-4-1.5-7-5.4-7-9.8V5.8z"/><path d="M9.5 12l1.8 1.8 3.4-3.6"/></g></svg><div class="t" style="font-weight:700;margin-top:10px">host firewall</div><div class="m" style="font-size:12px;color:#6b6b6b">accepts tcp/5432</div><div style="margin-top:8px"><span class="chip" style="font-size:11px">UFW_RULE_17</span></div></div><div class="arrow" style="align-self:center">→</div>
+<div class="card" style="flex:1;padding:14px;min-width:0"><svg class="ic" width="34" height="34" viewBox="0 0 34 34"><rect width="34" height="34" rx="7" fill="#6b7280"/><g transform="translate(5 5) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="6" rx="1.5"/><rect x="4" y="14" width="16" height="6" rx="1.5"/><path d="M7.5 7h.01M7.5 17h.01"/></g></svg><div class="t" style="font-weight:700;margin-top:10px">Docker</div><div class="m" style="font-size:12px;color:#6b6b6b">publishes 5432</div><div style="margin-top:8px"><span class="chip" style="font-size:11px">DOCKER_PORT_31</span></div></div><div class="arrow" style="align-self:center">→</div>
+<div class="card" style="flex:1;padding:14px;min-width:0"><svg class="ic" width="34" height="34" viewBox="0 0 34 34"><rect width="34" height="34" rx="7" fill="#2f6fdb"/><g transform="translate(5 5) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5.5" rx="7" ry="2.5"/><path d="M5 5.5v13c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5v-13M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5"/></g></svg><div class="t" style="font-weight:700;margin-top:10px">prod-db</div><div class="m" style="font-size:12px;color:#6b6b6b">pg_hba accepts staging CIDR</div><div style="margin-top:8px"><span class="chip" style="font-size:11px">PG_HBA_04</span></div></div>
 </div>
+<div class="card" style="padding:16px 18px;margin-top:14px;display:flex;align-items:center;gap:16px">
+<span class="pill" style="background:#1f9d55">REACHABLE</span><b style="font-size:18px">confidence 0.97</b>
+<span style="color:#1f1f1f">All four necessary conditions are observed; not inferred from a provider firewall rule alone.</span></div>
+<div class="card" style="padding:12px 18px;margin-top:10px;border-left:4px solid #d98e04;color:#d98e04;font-weight:600">
+Without host/runtime evidence the result would be CLOUD_PATH_PRESENT — not confirmed reachability.</div>
+<div class="foot"><span>read-only · GET only · no provider writes</span><span>·</span><span>every finding cites its evidence</span></div>
+</body>
 </html>

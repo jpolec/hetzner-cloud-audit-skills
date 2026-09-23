@@ -23,8 +23,8 @@ The release target is one defensible first run: one read-only project token, zer
 
 Goal: one read-only token, zero SSH, a complete and honest provider-level report. Hetzner depth comes before any other provider.
 
-1. **`hetzner-audit doctor`**: checks the token without printing it, API reachability, per-endpoint access, project scope, optional tools, and whether the report location could leak into Git.
-2. **First-page summary**: scope counts, findings confirmed from the API, hypotheses that need host or runtime validation, collection gaps, catalog cost, and potential versus confirmed savings, always in that order.
+1. ✅ **`hetzner-audit doctor`**: checks the token without printing it, API reachability, per-endpoint access, project scope, optional tools, and whether the report location could leak into Git.
+2. ✅ **First-page summary**: scope counts, findings confirmed from the API, hypotheses that need host or runtime validation, collection gaps, catalog cost, and potential versus confirmed savings, always in that order.
 3. **Production-grade collector**:
    - retry and backoff for 429 and 5xx;
    - explicit status for every endpoint;
@@ -52,6 +52,8 @@ Goal: one read-only token, zero SSH, a complete and honest provider-level report
    - evidence age and baseline selection;
    - a PR comment.
 8. **Cost evidence**: RAM, disk, and network p95 from Prometheus or node exporter, operator CSV/JSON, and billing exports. Downsizing is never confirmed without RAM, disk, owner intent, and rollback.
+
+Also done in v0.4: architecture, per-VM connectivity, and per-VM cost diagrams. Private networks are now modeled as unfiltered by cloud firewalls.
 
 ## Later
 

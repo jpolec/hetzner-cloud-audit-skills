@@ -166,6 +166,9 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
                     network_names.get(item.get("network"), str(item.get("network")))
                     for item in props.get("private_net", []) or []
                 ],
+                "private_ips": [
+                    str(item.get("ip")) for item in props.get("private_net", []) or [] if item.get("ip")
+                ],
                 "volume_gb": sum(int(item.properties.get("size", 0) or 0) for item in attached),
                 "backups": bool(props.get("backup_enabled")),
                 "delete_protection": bool(props.get("delete_protection")),
@@ -199,7 +202,8 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
         "tailscale_admin": sum(
             1 for item in servers if any(port.startswith("tcp/") for port in item["ingress"].get("tailscale", []))
         ),
-        "broad_private_ingress": sum(1 for item in servers if "tcp/all" in item["ingress"].get("private", [])),
+        # Hetzner Cloud Firewalls do not filter private networks: every member reaches every other.
+        "private_members": sum(1 for item in servers if item["networks"]),
         "no_firewall": sum(1 for item in servers if item["public_ip"] and not item["firewall"]),
         "volumes": len(volumes_all),
         "volume_gb": sum(int(item.properties.get("size", 0) or 0) for item in volumes_all),
@@ -318,7 +322,8 @@ def render_topology_markdown(topology: dict[str, Any]) -> str:
         "",
         "Exposure: **critical** = sensitive port or all ports open to any address, or no cloud firewall; "
         "**public** = other ports open to any address; **proxied** = reachable only through Cloudflare; "
-        "**private** = no public ingress except the Tailscale WireGuard port.",
+        "**private** = no public ingress except the Tailscale WireGuard port. "
+        "Hetzner Cloud Firewalls do not filter private networks, so members of one network reach each other on every port.",
         "",
         "| Server | Group | Type | Exposure | Public ingress | Private / admin ingress |",
         "|---|---|---|---|---|---|",
@@ -330,10 +335,15 @@ def render_topology_markdown(topology: dict[str, Any]) -> str:
             if kind in {"world", "cloudflare", "allowlist"} and any(port != "icmp" for port in ports)
         ) or ("none (ICMP only)" if "icmp" in server["ingress"].get("world", []) else "none")
         private = "; ".join(
-            f"{SOURCE_LABELS[kind]}: {', '.join(ports)}"
-            for kind, ports in server["ingress"].items()
-            if kind in {"private", "tailscale"}
-        ) or "none"
+            [f"{SOURCE_LABELS['tailscale']}: {', '.join(server['ingress']['tailscale'])}"]
+            if server["ingress"].get("tailscale")
+            else []
+        )
+        if server["networks"]:
+            private = "; ".join(
+                part for part in (private, f"{', '.join(server['networks'])}: all ports (not filtered by cloud firewalls)") if part
+            )
+        private = private or "none"
         server_type = server["type"] + (" (deprecated)" if server["deprecated_type"] else "")
         lines.append(
             f"| {server['name']} | {_group_title(server['group'])} | {server_type} | {server['exposure']} | {public} | {private} |"

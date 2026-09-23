@@ -69,6 +69,38 @@ def _icon(add: Any, x: float, y: float, glyph: str, color: str, size: int = 34) 
     )
 
 
+HEADER_H = 206  # brand line, title, subtitle, and summary tiles
+
+
+def _open_svg(add: Any, c: dict[str, str], width: float, height: float) -> None:
+    add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width:.0f}" height="{height:.0f}" viewBox="0 0 {width:.0f} {height:.0f}" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">')
+    add(f'<rect width="100%" height="100%" rx="16" fill="{c["bg"]}"/>')
+    add('<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker>'
+        '<filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>')
+
+
+def _header(
+    add: Any, c: dict[str, str], width: float, margin: float, title: str, subtitle: str,
+    tiles: list[tuple[str, str, str, str]],
+) -> None:
+    """Brand line (tool name), title, subtitle, and one row of summary tiles."""
+    add(f'<rect x="{margin}" y="{margin}" width="22" height="22" rx="5" fill="#d50c2d"/>')
+    add(f'<g transform="translate({margin + 4} {margin + 4}) scale(0.58)" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">{GLYPHS["shield"]}</g>')
+    add(f'<text x="{margin + 30}" y="{margin + 16}" font-size="14" font-weight="800" fill="{c["text"]}">hetzner-audit</text>')
+    add(f'<text x="{margin + 132}" y="{margin + 16}" font-size="12.5" fill="{c["muted"]}">read-only Hetzner Cloud audit · github.com/jpolec/hetzner-cloud-audit-skills</text>')
+    add(f'<text x="{margin}" y="{margin + 50}" font-size="22" font-weight="700" fill="{c["text"]}">{escape(title)}</text>')
+    add(f'<text x="{margin}" y="{margin + 74}" font-size="13" fill="{c["muted"]}">{escape(subtitle)}</text>')
+    tile_gap = 12
+    tile_w = (width - 2 * margin - tile_gap * (len(tiles) - 1)) / len(tiles)
+    for index, (label, value, note, color) in enumerate(tiles):
+        tx = margin + index * (tile_w + tile_gap)
+        ty = margin + 96
+        add(f'<rect x="{tx:.1f}" y="{ty}" width="{tile_w:.1f}" height="86" rx="10" fill="{c["surface"]}" stroke="{c["line"]}" filter="url(#shadow)"/>')
+        add(f'<text x="{tx + 14:.1f}" y="{ty + 22}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">{escape(label.upper())}</text>')
+        add(f'<text x="{tx + 14:.1f}" y="{ty + 54}" font-size="28" font-weight="800" fill="{color}">{escape(value)}</text>')
+        add(f'<text x="{tx + 14:.1f}" y="{ty + 74}" font-size="11.5" fill="{c["muted"]}">{escape(note)}</text>')
+
+
 def render_svg(topology: dict[str, Any], title: str = "Hetzner Cloud architecture", theme: str = "light") -> str:
     c = THEMES[theme]
     node_w, node_h, gap, pad = 204, 58, 12, 14
@@ -127,7 +159,7 @@ def render_svg(topology: dict[str, Any], title: str = "Hetzner Cloud architectur
     width = grid_right + 16 + 16 + margin
 
     # --- vertical geometry
-    header_h = 176
+    header_h = HEADER_H
     zone_y = margin + header_h
     vpc_y = zone_y + 40
     y: float = vpc_y + 62  # VPC title, subnet strip, location headers
@@ -180,36 +212,23 @@ def render_svg(topology: dict[str, Any], title: str = "Hetzner Cloud architectur
 
     out: list[str] = []
     add = out.append
-    add(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width:.0f}" height="{height:.0f}" viewBox="0 0 {width:.0f} {height:.0f}" font-family="ui-sans-serif, -apple-system, Segoe UI, Helvetica, Arial, sans-serif">')
-    add(f'<rect width="100%" height="100%" rx="16" fill="{c["bg"]}"/>')
-    add('<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/></marker>'
-        '<filter id="shadow" x="-5%" y="-10%" width="110%" height="130%"><feDropShadow dx="0" dy="1" stdDeviation="1.5" flood-color="#000" flood-opacity="0.08"/></filter></defs>')
-
-    # --- header: title + summary tiles
-    add(f'<text x="{margin}" y="{margin + 20}" font-size="22" font-weight="700" fill="{c["text"]}">{escape(title)}</text>')
+    _open_svg(add, c, width, height)
     zone_names = sorted({item.get("network_zone", "") for item in servers if item.get("network_zone")})
     subtitle = f"network zone {', '.join(zone_names) or 'unknown'} · read-only API evidence · public IPs omitted"
     if topology.get("collected_at"):
         subtitle += f" · collected {str(topology['collected_at'])[:16].replace('T', ' ')} UTC"
-    add(f'<text x="{margin}" y="{margin + 44}" font-size="13" fill="{c["muted"]}">{escape(subtitle)}</text>')
-    tiles = [
-        ("Servers", f"{stats.get('servers', len(servers))}", f"{stats.get('locations', len(locations))} locations", c["text"]),
-        ("Internet-exposed", f"{stats.get('internet_exposed', 0)}", "open to any address", c["critical"] if stats.get("internet_exposed") else c["vpc"]),
-        ("Behind Cloudflare", f"{stats.get('cloudflare_fronted', 0)}", "web ports CF-only", c["cloudflare"]),
-        ("Tailscale admin", f"{stats.get('tailscale_admin', 0)}", "admin ports on tailnet", c["tailscale"]),
-        ("Broad private ingress", f"{stats.get('broad_private_ingress', 0)}", "all TCP from the network", c["public"] if stats.get("broad_private_ingress") else c["vpc"]),
-        ("Volumes", f"{stats.get('volumes', 0)}", f"{stats.get('volume_gb', 0):,} GB · {stats.get('unattached_volumes', 0)} unattached", c["text"]),
-        ("Delete-protected", f"{stats.get('delete_protected', 0)}/{stats.get('servers', len(servers))}", f"{stats.get('deprecated_types', 0)} on deprecated types", c["public"] if stats.get("delete_protected", 0) < stats.get("servers", 0) else c["vpc"]),
-    ]
-    tile_gap = 12
-    tile_w = (width - 2 * margin - tile_gap * (len(tiles) - 1)) / len(tiles)
-    for index, (label, value, note, color) in enumerate(tiles):
-        tx = margin + index * (tile_w + tile_gap)
-        ty = margin + 66
-        add(f'<rect x="{tx:.1f}" y="{ty}" width="{tile_w:.1f}" height="86" rx="10" fill="{c["surface"]}" stroke="{c["line"]}" filter="url(#shadow)"/>')
-        add(f'<text x="{tx + 14:.1f}" y="{ty + 22}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">{escape(label.upper())}</text>')
-        add(f'<text x="{tx + 14:.1f}" y="{ty + 54}" font-size="28" font-weight="800" fill="{color}">{escape(value)}</text>')
-        add(f'<text x="{tx + 14:.1f}" y="{ty + 74}" font-size="11.5" fill="{c["muted"]}">{escape(note)}</text>')
+    _header(
+        add, c, width, margin, title, subtitle,
+        [
+            ("Servers", f"{stats.get('servers', len(servers))}", f"{stats.get('locations', len(locations))} locations", c["text"]),
+            ("Internet-exposed", f"{stats.get('internet_exposed', 0)}", "open to any address", c["critical"] if stats.get("internet_exposed") else c["vpc"]),
+            ("Behind Cloudflare", f"{stats.get('cloudflare_fronted', 0)}", "web ports CF-only", c["cloudflare"]),
+            ("Tailscale admin", f"{stats.get('tailscale_admin', 0)}", "admin ports on tailnet", c["tailscale"]),
+            ("Private network", f"{stats.get('private_members', 0)}", "servers · not filtered by cloud FW", c["public"] if stats.get("private_members", 0) > 1 else c["vpc"]),
+            ("Volumes", f"{stats.get('volumes', 0)}", f"{stats.get('volume_gb', 0):,} GB · {stats.get('unattached_volumes', 0)} unattached", c["text"]),
+            ("Delete-protected", f"{stats.get('delete_protected', 0)}/{stats.get('servers', len(servers))}", f"{stats.get('deprecated_types', 0)} on deprecated types", c["public"] if stats.get("delete_protected", 0) < stats.get("servers", 0) else c["vpc"]),
+        ],
+    )
 
     # --- zone boundary
     add(f'<rect x="{zone_x}" y="{zone_y}" width="{width - zone_x - margin}" height="{zone_bottom - zone_y}" rx="12" fill="none" stroke="{c["zone"]}" stroke-width="1.4"/>')
@@ -226,7 +245,7 @@ def render_svg(topology: dict[str, Any], title: str = "Hetzner Cloud architectur
     extra_nets = f" (+{len(topology['networks']) - 1} more)" if len(topology["networks"]) > 1 else ""
     add(f'<text x="{vpc_x + 36}" y="{vpc_y + 18}" font-size="13" font-weight="700" fill="{c["vpc"]}">Private network {escape(network["name"])} · {escape(network.get("ip_range", ""))}{escape(extra_nets)}</text>')
     subnets = ", ".join(network.get("subnets", [])) or "no subnets reported"
-    add(f'<text x="{vpc_x + 36}" y="{vpc_y + 36}" font-size="11.5" fill="{c["muted"]}">subnet {escape(subnets)} · cloud firewalls attached per server</text>')
+    add(f'<text x="{vpc_x + 36}" y="{vpc_y + 36}" font-size="11.5" fill="{c["muted"]}">subnet {escape(subnets)} · any-to-any on all ports: Hetzner Cloud Firewalls do not filter private networks</text>')
 
     # --- location columns (dashed, AZ-like) spanning VPC and outside band
     for loc in locations:
@@ -348,5 +367,296 @@ def render_svg(topology: dict[str, Any], title: str = "Hetzner Cloud architectur
     add(f'<text x="{width - margin - 300}" y="{legend_y + 76}" font-size="11.5" fill="{c["text"]}">location</text>')
     add(f'<rect x="{width - margin - 236}" y="{legend_y + 64}" width="22" height="14" rx="3" fill="{c["vpc_fill"]}" stroke="{c["vpc"]}"/>')
     add(f'<text x="{width - margin - 206}" y="{legend_y + 76}" font-size="11.5" fill="{c["text"]}">private network (VPC)</text>')
+    add("</svg>")
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------- per-VM connectivity view
+
+def _chips(item: dict[str, Any]) -> list[tuple[str, str]]:
+    """Ingress summary per trust class, as (text, theme key) chips."""
+    chips: list[tuple[str, str]] = []
+    labels = {"world": "Internet", "cloudflare": "Cloudflare", "allowlist": "allow-list"}
+    for kind in ("world", "cloudflare", "allowlist"):
+        ports = [port.split("/")[-1] if port.startswith("tcp/") else port for port in item["ingress"].get(kind, []) if port != "icmp"]
+        if ports:
+            chips.append((f"{labels[kind]} {','.join(ports)}", kind))
+    admin = [
+        port.split("/")[-1] if port.startswith("tcp/") else port
+        for port in item["ingress"].get("tailscale", [])
+        if port.startswith("tcp/")
+    ]
+    if admin:
+        chips.append((f"Tailscale {','.join(admin)}", "tailscale"))
+    return chips
+
+
+def _vm_card(
+    add: Any, c: dict[str, str], x: float, y: float, w: float, h: float, item: dict[str, Any],
+    lines: list[tuple[str, str]], category: str,
+) -> None:
+    color, glyph = CATEGORY.get(category, CATEGORY["other"])
+    add(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="9" fill="{c["surface"]}" stroke="{c["line"]}" filter="url(#shadow)"/>')
+    _icon(add, x + 10, y + 12, glyph, color, 34)
+    add(f'<text x="{x + 54}" y="{y + 24}" font-size="13" font-weight="700" fill="{c["text"]}">{escape(item["name"][:24])}</text>')
+    for index, (text, color_key) in enumerate(lines):
+        weight = "700" if color_key not in {"muted", "text"} else "400"
+        add(f'<text x="{x + 54}" y="{y + 40 + index * 14}" font-size="10.5" font-weight="{weight}" fill="{c[color_key]}">{escape(text[:34])}</text>')
+    if item["exposure"] in EXPOSURE_PILL:
+        text = EXPOSURE_PILL[item["exposure"]]
+        pw = 8 + len(text) * 6.4
+        add(f'<rect x="{x + w - pw - 8}" y="{y - 8}" width="{pw:.1f}" height="16" rx="8" fill="{c[item["exposure"]]}"/>')
+        add(f'<text x="{x + w - pw / 2 - 8:.1f}" y="{y + 3.5}" text-anchor="middle" font-size="9.5" font-weight="800" fill="#fff">{escape(text)}</text>')
+
+
+def _category(item: dict[str, Any]) -> str:
+    if item["sensitive"]:
+        return "security" if item["group"] == "security" else "data"
+    return str(item["group"])
+
+
+def render_connectivity_svg(topology: dict[str, Any], title: str = "Per-VM connectivity", theme: str = "light") -> str:
+    """Bus view: the private network in the middle, each VM attached with its ingress per trust class."""
+    c = THEMES[theme]
+    margin, card_w, card_h, gap, per_row = 28, 232, 84, 16, 6
+    servers: list[dict[str, Any]] = topology["servers"]
+    in_net = [item for item in servers if item["networks"]]
+    outside = [item for item in servers if not item["networks"]]
+    upper = sorted((item for item in in_net if item["group"] in {"edge", "app", "other"}), key=lambda item: (item["group"] != "edge", item["name"]))
+    lower = sorted((item for item in in_net if item["group"] not in {"edge", "app", "other"}), key=lambda item: (not item["sensitive"], item["name"]))
+    width = margin * 2 + per_row * card_w + (per_row - 1) * gap
+    rows_up = max(1, math.ceil(len(upper) / per_row))
+    rows_down = max(1, math.ceil(len(lower) / per_row)) if lower else 0
+    top = margin + HEADER_H + 34
+    bus_y = top + rows_up * (card_h + gap * 2) + 22
+    lower_top = bus_y + 58
+    outside_top = lower_top + rows_down * (card_h + gap * 2) + (40 if outside else 0)
+    legend_y = outside_top + (math.ceil(len(outside) / per_row) * (card_h + gap * 2) + 30 if outside else 0) + 10
+    height = legend_y + 70 + margin
+
+    out: list[str] = []
+    add = out.append
+    _open_svg(add, c, width, height)
+    network = topology["networks"][0] if topology["networks"] else {"name": "private network", "ip_range": ""}
+    sensitive_in_net = [item for item in in_net if item["sensitive"]]
+    stats = topology.get("stats", {})
+    _header(
+        add, c, width, margin, title,
+        "who can reach whom · ingress per trust class · public IPs omitted",
+        [
+            ("In private network", str(len(in_net)), f"{network['name']} · {network.get('ip_range', '')}", c["vpc"]),
+            ("Reachable pairs", f"{len(in_net) * max(len(in_net) - 1, 0)}", "any-to-any, all ports", c["public"] if len(in_net) > 1 else c["vpc"]),
+            ("Sensitive in network", str(len(sensitive_in_net)), f"each reachable from {max(len(in_net) - 1, 0)} VM{'s' if len(in_net) != 2 else ''}", c["critical"] if sensitive_in_net else c["vpc"]),
+            ("Outside network", str(len(outside)), "public interface only", c["text"]),
+            ("Internet / CF entry", f"{stats.get('internet_exposed', 0)} / {stats.get('cloudflare_fronted', 0)}", "open to any address / CF-only", c["critical"] if stats.get("internet_exposed") else c["cloudflare"]),
+            ("Tailscale admin", str(stats.get("tailscale_admin", 0)), "admin ports on tailnet", c["tailscale"]),
+        ],
+    )
+
+    # The bus: one bar for the private network.
+    add(f'<rect x="{margin}" y="{bus_y}" width="{width - 2 * margin}" height="34" rx="17" fill="{c["vpc_fill"]}" stroke="{c["vpc"]}" stroke-width="2"/>')
+    add(f'<text x="{margin + 18}" y="{bus_y + 22}" font-size="13" font-weight="700" fill="{c["vpc"]}">{escape(network["name"])} · {escape(network.get("ip_range", ""))} — any-to-any on every port: Hetzner Cloud Firewalls do not filter private networks</text>')
+
+    def row_block(members: list[dict[str, Any]], start_y: float, above: bool) -> None:
+        for index, item in enumerate(members):
+            row, column = divmod(index, per_row)
+            x = margin + column * (card_w + gap)
+            y = start_y + row * (card_h + gap * 2)
+            link_color = c["critical"] if item["sensitive"] else c["vpc"]
+            link_x = x + card_w / 2
+            if above:
+                add(f'<path d="M {link_x} {y + card_h} L {link_x} {bus_y}" stroke="{link_color}" stroke-width="{2.2 if item["sensitive"] else 1.6}" stroke-dasharray="{"" if item["sensitive"] else "4 3"}"/>')
+            else:
+                add(f'<path d="M {link_x} {bus_y + 34} L {link_x} {y}" stroke="{link_color}" stroke-width="{2.2 if item["sensitive"] else 1.6}" stroke-dasharray="{"" if item["sensitive"] else "4 3"}"/>')
+            ip = ", ".join(item.get("private_ips", []))
+            lines: list[tuple[str, str]] = [(" · ".join(part for part in (ip, item["type"], item["location"]) if part), "muted")]
+            chips = _chips(item)
+            lines += chips[:2] or [("no public ingress", "muted")]
+            if item["sensitive"]:
+                others = len(in_net) - 1
+                lines = lines[:2] + [(f"reachable from {others} VM{'s' if others != 1 else ''}", "critical")]
+            _vm_card(add, c, x, y, card_w, card_h, item, lines, _category(item))
+
+    add(f'<text x="{margin}" y="{top - 12}" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">EDGE, APPLICATIONS, OTHER</text>')
+    row_block(upper, top, True)
+    if lower:
+        add(f'<text x="{width - margin}" y="{lower_top - 6}" text-anchor="end" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">DATA, IDENTITY &amp; SECRETS</text>')
+        row_block(lower, lower_top + 6, False)
+    if outside:
+        add(f'<rect x="{margin - 10}" y="{outside_top - 28}" width="{width - 2 * margin + 20}" height="{math.ceil(len(outside) / per_row) * (card_h + gap * 2) + 30}" rx="10" fill="none" stroke="{c["line"]}" stroke-dasharray="3 4"/>')
+        add(f'<text x="{margin}" y="{outside_top - 10}" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">OUTSIDE THE PRIVATE NETWORK · reachable only through public interfaces and the cloud firewall</text>')
+        for index, item in enumerate(outside):
+            row, column = divmod(index, per_row)
+            x = margin + column * (card_w + gap)
+            y = outside_top + 6 + row * (card_h + gap * 2)
+            lines = [(" · ".join(part for part in (item["type"], item["location"]) if part), "muted")]
+            lines += _chips(item)[:2] or [("no public ingress", "muted")]
+            _vm_card(add, c, x, y, card_w, card_h, item, lines, _category(item))
+
+    # Legend
+    add(f'<rect x="{margin}" y="{legend_y}" width="{width - 2 * margin}" height="70" rx="10" fill="{c["surface"]}" stroke="{c["line"]}"/>')
+    add(f'<text x="{margin + 16}" y="{legend_y + 22}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">LEGEND</text>')
+    lx = margin + 16.0
+    ly = legend_y + 48
+    add(f'<path d="M {lx} {ly} L {lx + 30} {ly}" stroke="{c["vpc"]}" stroke-width="1.6" stroke-dasharray="4 3"/>')
+    add(f'<text x="{lx + 38}" y="{ly + 4}" font-size="11.5" fill="{c["text"]}">attached to the private network</text>')
+    lx += 230
+    add(f'<path d="M {lx} {ly} L {lx + 30} {ly}" stroke="{c["critical"]}" stroke-width="2.2"/>')
+    add(f'<text x="{lx + 38}" y="{ly + 4}" font-size="11.5" fill="{c["text"]}">sensitive host (database, identity, secrets) on the shared network</text>')
+    lx += 430
+    for key, label in (("world", "Internet ports"), ("cloudflare", "Cloudflare-only ports"), ("tailscale", "Tailscale admin ports")):
+        add(f'<text x="{lx}" y="{ly + 4}" font-size="11.5" font-weight="700" fill="{c[key]}">{escape(label)}</text>')
+        lx += 22 + len(label) * 6.6
+    add("</svg>")
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------- per-VM cost view
+
+COMPONENT_COLORS = {"server": "#2f6fdb", "volumes": "#0f8b8d", "ipv4": "#6d4fc2", "backup": "#1f9d55"}
+
+
+def _short(text: str, limit: int) -> str:
+    return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def render_cost_svg(
+    topology: dict[str, Any], cost: dict[str, Any], title: str = "Per-VM monthly cost", theme: str = "light"
+) -> str:
+    """Cards per VM sorted by monthly catalog cost, with component bars and the best candidate saving."""
+    c = THEMES[theme]
+    margin, card_w, card_h, gap, per_row = 28, 268, 112, 16, 5
+    currency = cost.get("currency", "EUR")
+    by_id = {item["id"]: item for item in topology["servers"]}
+    rows = sorted(cost.get("servers", []), key=lambda item: -float(item.get("monthly_net", 0) or 0))
+    best: dict[str, dict[str, Any]] = {}
+    other_recs = []
+    for rec in cost.get("recommendations", []):
+        saving = float(rec.get("estimated_savings", {}).get("monthly", 0) or 0)
+        for asset in rec.get("assets", []):
+            if asset in by_id:
+                if saving > float(best.get(asset, {}).get("estimated_savings", {}).get("monthly", 0) or 0):
+                    best[asset] = rec
+            else:
+                other_recs.append(rec)
+    top_cost = max((float(item.get("monthly_net", 0) or 0) for item in rows), default=1.0) or 1.0
+    monthly = float(cost.get("current_catalog_estimate", {}).get("monthly_net", 0) or 0)
+    savings = cost.get("identified_potential_savings", {})
+    extras = cost.get("resource_components_net", {}) or {}
+    extra_total = sum(float(value or 0) for value in extras.values())
+
+    width = margin * 2 + per_row * card_w + (per_row - 1) * gap
+    top = margin + HEADER_H + 20
+    split_y = top
+    grid_top = split_y + 78
+    grid_rows = max(1, math.ceil(len(rows) / per_row))
+    extras_y = grid_top + grid_rows * (card_h + gap) + 8
+    legend_y = extras_y + (64 if (extra_total or other_recs) else 0)
+    height = legend_y + 70 + margin
+
+    out: list[str] = []
+    add = out.append
+    _open_svg(add, c, width, height)
+    heaviest = rows[0] if rows else None
+    metrics = any(item.get("cpu_samples") for item in rows)
+    _header(
+        add, c, width, margin, title,
+        f"current Hetzner catalog prices, net · not an invoice · {'CPU p95 from provider metrics' if metrics else 'no CPU metrics collected'}",
+        [
+            ("Monthly estimate", f"{currency} {monthly:,.0f}", f"{currency} {monthly * 12:,.0f} per year", c["text"]),
+            ("Servers", str(len(rows)), f"{currency} {sum(float(i.get('monthly_net', 0) or 0) for i in rows):,.0f}/mo incl. volumes, IPv4", c["text"]),
+            ("Other resources", f"{currency} {extra_total:,.2f}", "unattached volumes, IPs, boxes", c["public"] if extra_total else c["vpc"]),
+            ("Potential savings", f"{currency} {float(savings.get('monthly_net', 0) or 0):,.2f}", f"{currency} {float(savings.get('annual_net', 0) or 0):,.0f} per year · needs validation", c["vpc"]),
+            ("Confirmed savings", f"{currency} {float(savings.get('confirmed_monthly_net', 0) or 0):,.2f}", "needs RAM, disk, owner intent", c["public"]),
+            ("Most expensive", f"{currency} {float(heaviest.get('monthly_net', 0) or 0):,.0f}" if heaviest else "-", (heaviest or {}).get("name", "-")[:26], c["text"]),
+        ],
+    )
+
+    # Split bar: share of monthly cost per role tier.
+    tiers: dict[str, float] = {}
+    for item in rows:
+        tier = by_id.get(item.get("asset_id"), {}).get("group", "other")
+        tiers[tier] = tiers.get(tier, 0.0) + float(item.get("monthly_net", 0) or 0)
+    total = sum(tiers.values()) or 1.0
+    add(f'<text x="{margin}" y="{split_y + 14}" font-size="11.5" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">COST BY ROLE</text>')
+    bar_x = float(margin)
+    bar_w = width - 2 * margin
+    for tier, value in sorted(tiers.items(), key=lambda item: -item[1]):
+        share = value / total
+        color = CATEGORY.get(tier, CATEGORY["other"])[0]
+        segment = bar_w * share
+        add(f'<rect x="{bar_x:.1f}" y="{split_y + 24}" width="{max(segment - 2, 1):.1f}" height="18" rx="4" fill="{color}"/>')
+        label = next((name for key, name, _w in GROUPS if key == tier), "Other")
+        if segment > 110:
+            add(f'<text x="{bar_x + 8:.1f}" y="{split_y + 37}" font-size="11" font-weight="700" fill="#fff">{escape(label)} {share:.0%}</text>')
+        add(f'<text x="{bar_x:.1f}" y="{split_y + 58}" font-size="10.5" fill="{c["muted"]}">{currency} {value:,.0f}</text>')
+        bar_x += segment
+
+    for index, item in enumerate(rows):
+        row, column = divmod(index, per_row)
+        x = margin + column * (card_w + gap)
+        y = grid_top + row * (card_h + gap)
+        node = by_id.get(item.get("asset_id"), {})
+        category = _category(node) if node else "other"
+        color, glyph = CATEGORY.get(category, CATEGORY["other"])
+        add(f'<rect x="{x}" y="{y}" width="{card_w}" height="{card_h}" rx="9" fill="{c["surface"]}" stroke="{c["line"]}" filter="url(#shadow)"/>')
+        _icon(add, x + 10, y + 12, glyph, color, 34)
+        add(f'<text x="{x + 54}" y="{y + 24}" font-size="13" font-weight="700" fill="{c["text"]}">{escape(_short(str(item.get("name", "")), 17))}</text>')
+        add(f'<text x="{x + card_w - 12}" y="{y + 26}" text-anchor="end" font-size="16" font-weight="800" fill="{c["text"]}">{currency} {float(item.get("monthly_net", 0) or 0):,.2f}</text>')
+        cpu = item.get("cpu_p95_capacity_percent")
+        detail = " · ".join(
+            part for part in (
+                str(item.get("server_type", "")),
+                f"{item.get('cores', '?')}c/{item.get('memory_gb', '?')}G",
+                node.get("location", ""),
+                f"CPU p95 {cpu:.0f}%" if isinstance(cpu, (int, float)) else "",
+                "stopped" if item.get("status") not in (None, "running") else "",
+            ) if part
+        )
+        add(f'<text x="{x + 54}" y="{y + 42}" font-size="10.5" fill="{c["muted"]}">{escape(_short(detail, 38))}</text>')
+        # Component bar scaled to the most expensive VM.
+        components = item.get("components_net", {}) or {}
+        bx = x + 12.0
+        full = card_w - 24
+        add(f'<rect x="{bx}" y="{y + 56}" width="{full}" height="10" rx="3" fill="{c["line"]}"/>')
+        for key in ("server", "volumes", "ipv4", "backup"):
+            value = float(components.get(key, 0) or 0)
+            if value <= 0:
+                continue
+            segment = full * value / top_cost
+            add(f'<rect x="{bx:.1f}" y="{y + 56}" width="{segment:.1f}" height="10" rx="2" fill="{COMPONENT_COLORS[key]}"/>')
+            bx += segment
+        parts = " · ".join(
+            f"{key} {float(components.get(key, 0) or 0):,.2f}" for key in ("server", "volumes", "ipv4", "backup") if float(components.get(key, 0) or 0)
+        )
+        add(f'<text x="{x + 12}" y="{y + 82}" font-size="10.5" fill="{c["muted"]}">{escape(parts)}</text>')
+        rec = best.get(str(item.get("asset_id")))
+        if rec:
+            candidate = rec.get("candidate_state", {}).get("server_type") or {
+                "HETZ-COST-001": "retire stopped server",
+                "HETZ-COST-004": "retire volume",
+            }.get(str(rec.get("rule_id")), "review")
+            saving = float(rec.get("estimated_savings", {}).get("monthly", 0) or 0)
+            line = f"→ {candidate} · −{currency} {saving:,.2f}/mo (to validate)"
+            add(f'<text x="{x + 12}" y="{y + 100}" font-size="10.5" font-weight="700" fill="{c["vpc"]}">{escape(_short(line, 44))}</text>')
+        elif node.get("deprecated_type"):
+            add(f'<text x="{x + 12}" y="{y + 100}" font-size="10.5" font-weight="700" fill="{c["public"]}">deprecated type · plan a migration</text>')
+
+    if extra_total or other_recs:
+        add(f'<rect x="{margin}" y="{extras_y}" width="{width - 2 * margin}" height="48" rx="10" fill="{c["surface"]}" stroke="{c["line"]}"/>')
+        text = " · ".join(f"{key.replace('_', ' ')} {currency} {float(value or 0):,.2f}" for key, value in extras.items() if float(value or 0))
+        recs = "; ".join(f"{rec.get('title', '')} (save {currency} {float(rec.get('estimated_savings', {}).get('monthly', 0) or 0):,.2f}/mo)" for rec in other_recs[:3])
+        add(f'<text x="{margin + 16}" y="{extras_y + 20}" font-size="11.5" font-weight="700" fill="{c["text"]}">Outside servers: {escape(text or "none")}</text>')
+        if recs:
+            add(f'<text x="{margin + 16}" y="{extras_y + 38}" font-size="11" fill="{c["vpc"]}">{escape(recs)}</text>')
+
+    add(f'<rect x="{margin}" y="{legend_y}" width="{width - 2 * margin}" height="70" rx="10" fill="{c["surface"]}" stroke="{c["line"]}"/>')
+    add(f'<text x="{margin + 16}" y="{legend_y + 22}" font-size="11" font-weight="700" letter-spacing="0.6" fill="{c["muted"]}">LEGEND</text>')
+    lx = margin + 16.0
+    for key, label in (("server", "server type"), ("volumes", "attached volumes"), ("ipv4", "primary IPv4"), ("backup", "backups")):
+        add(f'<rect x="{lx}" y="{legend_y + 40}" width="22" height="10" rx="2" fill="{COMPONENT_COLORS[key]}"/>')
+        add(f'<text x="{lx + 30}" y="{legend_y + 49}" font-size="11.5" fill="{c["text"]}">{label}</text>')
+        lx += 44 + len(label) * 6.6
+    add(f'<text x="{lx + 20}" y="{legend_y + 49}" font-size="11.5" fill="{c["muted"]}">Bars are scaled to the most expensive VM. Savings stay unconfirmed until RAM, disk, owner intent, and rollback are evidenced.</text>')
     add("</svg>")
     return "\n".join(out)

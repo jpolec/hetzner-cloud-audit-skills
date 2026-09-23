@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import unittest
 
-from hetzner_security.diagram import render_svg
+from hetzner_security.diagram import render_connectivity_svg, render_cost_svg, render_svg
 from hetzner_security.models import Asset, Snapshot
 from hetzner_security.topology import (
     build_topology,
@@ -70,6 +70,31 @@ class TopologyTest(unittest.TestCase):
         self.assertTrue(render_svg(topology).startswith("<svg"))
         self.assertIn("#f4f4f4", render_svg(topology))
         self.assertIn("#0b1220", render_svg(topology, theme="dark"))
+
+    def test_connectivity_and_cost_views_render_without_public_addresses(self) -> None:
+        import xml.dom.minidom
+
+        topology = build_topology(self.snapshot)
+        cost = {
+            "currency": "EUR",
+            "current_catalog_estimate": {"monthly_net": 30.0},
+            "identified_potential_savings": {"monthly_net": 5.0, "annual_net": 60.0, "confirmed_monthly_net": 0.0},
+            "servers": [
+                {"asset_id": item["id"], "name": item["name"], "status": "running", "server_type": "cx23", "cores": 2, "memory_gb": 4, "monthly_net": 10.0, "components_net": {"server": 9.5, "ipv4": 0.5}}
+                for item in topology["servers"]
+            ],
+            "recommendations": [
+                {"rule_id": "HETZ-COST-002", "assets": [topology["servers"][0]["id"]], "candidate_state": {"server_type": "cx22"}, "estimated_savings": {"monthly": 5.0}}
+            ],
+            "resource_components_net": {},
+        }
+        for output in (render_connectivity_svg(topology), render_cost_svg(topology, cost)):
+            xml.dom.minidom.parseString(output)  # noqa: S318 -- our own output
+            self.assertNotIn("192.0.2.10", output)
+        connectivity = render_connectivity_svg(topology)
+        self.assertIn("do not filter private networks", connectivity)
+        self.assertIn("reachable from 1 VM<", connectivity)
+        self.assertIn("cx22", render_cost_svg(topology, cost))
 
     def test_svg_is_well_formed_xml_with_special_characters(self) -> None:
         import xml.dom.minidom
