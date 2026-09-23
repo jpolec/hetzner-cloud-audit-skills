@@ -1,4 +1,4 @@
-# Audit for Hetzner Cloud
+# Skill Audit for Hetzner Cloud
 
 ### Know your Hetzner Cloud: what is exposed, what is wasted, and what to fix next.
 
