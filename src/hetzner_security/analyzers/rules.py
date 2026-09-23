@@ -24,13 +24,42 @@ from ..topology import classify_source
 Rule = Callable[[Snapshot, AttackGraph], list[Finding]]
 CGNAT_RANGE = ipaddress.IPv4Network("100.64.0.0/10")
 PUBLIC_SOURCES = {"0.0.0.0/0", "::/0", "any", "internet"}
-MANAGEMENT_PORTS = {
-    2375: "Docker daemon",
-    2376: "Docker daemon TLS",
-    6443: "Kubernetes API",
-    9200: "Elasticsearch API",
-    27017: "MongoDB",
-}
+# Services that should never face the whole Internet: (protocol, first port, last port, name, severity).
+# Rule IDs: SSH, PostgreSQL, and Redis keep their historical IDs; everything else is HETZ-NET-002.
+SENSITIVE_SERVICES: tuple[tuple[str, int, int, str, Severity], ...] = (
+    ("tcp", 21, 21, "FTP", Severity.HIGH),
+    ("tcp", 23, 23, "Telnet", Severity.CRITICAL),
+    ("tcp", 111, 111, "RPC portmapper", Severity.HIGH),
+    ("udp", 111, 111, "RPC portmapper", Severity.HIGH),
+    ("udp", 161, 161, "SNMP", Severity.HIGH),
+    ("tcp", 445, 445, "SMB", Severity.CRITICAL),
+    ("tcp", 2049, 2049, "NFS", Severity.HIGH),
+    ("tcp", 2375, 2375, "Docker daemon", Severity.CRITICAL),
+    ("tcp", 2376, 2376, "Docker daemon TLS", Severity.CRITICAL),
+    ("tcp", 2379, 2380, "etcd", Severity.CRITICAL),
+    ("tcp", 3306, 3306, "MySQL/MariaDB", Severity.HIGH),
+    ("tcp", 3389, 3389, "RDP", Severity.HIGH),
+    ("tcp", 5601, 5601, "Kibana", Severity.HIGH),
+    ("tcp", 5672, 5672, "AMQP (RabbitMQ)", Severity.HIGH),
+    ("tcp", 5984, 5984, "CouchDB", Severity.HIGH),
+    ("tcp", 5985, 5986, "WinRM", Severity.HIGH),
+    ("tcp", 6443, 6443, "Kubernetes API", Severity.CRITICAL),
+    ("tcp", 8123, 8123, "ClickHouse HTTP", Severity.HIGH),
+    ("tcp", 8200, 8200, "Vault API", Severity.HIGH),
+    ("tcp", 8500, 8500, "Consul", Severity.CRITICAL),
+    ("tcp", 9000, 9000, "Object storage / ClickHouse native", Severity.HIGH),
+    ("tcp", 9090, 9090, "Prometheus", Severity.HIGH),
+    ("tcp", 9092, 9092, "Kafka", Severity.HIGH),
+    ("tcp", 9200, 9200, "Elasticsearch API", Severity.CRITICAL),
+    ("tcp", 10250, 10250, "Kubelet API", Severity.CRITICAL),
+    ("tcp", 11211, 11211, "Memcached", Severity.HIGH),
+    ("udp", 11211, 11211, "Memcached (UDP amplification)", Severity.CRITICAL),
+    ("tcp", 15672, 15672, "RabbitMQ management", Severity.HIGH),
+    ("tcp", 27017, 27017, "MongoDB", Severity.CRITICAL),
+    ("tcp", 30000, 32767, "Kubernetes NodePort range", Severity.HIGH),
+)
+MANAGEMENT_PORTS = {start: name for proto, start, end, name, _sev in SENSITIVE_SERVICES if proto == "tcp" and start == end}
+WORLD_SOURCES = {"0.0.0.0/0", "::/0"}
 
 
 def _fingerprint(rule_id: str, assets: list[str], discriminator: str = "") -> str:
@@ -85,13 +114,18 @@ def _candidate(
     )
 
 
-def _public_ports(asset: Asset) -> list[dict[str, object]]:
+def _public_ports(asset: Asset, protocol: str = "tcp") -> list[dict[str, object]]:
     rules = asset.properties.get("inbound", [])
     return [
         rule
         for rule in rules
-        if set(rule.get("sources", [])) & PUBLIC_SOURCES and rule.get("protocol", "tcp") == "tcp"
+        if set(rule.get("sources", [])) & PUBLIC_SOURCES and rule.get("protocol", "tcp") == protocol
     ]
+
+
+def _all_ports(rule: dict[str, object]) -> bool:
+    start, end = _port_bounds(rule)
+    return start <= 1 and end >= 65535
 
 
 def _as_int(value: object, default: int = -1) -> int:
@@ -127,59 +161,157 @@ def _port_bounds(rule: dict[str, object]) -> tuple[int, int]:
 
 def public_service_exposure(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     output: list[Finding] = []
-    services = {
-        22: ("HETZ-NET-001", "SSH reachable from the public internet", Severity.HIGH),
-        5432: ("HETZ-NET-003", "PostgreSQL reachable from the public internet", Severity.HIGH),
-        6379: ("HETZ-NET-004", "Redis reachable from the public internet", Severity.CRITICAL),
-        **{
-            port: ("HETZ-NET-002", f"{name} reachable from the public internet", Severity.CRITICAL)
-            for port, name in MANAGEMENT_PORTS.items()
-        },
-    }
+    services: list[tuple[str, int, int, str, str, Severity]] = [
+        ("tcp", 22, 22, "HETZ-NET-001", "SSH reachable from the public internet", Severity.HIGH),
+        ("tcp", 5432, 5432, "HETZ-NET-003", "PostgreSQL reachable from the public internet", Severity.HIGH),
+        ("tcp", 6379, 6379, "HETZ-NET-004", "Redis reachable from the public internet", Severity.CRITICAL),
+        *[
+            (proto, first, last, "HETZ-NET-002", f"{name} reachable from the public internet", severity)
+            for proto, first, last, name, severity in SENSITIVE_SERVICES
+        ],
+    ]
     for asset in snapshot.assets:
         if asset.type not in {"server", "firewall", "service"}:
             continue
-        for rule in _public_ports(asset):
-            start, end = _port_bounds(rule)
-            for port, (rule_id, title, severity) in services.items():
-                if not start <= port <= end:
-                    continue
-                evidence = [_evidence(asset, "firewall_rule", rule, "properties.inbound")]
-                if port in _int_set(asset.properties.get("listening_ports")):
-                    evidence.append(
-                        _evidence(
-                            asset,
-                            "listening_socket",
-                            {"protocol": "tcp", "port": port},
-                            "properties.listening_ports",
+        for proto in ("tcp", "udp"):
+            for rule in _public_ports(asset, proto):
+                if _all_ports(rule):
+                    continue  # reported once as HETZ-FW-001 instead of once per service
+                start, end = _port_bounds(rule)
+                for service_proto, first, last, rule_id, title, severity in services:
+                    if service_proto != proto or end < first or start > last:
+                        continue
+                    port = max(start, first)
+                    label = f"{proto}/{first}" if first == last else f"{proto}/{first}-{last}"
+                    evidence = [_evidence(asset, "firewall_rule", rule, "properties.inbound")]
+                    if port in _int_set(asset.properties.get("listening_ports")):
+                        evidence.append(
+                            _evidence(asset, "listening_socket", {"protocol": proto, "port": port}, "properties.listening_ports")
+                        )
+                    if port in _int_set(asset.properties.get("host_firewall_allow_ports")):
+                        evidence.append(
+                            _evidence(asset, "host_firewall_allow", {"protocol": proto, "port": port}, "properties.host_firewall_allow_ports")
+                        )
+                    output.append(
+                        _candidate(
+                            rule_id,
+                            title,
+                            severity,
+                            0.86,
+                            [asset.id],
+                            f"An inbound rule admits a public source to {label.upper()}.",
+                            "Management and data services are reachable only from declared trusted sources.",
+                            f"{label.upper()} admits {sorted(_string_set(rule.get('sources')) & PUBLIC_SOURCES)}.",
+                            evidence,
+                            ["internet", label, asset.id],
+                            ["The rule is attached to the target and no downstream firewall blocks it."],
+                            "An unauthenticated network peer can reach a sensitive service boundary.",
+                            "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+                            ["https://docs.hetzner.com/cloud/firewalls/overview/"],
+                            label if label != "tcp/" + str(port) else str(port),
                         )
                     )
-                if port in _int_set(asset.properties.get("host_firewall_allow_ports")):
-                    evidence.append(
-                        _evidence(
-                            asset,
-                            "host_firewall_allow",
-                            {"protocol": "tcp", "port": port},
-                            "properties.host_firewall_allow_ports",
-                        )
-                    )
+    return output
+
+
+def firewall_quality(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    """Firewall hygiene visible from the API alone: all-ports-open, unattached, IPv4/IPv6 drift, duplicates."""
+    output: list[Finding] = []
+    for firewall in (asset for asset in snapshot.assets if asset.type == "firewall"):
+        inbound = firewall.properties.get("inbound", []) or []
+        for rule in inbound:
+            sources = _string_set(rule.get("sources"))
+            if rule.get("protocol") in {"tcp", "udp"} and sources & WORLD_SOURCES and _all_ports(rule):
                 output.append(
                     _candidate(
-                        rule_id,
-                        title,
-                        severity,
-                        0.86,
-                        [asset.id],
-                        f"An inbound rule admits a public source to TCP/{port}.",
-                        "Management and data services are reachable only from declared trusted sources.",
-                        f"TCP/{port} admits {sorted(_string_set(rule.get('sources')) & PUBLIC_SOURCES)}.",
-                        evidence,
-                        ["internet", f"tcp/{port}", asset.id],
-                        ["The rule is attached to the target and no downstream firewall blocks it."],
-                        "An unauthenticated network peer can reach a sensitive authentication boundary.",
-                        "Restrict the rule to a VPN, bastion, or explicit workload CIDR and verify host controls.",
+                        "HETZ-FW-001",
+                        "Firewall rule opens every port to the whole Internet",
+                        Severity.HIGH,
+                        0.97,
+                        [firewall.id],
+                        f"{firewall.name} admits {str(rule.get('protocol')).upper()} on all ports from {sorted(sources & WORLD_SOURCES)}.",
+                        "Inbound rules name the specific ports a service needs.",
+                        "protocol any-port rule with a world source",
+                        [_evidence(firewall, "firewall_rule", rule, "properties.inbound")],
+                        ["internet", f"{rule.get('protocol')}/1-65535", firewall.id],
+                        [],
+                        "Every listener on every attached server is reachable from the Internet, including ones started later.",
+                        "Replace the rule with explicit ports; keep admin access on a VPN or allow-list.",
                         ["https://docs.hetzner.com/cloud/firewalls/overview/"],
-                        str(port),
+                        str(rule.get("protocol")),
+                    )
+                )
+            if rule.get("protocol") in {"tcp", "udp"} and len(sources & WORLD_SOURCES) == 1:
+                family = "IPv6 (::/0)" if "::/0" in sources else "IPv4 (0.0.0.0/0)"
+                other = "IPv4" if "::/0" in sources else "IPv6"
+                start, end = _port_bounds(rule)
+                port = f"{start}" if start == end else f"{start}-{end}"
+                output.append(
+                    _candidate(
+                        "HETZ-FW-003",
+                        "Firewall rule treats IPv4 and IPv6 differently",
+                        Severity.LOW,
+                        0.9,
+                        [firewall.id],
+                        f"{firewall.name} opens {rule.get('protocol')}/{port} to {family} but not to {other}.",
+                        "Public rules cover IPv4 and IPv6 consistently, or the difference is intentional and documented.",
+                        f"only {family} is listed",
+                        [_evidence(firewall, "firewall_rule", rule, "properties.inbound")],
+                        [family, f"{rule.get('protocol')}/{port}", firewall.id],
+                        [],
+                        "A service may be reachable over one address family that reviews and scanners do not check.",
+                        "Add the missing family to the rule, or record why only one family is exposed.",
+                        ["https://docs.hetzner.com/cloud/firewalls/overview/"],
+                        f"{rule.get('protocol')}/{port}",
+                    )
+                )
+        seen: dict[str, int] = {}
+        for rule in inbound:
+            key = json.dumps([rule.get("protocol"), *_port_bounds(rule), sorted(_string_set(rule.get("sources")))])
+            seen[key] = seen.get(key, 0) + 1
+        duplicates = sum(count - 1 for count in seen.values() if count > 1)
+        if duplicates:
+            output.append(
+                _candidate(
+                    "HETZ-FW-004",
+                    "Firewall contains duplicate rules",
+                    Severity.LOW,
+                    0.95,
+                    [firewall.id],
+                    f"{firewall.name} has {duplicates} duplicate inbound rule(s).",
+                    "Each firewall rule is unique, so reviews and diffs stay readable.",
+                    f"{duplicates} duplicate rule(s)",
+                    [_evidence(firewall, "firewall_rules", len(inbound), "properties.inbound")],
+                    [firewall.id],
+                    [],
+                    "Duplicates hide real changes in reviews and make drift harder to spot.",
+                    "Remove the duplicate rules in IaC.",
+                    ["https://docs.hetzner.com/cloud/firewalls/overview/"],
+                )
+            )
+        applied = firewall.properties.get("applied_to")
+        if isinstance(applied, list) and firewall.source == "hcloud_api":
+            resources = [
+                item for item in applied
+                if item.get("type") == "server" or item.get("applied_to_resources")
+            ]
+            if not resources:
+                output.append(
+                    _candidate(
+                        "HETZ-FW-002",
+                        "Firewall is not applied to any resource",
+                        Severity.LOW,
+                        0.95,
+                        [firewall.id],
+                        f"{firewall.name} is attached to nothing" + (" (its label selector matches no server)" if applied else "") + ".",
+                        "Every firewall protects something, or it is removed.",
+                        "applied_to is empty",
+                        [_evidence(firewall, "firewall_applied_to", applied, "properties.applied_to")],
+                        [firewall.id],
+                        [],
+                        "An unused firewall suggests drift: the server it was meant for may be unprotected.",
+                        "Check which server this firewall was meant for, then attach it or delete it through IaC.",
+                        ["https://docs.hetzner.com/cloud/firewalls/overview/"],
                     )
                 )
     return output
@@ -636,7 +768,7 @@ def cloudflare_origin_bypass(snapshot: Snapshot, graph: AttackGraph) -> list[Fin
                 "Origins behind Cloudflare accept web traffic only from Cloudflare ranges.",
                 "tcp/80 or tcp/443 is open to 0.0.0.0/0 or ::/0.",
                 [_evidence(asset, "firewall_rule", rule, "properties.inbound") for rule in rules]
-                + [_evidence(peer, "cloudflare_only_peer", web_sources(peer), "properties.inbound") for peer in fronted[:3]],
+                + [_evidence(peer, "cloudflare_only_peer", sorted(web_sources(peer)), "properties.inbound") for peer in fronted[:3]],
                 ["internet", asset.id],
                 ["The origin is meant to be served through Cloudflare."],
                 "Direct origin access bypasses Cloudflare WAF, rate limiting, and DDoS protection, and can expose the origin IP.",
@@ -720,6 +852,7 @@ def contextualize_vulnerabilities(snapshot: Snapshot, graph: AttackGraph) -> lis
 RULES: tuple[Rule, ...] = (
     public_service_exposure,
     internet_host_without_firewall,
+    firewall_quality,
     cloudflare_origin_bypass,
     expectation_drift,
     cross_environment_data_path,
