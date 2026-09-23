@@ -7,6 +7,7 @@ changes infrastructure; actions are plans for a human.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from .cost import _available, _location, _type_price
@@ -195,7 +196,8 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
             by_rule.setdefault(finding.rule_id, []).append(finding)
 
     def add(priority: int, title: str, why: str, finding: Finding | None, level: tuple[str, str] | None,
-            risk: str, saving: float | None, next_step: str, rules: list[str], category: str | None = None) -> None:
+            risk: str, saving: float | None, next_step: str, rules: list[str], category: str | None = None,
+            commands: list[str] | None = None) -> None:
         category = category or (
             "security" if priority < 40 else "cost" if priority in {40, 50, 80, 90} else "resilience" if priority < 90 else "hygiene"
         )
@@ -212,6 +214,7 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
                 "next_step": next_step,
                 "rules": rules,
                 "category": category,
+                "commands": commands or [],
             }
         )
 
@@ -276,8 +279,15 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
             None, ("MEDIUM", "unused now; history and owner unknown"), "low", saving,
             "Confirm the owner and any restore dependency, snapshot if unsure, then delete through IaC.", [str(rec.get("rule_id"))])
     for finding in by_rule.get("HETZ-GOV-001", []):
+        lookup = {asset.id: asset for asset in snapshot.assets}
+        protection_commands = [
+            f"hcloud {lookup[asset_id].type} enable-protection {_shell_name(lookup[asset_id].name)} delete"
+            for asset_id in finding.assets
+            if asset_id in lookup and lookup[asset_id].type in {"server", "volume", "network"}
+        ]
         add(60, f"Enable deletion protection ({len(finding.assets)} resources)", finding.observation, finding, None, "low", None,
-            "Set protection.delete=true in IaC for production servers, volumes, networks, and Storage Boxes.", ["HETZ-GOV-001"])
+            "Set protection.delete=true in IaC for production servers, volumes, networks, and Storage Boxes.", ["HETZ-GOV-001"],
+            commands=protection_commands[:12] + ([f"# … and {len(protection_commands) - 12} more"] if len(protection_commands) > 12 else []))
     backups = by_rule.get("HETZ-BCP-001", [])
     if backups:
         boxes = [asset.name for asset in snapshot.assets if asset.type == "storage_box"]
@@ -297,8 +307,10 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
             None, ("LOW", "optimization hypothesis from CPU only"), "medium", None,
             "Export 30 days of RAM and disk p95 (node exporter or Prometheus) and rerun `hetzner-audit cost`.", ["HETZ-COST-002", "HETZ-COST-003"])
     for finding in by_rule.get("HETZ-GOV-004", []):
+        label_names = _names(snapshot, finding.assets)
         add(92, f"Label {len(finding.assets)} servers with environment and role", finding.observation, finding, None, "low", None,
-            "Add environment, role, and owner labels in IaC (sensitivity=high for databases and secrets) so policy and blast-radius checks cover every server.", ["HETZ-GOV-004"])
+            "Add environment, role, and owner labels in IaC (sensitivity=high for databases and secrets) so policy and blast-radius checks cover every server.", ["HETZ-GOV-004"],
+            commands=[f"hcloud server add-label {_shell_name(name)} environment=<env> role=<role> owner=<team>" for name in label_names[:12]])
     unlabeled = {asset for finding in by_rule.get("HETZ-GOV-004", []) for asset in finding.assets}
     for finding in by_rule.get("HETZ-GOV-002", []):
         if set(finding.assets) <= unlabeled:
@@ -333,15 +345,34 @@ def build_actions(snapshot: Snapshot, findings: list[Finding], cost: dict[str, A
         if not group:
             continue
         first = group[0]
+        fw_commands: list[str] = []
+        if rule_id == "HETZ-FW-001":
+            for fw_finding in group:
+                observed: object = next((ev.observed for ev in fw_finding.evidence if ev.kind == "firewall_rule"), {})
+                fw_rule: dict[str, Any] = observed if isinstance(observed, dict) else {}
+                sources = " ".join(f"--source-ips {_shell_name(str(source))}" for source in (fw_rule.get("sources") or []))
+                fw_name = _shell_name(_names(snapshot, fw_finding.assets[:1])[0])
+                protocol = _shell_name(str(fw_rule.get("protocol", "tcp")))
+                fw_commands.append(f"hcloud firewall delete-rule {fw_name} --direction in --protocol {protocol} {sources}".strip())
         if len(group) == 1:
-            add(priority, first.title, first.observation, first, None, risk, None, first.remediation, [rule_id], category)
+            add(priority, first.title, first.observation, first, None, risk, None, first.remediation, [rule_id], category, commands=fw_commands)
         else:  # one action per rule, not one per resource
             names = ", ".join(_names(snapshot, [item.assets[0] for item in group[:5]])) + (" …" if len(group) > 5 else "")
-            add(priority, f"{first.title} ({len(group)} resources)", f"Affected: {names}. {first.observation}", first, None, risk, None, first.remediation, [rule_id], category)
+            add(priority, f"{first.title} ({len(group)} resources)", f"Affected: {names}. {first.observation}", first, None, risk, None, first.remediation, [rule_id], category, commands=fw_commands)
     actions.sort(key=lambda item: item["priority"])
     for index, item in enumerate(actions, 1):
         item["rank"] = index
     return actions
+
+
+def _shell_name(value: str) -> str:
+    """Provider names inside suggested commands: letters, digits, dot, dash, underscore, slash, colon only."""
+    return re.sub(r"[^A-Za-z0-9._/:-]", "", value) or "<name>"
+
+
+def _shell_safe(command: str) -> str:
+    """One line, no code-fence breakout; names were already reduced by _shell_name."""
+    return " ".join(command.split()).replace("`", "")
 
 
 def render_actions_markdown(actions: list[dict[str, Any]], currency: str = "EUR") -> list[str]:
@@ -360,6 +391,15 @@ def render_actions_markdown(actions: list[dict[str, Any]], currency: str = "EUR"
             f"**Next step:** {md(item['next_step'])}",
             "",
         ]
+        if item.get("commands"):
+            lines += [
+                "Suggested commands. Review them first: they need a Read & Write token, and hetzner-audit never runs them.",
+                "",
+                "```sh",
+                *[_shell_safe(command) for command in item["commands"]],
+                "```",
+                "",
+            ]
     return lines
 
 

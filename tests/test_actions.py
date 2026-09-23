@@ -82,6 +82,23 @@ class ActionsTest(unittest.TestCase):
         self.assertEqual(evidence_level(labels)[0], "HIGH")
 
 
+class CommandSafetyTest(unittest.TestCase):
+    def test_suggested_commands_cannot_carry_shell_metacharacters(self) -> None:
+        from hetzner_security.actions import render_actions_markdown
+
+        evil = Asset("hcloud:server:1", "server", "x>/etc/passwd;rm -rf ~ $(id)", {"protection": {"delete": False}, "delete_protection": False},
+                     {"environment": "production"}, "hcloud_api")
+        snapshot = Snapshot(assets=[evil])
+        actions = build_actions(snapshot, verify_all(hunt(snapshot), snapshot))
+        commands = [command for item in actions for command in item["commands"]]
+        self.assertTrue(commands)
+        for command in commands:
+            for char in (";", "$", "(", ")", "~", "|", "&"):
+                self.assertNotIn(char, command)
+        self.assertNotIn("x>/etc", "\n".join(commands))
+        self.assertIn("Read & Write token", "\n".join(render_actions_markdown(actions)))
+
+
 class GroupedActionsTest(unittest.TestCase):
     def test_many_findings_of_one_rule_become_one_action(self) -> None:
         records = [
