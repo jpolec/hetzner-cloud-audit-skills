@@ -5,6 +5,7 @@ The module intentionally implements only HTTP GET and exposes no generic request
 
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
@@ -358,6 +359,34 @@ def _is_stateful(server: dict[str, Any]) -> bool:
     return bool(server.get("volumes")) or bool(words & STATEFUL_ROLES)
 
 
+def _ssh_key_strength(public_key: object) -> tuple[str | None, int | None]:
+    """Key algorithm and size from an OpenSSH public key, computed before the key is redacted."""
+    if not isinstance(public_key, str) or not public_key.strip():
+        return None, None
+    parts = public_key.split()
+    key_type = parts[0]
+    if key_type == "ssh-ed25519":
+        return key_type, 256
+    if key_type.startswith("ecdsa-sha2-nistp"):
+        return key_type, int(key_type.removeprefix("ecdsa-sha2-nistp") or 0) or None
+    if key_type in {"ssh-rsa", "ssh-dss"} and len(parts) > 1:
+        try:
+            blob = base64.b64decode(parts[1])
+            fields: list[bytes] = []
+            offset = 0
+            while offset + 4 <= len(blob) and len(fields) < 3:
+                length = int.from_bytes(blob[offset : offset + 4], "big")
+                fields.append(blob[offset + 4 : offset + 4 + length])
+                offset += 4 + length
+            if key_type == "ssh-rsa" and len(fields) == 3:
+                return key_type, int.from_bytes(fields[2], "big").bit_length()
+            if key_type == "ssh-dss" and len(fields) >= 2:
+                return key_type, int.from_bytes(fields[1], "big").bit_length()
+        except (ValueError, IndexError):
+            return key_type, None
+    return key_type, None
+
+
 def _normalize_resources(
     raw: dict[str, list[dict[str, Any]]],
 ) -> dict[str, list[dict[str, Any]]]:
@@ -367,6 +396,8 @@ def _normalize_resources(
         firewall["inbound"] = [
             _normal_rule(rule) for rule in firewall.get("rules", []) if rule.get("direction") == "in"
         ]
+    for key in normalized.get("ssh_key", []):
+        key["key_type"], key["key_bits"] = _ssh_key_strength(key.get("public_key"))
     for server in normalized.get("server", []):
         public_net = server.get("public_net", {})
         firewall_ids = [item.get("id") for item in public_net.get("firewalls", [])]

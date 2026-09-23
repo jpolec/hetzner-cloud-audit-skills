@@ -449,6 +449,54 @@ def dangling_dns(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     return output
 
 
+def ssh_key_hygiene(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
+    output: list[Finding] = []
+    now = _now(snapshot)
+    for key in _of(snapshot, "ssh_key"):
+        key_type, bits = key.properties.get("key_type"), key.properties.get("key_bits")
+        weak = key_type == "ssh-dss" or (key_type == "ssh-rsa" and isinstance(bits, int) and bits < 3072)
+        if weak:
+            output.append(
+                _candidate(
+                    "HETZ-KEY-001",
+                    "Project SSH key uses a weak algorithm or size",
+                    Severity.MEDIUM,
+                    0.95,
+                    [key.id],
+                    f"{key.name} is {key_type}" + (f" with {bits} bits" if bits else "") + ".",
+                    "SSH keys are Ed25519, or RSA with at least 3072 bits.",
+                    f"{key_type} {bits or ''}".strip(),
+                    [_evidence(key, "ssh_key_strength", {"type": key_type, "bits": bits}, "properties.key_type")],
+                    [key.id, "new servers", "root login"],
+                    [],
+                    "New servers created with this key trust a key that no longer meets current strength guidance.",
+                    "Create an Ed25519 key, use it for new servers, and delete the old key from the project.",
+                    ["https://docs.hetzner.com/cloud/servers/getting-started/connecting-to-the-server/"],
+                )
+            )
+        created = _date(key.properties.get("created"))
+        if created and (now - created).days > 730:
+            output.append(
+                _candidate(
+                    "HETZ-KEY-002",
+                    "Project SSH key is more than two years old",
+                    Severity.LOW,
+                    0.9,
+                    [key.id],
+                    f"{key.name} was added on {created.date()}.",
+                    "Project SSH keys are reviewed and rotated periodically.",
+                    f"created {created.date()}",
+                    [_evidence(key, "ssh_key_created", key.properties.get("created"), "properties.created")],
+                    [key.id],
+                    [],
+                    "Old keys outlive the people and laptops they were issued to.",
+                    "Confirm the key's owner still needs it; rotate or delete it.",
+                    ["https://docs.hetzner.com/cloud/servers/getting-started/connecting-to-the-server/"],
+                )
+            )
+    return output
+
+
 def placement_spread(snapshot: Snapshot, graph: AttackGraph) -> list[Finding]:
     """Production servers that share a role should not share a physical host."""
     groups: dict[tuple[str, str], list[Asset]] = {}
@@ -493,4 +541,5 @@ RESOURCE_RULES = (
     certificate_lifecycle,
     dangling_dns,
     placement_spread,
+    ssh_key_hygiene,
 )

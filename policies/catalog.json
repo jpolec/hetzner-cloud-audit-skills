@@ -27,6 +27,8 @@
     {"id":"HETZ-DNS-001","category":"hetzner","layers":["dns","takeover"],"title":"DNS record points to an IP this project does not own","absence_requires_validation":true},
     {"id":"HETZ-DNS-002","category":"hetzner","layers":["dns","disclosure"],"title":"Public DNS record points to a private address"},
     {"id":"HETZ-PLC-001","category":"hetzner","layers":["placement","availability"],"title":"Redundant production servers are not in a spread placement group"},
+    {"id":"HETZ-KEY-001","category":"hetzner","layers":["ssh_key","access"],"title":"Project SSH key uses a weak algorithm or size"},
+    {"id":"HETZ-KEY-002","category":"hetzner","layers":["ssh_key","governance"],"title":"Project SSH key is more than two years old"},
     {"id":"HETZ-NET-006","category":"hetzner","layers":["cloud_firewall","edge_proxy"],"title":"Web origin reachable directly, bypassing Cloudflare","absence_requires_validation":true},
     {"id":"HETZ-FW-001","category":"hetzner","layers":["cloud_firewall"],"title":"Firewall rule opens every port to the whole Internet"},
     {"id":"HETZ-FW-002","category":"hetzner","layers":["cloud_firewall","governance"],"title":"Firewall is not applied to any resource"},

@@ -95,6 +95,7 @@ def build_summary(snapshot: Snapshot, findings: list[Finding]) -> dict[str, Any]
         "needs_validation": _grouped([item for item in findings if item.status == FindingStatus.NEEDS_VALIDATION]),
         "rejected": sum(1 for item in findings if item.status == FindingStatus.REJECTED),
         "failed_endpoints": failed_endpoints,
+        "suppressed": snapshot.metadata.get("suppressed_findings", []),
         "missing_layers": missing_layers,
         "cost": cost,
     }
@@ -126,6 +127,7 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
         ("Confirmed (evidence complete)", _count(sum(item["findings"] for item in confirmed), "finding", "findings")),
         ("Needs host/runtime validation", _count(sum(item["findings"] for item in pending), "hypothesis", "hypotheses")),
         ("Rejected by the verifier", str(summary["rejected"])),
+        ("Suppressed by owner labels", str(len(summary.get("suppressed", [])))),
         (
             "Collection gaps",
             f"{_count(len(summary['failed_endpoints']), 'endpoint', 'endpoints')} failed · "
@@ -172,6 +174,9 @@ def render_summary_markdown(summary: dict[str, Any]) -> list[str]:
         f"- {name}: not collected. The Hetzner API cannot see it; related findings stay `needs_validation`."
         for name in summary["missing_layers"]
     ]
+    if summary.get("suppressed"):
+        lines += ["", "### Suppressed by owner labels (`audit.ignore`)", ""]
+        lines += [f"- {item['rule_id']} · {md(item['title'])} ({len(item['assets'])} asset(s))" for item in summary["suppressed"]]
     if cost and not cost["metrics_collected"]:
         lines.append("- CPU metrics: not collected; run `hetzner-audit cost --metrics-days 30` for rightsizing candidates.")
     lines.append("")

@@ -11,6 +11,32 @@ from hetzner_security.cli.main import build_parser, run
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class SuppressionTest(unittest.TestCase):
+    def test_audit_ignore_labels_suppress_visibly(self) -> None:
+        import tempfile
+
+        snapshot = {"assets": [
+            {"id": "a", "type": "server", "name": "tmp-build", "source": "hcloud_api",
+             "labels": {"environment": "production", "audit.ignore.HETZ-BCP-001": "true"},
+             "properties": {"stateful": True, "backup_enabled": False}},
+            {"id": "b", "type": "server", "name": "scratch", "source": "hcloud_api",
+             "labels": {"audit.ignore": "true"}, "properties": {}},
+        ]}
+        with tempfile.TemporaryDirectory() as directory:
+            source = Path(directory) / "s.json"
+            source.write_text(json.dumps(snapshot))
+            report = Path(directory) / "audit.md"
+            run(build_parser().parse_args(["audit", "--input", str(source), "--format", "markdown", "--output", str(report)]))
+            text = report.read_text()
+            data = Path(directory) / "audit.json"
+            run(build_parser().parse_args(["audit", "--input", str(source), "--format", "json", "--output", str(data)]))
+            findings = json.loads(data.read_text())["findings"]
+        self.assertNotIn("HETZ-BCP-001", {item["rule_id"] for item in findings})
+        self.assertFalse([item for item in findings if item["assets"] == ["b"]])
+        self.assertIn("Suppressed by owner labels (`audit.ignore`)", text)
+        self.assertIn("HETZ-BCP-001", text.split("Suppressed by owner labels (`audit.ignore`)")[1])
+
+
 class CliTest(unittest.TestCase):
     def test_fail_on_counts_only_confirmed_findings(self) -> None:
         fixture = str(Path(__file__).parents[1] / "benchmarks" / "scenarios" / "v0.1-insecure.json")

@@ -128,6 +128,14 @@ class DnsTest(unittest.TestCase):
         self.assertFalse([rule for rule in owned if rule.startswith("HETZ-DNS-")])
 
 
+class SshKeyTest(unittest.TestCase):
+    def test_weak_and_old_keys(self) -> None:
+        weak = _asset("ssh_key", "old-rsa", {"key_type": "ssh-rsa", "key_bits": 2048, "created": "2021-01-01T00:00:00+00:00"})
+        good = _asset("ssh_key", "ed", {"key_type": "ssh-ed25519", "key_bits": 256, "created": "2026-01-01T00:00:00+00:00"})
+        self.assertEqual(set(_findings(weak)) & {"HETZ-KEY-001", "HETZ-KEY-002"}, {"HETZ-KEY-001", "HETZ-KEY-002"})
+        self.assertFalse([rule for rule in _findings(good) if rule.startswith("HETZ-KEY-")])
+
+
 class PlacementTest(unittest.TestCase):
     def test_redundant_role_without_spread_and_clean_twin(self) -> None:
         labels = {"environment": "production", "role": "db", "project": "shop"}

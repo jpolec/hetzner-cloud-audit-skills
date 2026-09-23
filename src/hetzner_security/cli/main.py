@@ -18,6 +18,7 @@ from ..diagram import render_connectivity_svg, render_cost_svg, render_svg
 from ..doctor import render_doctor_markdown, run_doctor
 from ..findings import render_json, render_markdown, render_sarif
 from ..findings.summary import build_summary
+from ..findings.suppress import apply_suppressions
 from ..graph import AttackGraph, render_path_markdown
 from ..models import Finding, FindingStatus, Severity, Snapshot
 from ..policy import apply_policy, load_policy
@@ -160,7 +161,10 @@ def _render_map_svg(snapshot: Snapshot, topology: dict[str, Any], args: argparse
 
 def _findings(snapshot: Snapshot, *, verify: bool = True) -> list[Finding]:
     candidates = hunt(snapshot)
-    return verify_all(candidates, snapshot) if verify else candidates
+    findings = verify_all(candidates, snapshot) if verify else candidates
+    kept, suppressed = apply_suppressions(findings, snapshot)
+    snapshot.metadata["suppressed_findings"] = suppressed  # surfaced in the report, never silent
+    return kept
 
 
 def run(args: argparse.Namespace) -> int:

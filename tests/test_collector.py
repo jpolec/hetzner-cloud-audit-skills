@@ -94,6 +94,24 @@ class CollectorSafetyTest(unittest.TestCase):
         self.assertFalse(_is_stateful({"name": "web-1", "labels": {}}))
         self.assertFalse(_is_stateful({"name": "db-cache", "labels": {"stateful": "false"}, "volumes": [1]}))
 
+    def test_ssh_key_strength_is_recorded_before_redaction(self) -> None:
+        import base64
+
+        from hetzner_security.collectors.hcloud import _normalize_resources, _ssh_key_strength
+
+        def field(data: bytes) -> bytes:
+            return len(data).to_bytes(4, "big") + data
+
+        modulus = (1 << 2047) | 1  # 2048-bit
+        blob = field(b"ssh-rsa") + field((65537).to_bytes(3, "big")) + field(b"\x00" + modulus.to_bytes(256, "big"))
+        key = "ssh-rsa " + base64.b64encode(blob).decode() + " someone@example.com"
+        self.assertEqual(_ssh_key_strength(key), ("ssh-rsa", 2048))
+        self.assertEqual(_ssh_key_strength("ssh-ed25519 AAAA x"), ("ssh-ed25519", 256))
+        normalized = _sanitize_resource(_normalize_resources({"ssh_key": [{"id": 1, "public_key": key}]}))
+        row = normalized["ssh_key"][0]
+        self.assertEqual((row["key_type"], row["key_bits"]), ("ssh-rsa", 2048))
+        self.assertNotIn("AAAA", row["public_key"])
+
     def test_personal_data_is_redacted(self) -> None:
         value = _sanitize_resource(
             {
