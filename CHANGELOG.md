@@ -36,6 +36,7 @@ v0.6 and v0.7 of the roadmap ship together as one release.
 - Edge-provider registry: Cloudflare, Fastly, Bunny CDN, AWS CloudFront, Gcore, and Imperva recognized from their published, dated ranges (`scripts/update_provider_ranges.py`, `--check`). `HETZ-NET-006` now names whichever provider the origin bypasses; maps label edge sources with the provider (VIA CF, VIA FASTLY, …).
 - Mesh VPNs: Tailscale, Headscale, NetBird, WireGuard, and ZeroTier are recognized by range, UDP port, or interface; their UDP ports never count as exposure.
 - "No public ingress" is reported as the good pattern, with tunnel agents (Cloudflare Tunnel, ngrok, frp, Tailscale, NetBird, ZeroTier) named from the host bundle's new `agents` section or container images.
+- README example gallery: four synthetic architectures (WireGuard + Fastly; zero ingress with Cloudflare Tunnel + Tailscale; k3s + Robot vSwitch + ZeroTier + Bunny CDN; load balancer + CloudFront + NetBird + Object Storage), reproducible with `scripts/make_gallery.py`.
 - `docs/coverage.md`: every recognized component with its evidence source and an honest live/fixture status.
 - `doctor` reports optional sources and credentials (values never printed) and warns when any secret sits in `.env`.
 - The generated benchmark now scores 18 rules, all at 1.00 precision and recall.

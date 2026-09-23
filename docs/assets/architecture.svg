@@ -92,7 +92,7 @@
 <rect x="40" y="435.0" width="34" height="34" rx="7" fill="#6d4fc2"/>
 <g transform="translate(45 440.0) scale(1.000)" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="1.6"/><circle cx="12" cy="6" r="1.6"/><circle cx="18" cy="6" r="1.6"/><circle cx="6" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18" cy="12" r="1.6"/><circle cx="12" cy="18" r="1.6"/></g>
 <text x="84" y="449.0" font-size="14" font-weight="700" fill="#1f1f1f">Mesh VPN</text>
-<text x="84" y="466.0" font-size="11" fill="#6b6b6b">Tailscale / NetBird · admin</text>
+<text x="84" y="466.0" font-size="11" fill="#6b6b6b">Tailscale / Tailscale/Headsca…</text>
 <path d="M 224 452.0 L 302 452.0" stroke="#6d4fc2" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrow)"/>
 <text x="126.0" y="496.0" text-anchor="middle" font-size="11" fill="#6d4fc2">reaches 14 servers</text>
 <path d="M 224 368.0 L 265 368.0 L 265 754 L 630 754 L 630 766" stroke="#f38020" stroke-width="1.8" fill="none" stroke-linejoin="round" marker-end="url(#arrow)"/>

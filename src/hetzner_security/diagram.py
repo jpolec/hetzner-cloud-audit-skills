@@ -216,7 +216,8 @@ def render_svg(
         col_x[loc] = x
         x += sub[loc] * node_w + (sub[loc] - 1) * gap + 2 * pad + gap
     grid_right = x - gap
-    width = grid_right + 16 + 16 + margin
+    # Keep room for the summary tiles and the legend when a project has only one or two locations.
+    width = max(grid_right + 16 + 16 + margin, 1480)
 
     # --- vertical geometry
     header_h = HEADER_H
@@ -345,6 +346,8 @@ def render_svg(
         glyph, name, note = SOURCE_STYLE[kind]
         if kind == "edge":
             name = _short(_edge_label(topology), 22)
+        if kind == "mesh" and topology.get("mesh_providers"):
+            note = _short(" / ".join(topology["mesh_providers"]), 30)
         add(f'<rect x="{margin}" y="{sy}" width="{source_w}" height="60" rx="12" fill="{c["surface"]}" stroke="{c[kind]}" stroke-width="1.6" filter="url(#shadow)"/>')
         _icon(add, margin + 12, sy + 13, glyph, c[kind], 34)
         add(f'<text x="{margin + 56}" y="{sy + 27}" font-size="14" font-weight="700" fill="{c["text"]}">{escape(name)}</text>')

@@ -130,14 +130,18 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
         props = server.properties
         ingress: dict[str, list[str]] = {}
         edge_names: set[str] = set()
+        mesh_names: set[str] = set()
         for rule in props.get("inbound", []) or []:
             classes = {classify_source(str(source), private_ranges) for source in rule.get("sources", [])}
             edge_names.update(filter(None, (edge_provider(str(source)) for source in rule.get("sources", []))))
+            if any(is_mesh(str(source)) for source in rule.get("sources", [])):
+                mesh_names.add("Tailscale/Headscale/NetBird")
             for kind in classes:
                 port = _port_text(rule)
                 mesh = mesh_port(rule.get("protocol"), rule.get("port_from")) if rule.get("port_from") == rule.get("port_to") else None
                 if kind == "world" and mesh:
                     kind, port = "mesh", f"udp/{rule.get('port_from')} ({mesh})"
+                    mesh_names.add(mesh)
                 ports = ingress.setdefault(kind, [])
                 if port not in ports:
                     ports.append(port)
@@ -188,6 +192,7 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
                 "ingress": ingress,
                 "exposure": exposure,
                 "edge_providers": sorted(edge_names),
+                "mesh_providers": sorted(mesh_names),
                 # A public server that accepts nothing from the Internet: admin over a mesh VPN, apps via tunnels.
                 "no_public_ingress": bool(props.get("public_ip")) and bool(props.get("firewall_attached")) and not any(
                     port != "icmp" for kind in ("world", "edge", "allowlist") for port in ingress.get(kind, [])
@@ -257,6 +262,7 @@ def build_topology(snapshot: Snapshot) -> dict[str, Any]:
         ],
         "servers": servers,
         "edge_providers": sorted({name for item in servers for name in item["edge_providers"]}),
+        "mesh_providers": sorted({name for item in servers for name in item["mesh_providers"]}),
         "storage_boxes": storage_boxes,
         **_beyond(snapshot),
         "unattached_volumes": [asset.name for asset in unattached],
@@ -275,7 +281,8 @@ def _host_summary(server: Asset) -> dict[str, Any] | None:
     bypass = sorted({item["host_port"] for item in props.get("docker_published") or []
                      if item.get("bind") in {"wildcard", "public"} and item["host_port"] not in own})
     return {
-        "firewall": ("unknown" if not firewall.get("known", True) else firewall.get("engine") if firewall.get("active") else "none"),
+        "firewall": ("unknown" if not firewall or not firewall.get("known", True)
+                     else firewall.get("engine") if firewall.get("active") else "none"),
         "docker_bypass": bypass,
         "containers": len({item.get("container") for item in props.get("docker_published") or []}),
         "password_ssh": (props.get("sshd") or {}).get("passwordauthentication") == "yes",
